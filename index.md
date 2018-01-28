@@ -37,40 +37,10 @@ In Proceedings of the IEEE international conference on computer communication (I
 
 ## Posters
 
-Network Function Fault Isolation in a Single Address Space
-**Mohan Kumar**, Steffen Mass, and Taesoo Kim
-The 14th USENIX Symposium on Networked Systems Design and Implementation (NSDI'17) Poster, 2017, Boston, MA, USA.
+Network Function Fault Isolation in a Single Address Space<br />
+**Mohan Kumar**, Steffen Mass, and Taesoo Kim<br />
+The 14th USENIX Symposium on Networked Systems Design and Implementation (NSDI'17) Poster, 2017, Boston, MA, USA.<br />
 
-DistCoz: Tell Me What to Optimize in My Distributed Application
-Steffen Mass, **Mohan Kumar**, and Taesoo Kim
-The 14th USENIX Symposium on Networked Systems Design and Implementation (NSDI'17) Poster, 2017, Boston, MA, USA.
-
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
-
-```markdown
-Syntax highlighted code block
-
-# Header 1
-## Header 2
-### Header 3
-
-- Bulleted
-- List
-
-1. Numbered
-2. List
-
-**Bold** and _Italic_ and `Code` text
-
-[Link](url) and ![Image](src)
-```
-
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
-
-### Jekyll Themes
-
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/mohankku/mohankku.github.io/settings). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
-
-### Support or Contact
-
-Having trouble with Pages? Check out our [documentation](https://help.github.com/categories/github-pages-basics/) or [contact support](https://github.com/contact) and we’ll help you sort it out.
+DistCoz: Tell Me What to Optimize in My Distributed Application<br />
+Steffen Mass, **Mohan Kumar**, and Taesoo Kim<br />
+The 14th USENIX Symposium on Networked Systems Design and Implementation (NSDI'17) Poster, 2017, Boston, MA, USA.<br />
