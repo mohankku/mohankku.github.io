@@ -38,11 +38,11 @@ In Proceedings of the IEEE international conference on computer communication (I
 ## Posters
 
 Network Function Fault Isolation in a Single Address Space
-Mohan Kumar, Steffen Mass, and Taesoo Kim
+**Mohan Kumar**, Steffen Mass, and Taesoo Kim
 The 14th USENIX Symposium on Networked Systems Design and Implementation (NSDI'17) Poster, 2017, Boston, MA, USA.
 
 DistCoz: Tell Me What to Optimize in My Distributed Application
-Steffen Mass, Mohan Kumar, and Taesoo Kim
+Steffen Mass, **Mohan Kumar**, and Taesoo Kim
 The 14th USENIX Symposium on Networked Systems Design and Implementation (NSDI'17) Poster, 2017, Boston, MA, USA.
 
 Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
