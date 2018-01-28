@@ -10,10 +10,10 @@ and Computer Networks.
 
 ### Publications
 
-- SOLROS: A Data-Centric Operating System Architecture for Heterogeneous Computing
-  Changwoo Min, Woon-Hak Kang, **Mohan Kumar**, Sanidhya Kashyap, Steffen Maass, Heeseung Jo, and Taesoo Kim.
-  In Proceedings of the thirteenth European conference on computer systems (EUROSYS 2018), Porto, Portugal.
-  (acceptance rate of 16.4%) To appear.
+1.SOLROS: A Data-Centric Operating System Architecture for Heterogeneous Computing<br />
+  Changwoo Min, Woon-Hak Kang, **Mohan Kumar**, Sanidhya Kashyap, Steffen Maass, Heeseung Jo, and Taesoo Kim.<br />
+  In Proceedings of the thirteenth European conference on computer systems (EUROSYS 2018), Porto, Portugal.<br />
+  (acceptance rate of 16.4%) To appear.<br />
 
 Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
 
