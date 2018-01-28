@@ -1,2 +1,5 @@
 theme: jekyll-theme-minimal
 title: Mohan Kumar
+description:
+show_downloads: true
+google_analytics:
