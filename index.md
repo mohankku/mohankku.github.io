@@ -1,13 +1,11 @@
-### About me
+## About me
 
 I am a Ph.D. student in the School of Computer Science at Gatech
 (Georgia Institute of technology), advised by Dr.Taesoo Kim.  My
 research interests are in Operating systems, Distributed systems,
 and Computer Networks.
 
-You can use the [editor on GitHub](https://github.com/mohankku/mohankku.github.io/edit/master/index.md) to maintain and preview the content for your website in Markdown files.
-
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+[CV](https://sites.google.com/site/mohankumargatech/curriculum-vitae/cv.pdf?attredirects=0&d=1) [Google Scholar](https://scholar.google.com/citations?user=NVCULdIAAAAJ&hl=en)
 
 ### Markdown
 
