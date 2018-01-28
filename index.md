@@ -5,7 +5,7 @@ I am a Ph.D. student in the School of Computer Science at Gatech
 research interests are in Operating systems, Distributed systems,
 and Computer Networks.
 
-[CV](./data/cv.pdf)      [Google Scholar](https://scholar.google.com/citations?user=NVCULdIAAAAJ&hl=en)
+[CV](./data/cv.pdf)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[Google Scholar](https://scholar.google.com/citations?user=NVCULdIAAAAJ&hl=en)
 
 ## Publications
 
