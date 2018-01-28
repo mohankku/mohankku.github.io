@@ -5,9 +5,15 @@ I am a Ph.D. student in the School of Computer Science at Gatech
 research interests are in Operating systems, Distributed systems,
 and Computer Networks.
 
-[CV](https://sites.google.com/site/mohankumargatech/curriculum-vitae/cv.pdf?attredirects=0&d=1)         [Google Scholar](https://scholar.google.com/citations?user=NVCULdIAAAAJ&hl=en)
+[CV](https://sites.google.com/site/mohankumargatech/curriculum-vitae/cv.pdf?attredirects=0&d=1)
+[Google Scholar](https://scholar.google.com/citations?user=NVCULdIAAAAJ&hl=en)
 
-### Markdown
+### Publications
+
+- SOLROS: A Data-Centric Operating System Architecture for Heterogeneous Computing
+  Changwoo Min, Woon-Hak Kang, **Mohan Kumar**, Sanidhya Kashyap, Steffen Maass, Heeseung Jo, and Taesoo Kim.
+  In Proceedings of the thirteenth European conference on computer systems (EUROSYS 2018), Porto, Portugal.
+  (acceptance rate of 16.4%) To appear.
 
 Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
 
