@@ -1,4 +1,9 @@
-## Welcome to GitHub Pages
+### About me
+
+I am a Ph.D. student in the School of Computer Science at Gatech
+(Georgia Institute of technology), advised by Dr.Taesoo Kim.  My
+research interests are in Operating systems, Distributed systems,
+and Computer Networks.
 
 You can use the [editor on GitHub](https://github.com/mohankku/mohankku.github.io/edit/master/index.md) to maintain and preview the content for your website in Markdown files.
 
