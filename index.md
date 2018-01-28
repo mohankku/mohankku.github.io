@@ -10,7 +10,7 @@ and Computer Networks.
 
 ### Publications
 
-1.SOLROS: A Data-Centric Operating System Architecture for Heterogeneous Computing<br />
+- SOLROS: A Data-Centric Operating System Architecture for Heterogeneous Computing<br />
   Changwoo Min, Woon-Hak Kang, **Mohan Kumar**, Sanidhya Kashyap, Steffen Maass, Heeseung Jo, and Taesoo Kim.<br />
   In Proceedings of the thirteenth European conference on computer systems (EUROSYS 2018), Porto, Portugal.<br />
   (acceptance rate of 16.4%) To appear.<br />
