@@ -3,5 +3,5 @@ title: Mohan Kumar
 description: mohankumar@gatech.edu
 show_downloads: false
 google_analytics:
-classes:wide
+layout:default
 image: "./data/mohan.png"
