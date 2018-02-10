@@ -118,7 +118,7 @@ header ul {
   background: #f4f4f4;
   border-radius:5px;
   border:1px solid #e0e0e0;
-  width:270px;
+  width:200px;
 }
 
 header li {
@@ -172,7 +172,7 @@ header ul a strong {
 }
 
 section {
-  width:500px;
+  width:600px;
   float:right;
   padding-bottom:50px;
 }
@@ -188,13 +188,13 @@ hr {
   margin:0 0 20px;
 }
 
-footer {
-  width:200px;
-  float:left;
-  position:fixed;
-  bottom:50px;
-  -webkit-font-smoothing:subpixel-antialiased;
-}
+// footer {
+//   width:200px;
+//   float:left;
+//   position:fixed;
+//   bottom:50px;
+//   -webkit-font-smoothing:subpixel-antialiased;
+// }
 
 @media print, screen and (max-width: 960px) {
 
