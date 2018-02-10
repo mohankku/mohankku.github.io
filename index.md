@@ -23,12 +23,12 @@ In Proceedings of the twelfth European conference on computer systems (EUROSYS 2
 (acceptance rate of 20.5%) Best student paper.<br />
 
 [S-NFV: Securing NFV states by using SGX<br />](./data/snfv.pdf)
-Ming-Wei Shih, **Mohan Kumar**, Taesoo Kim, and Ada Gavrilovska<br />
+Ming-Wei Shih, **Mohan Kumar**, Taesoo Kim, and Ada Gavrilovska.<br />
 In Proceedings of the ACM International Workshop on Security in SDN and NFV (SDN-NFV Security 2016), New Orleans, LA, USA.<br />
 Best Paper and was presented in NFV World Congress - 2016.<br />
 
 TCP Ordo: The cost of ordered processing in TCP Servers<br />
-**Mohan Kumar** and Ada Gavrilovska<br />
+**Mohan Kumar** and Ada Gavrilovska.<br />
 In Proceedings of the IEEE international conference on computer communication (INFOCOM 2016), San Francisco, CA, USA.<br />
 (acceptance rate of 18.25%).<br />
 
