@@ -1,123 +1,43 @@
----
-layout: default
----
+## About me
 
-Text can be **bold**, _italic_, or ~~strikethrough~~.
+I am a Ph.D. student in the School of Computer Science at Georgia Institute of technology, advised by Dr.Taesoo Kim.  My research interests are in
+Operating systems, Distributed systems, and Computer Networks.
 
-[Link to another page](another-page).
+[CV](./data/cv.pdf)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[Google Scholar](https://scholar.google.com/citations?user=NVCULdIAAAAJ&hl=en)
 
-There should be whitespace between paragraphs.
+## Publications
 
-There should be whitespace between paragraphs. We recommend including a README, or a file with information about your project.
+SOLROS: A Data-Centric Operating System Architecture for Heterogeneous Computing<br />
+Changwoo Min, Woon-Hak Kang, **Mohan Kumar**, Sanidhya Kashyap, Steffen Maass, Heeseung Jo, and Taesoo Kim.<br />
+In Proceedings of the thirteenth European conference on computer systems (EUROSYS 2018), Porto, Portugal.<br />
+(acceptance rate of 16.4%) To appear.<br />
 
-# [](#header-1)Header 1
+LATR: Lazy Translation Coherence<br />
+**Mohan Kumar**, Steffen Maass, Sanidhya Kashyap, Jan Vesely, Zi Yan, Taesoo Kim, Abhishek Bhattacharjee, and Tushar Krishna.<br />
+In proceedings of the 23rd ACM International Conference on Architectural Support for Programming Languages and Operating Systems (ASPLOS 2018), Williamsburg, VA, USA.<br />
+(acceptance rate of 17.6%) To appear.<br />
 
-This is a normal paragraph following a header. GitHub is a code hosting platform for version control and collaboration. It lets you and others work together on projects from anywhere.
+Mosaic: Processing a Trillion-Edge Graph on a Single Commodity Machine<br />
+Steffen Maass, Changwoo Min, Sanidhya Kashyap, Woonhak Kang, **Mohan Kumar**, and Taesoo Kim.<br />
+In Proceedings of the twelfth European conference on computer systems (EUROSYS 2017), Belgrade, Serbia.<br />
+(acceptance rate of 20.5%) Best student paper.<br />
 
-## [](#header-2)Header 2
+S-NFV: Securing NFV states by using SGX<br />
+Ming-Wei Shih, **Mohan Kumar**, Taesoo Kim, and Ada Gavrilovska<br />
+In Proceedings of the ACM International Workshop on Security in SDN and NFV (SDN-NFV Security 2016), New Orleans, LA, USA.<br />
+Best Paper and was presented in NFV World Congress - 2016.<br />
 
-> This is a blockquote following a header.
->
-> When something is important enough, you do it even if the odds are not in your favor.
+TCP Ordo: The cost of ordered processing in TCP Servers<br />
+**Mohan Kumar** and Ada Gavrilovska<br />
+In Proceedings of the IEEE international conference on computer communication (INFOCOM 2016), San Francisco, CA, USA.<br />
+(acceptance rate of 18.25%).<br />
 
-### [](#header-3)Header 3
+## Posters
 
-```js
-// Javascript code with syntax highlighting.
-var fun = function lang(l) {
-  dateformat.i18n = require('./lang/' + l)
-  return true;
-}
-```
+Network Function Fault Isolation in a Single Address Space<br />
+**Mohan Kumar**, Steffen Mass, and Taesoo Kim<br />
+The 14th USENIX Symposium on Networked Systems Design and Implementation (NSDI'17) Poster, 2017, Boston, MA, USA.<br />
 
-```ruby
-# Ruby code with syntax highlighting
-GitHubPages::Dependencies.gems.each do |gem, version|
-  s.add_dependency(gem, "= #{version}")
-end
-```
-
-#### [](#header-4)Header 4
-
-*   This is an unordered list following a header.
-*   This is an unordered list following a header.
-*   This is an unordered list following a header.
-
-##### [](#header-5)Header 5
-
-1.  This is an ordered list following a header.
-2.  This is an ordered list following a header.
-3.  This is an ordered list following a header.
-
-###### [](#header-6)Header 6
-
-| head1        | head two          | three |
-|:-------------|:------------------|:------|
-| ok           | good swedish fish | nice  |
-| out of stock | good and plenty   | nice  |
-| ok           | good `oreos`      | hmm   |
-| ok           | good `zoute` drop | yumm  |
-
-### There's a horizontal rule below this.
-
-* * *
-
-### Here is an unordered list:
-
-*   Item foo
-*   Item bar
-*   Item baz
-*   Item zip
-
-### And an ordered list:
-
-1.  Item one
-1.  Item two
-1.  Item three
-1.  Item four
-
-### And a nested list:
-
-- level 1 item
-  - level 2 item
-  - level 2 item
-    - level 3 item
-    - level 3 item
-- level 1 item
-  - level 2 item
-  - level 2 item
-  - level 2 item
-- level 1 item
-  - level 2 item
-  - level 2 item
-- level 1 item
-
-### Small image
-
-![](https://assets-cdn.github.com/images/icons/emoji/octocat.png)
-
-### Large image
-
-![](https://guides.github.com/activities/hello-world/branching.png)
-
-
-### Definition lists can be used with HTML syntax.
-
-<dl>
-<dt>Name</dt>
-<dd>Godzilla</dd>
-<dt>Born</dt>
-<dd>1952</dd>
-<dt>Birthplace</dt>
-<dd>Japan</dd>
-<dt>Color</dt>
-<dd>Green</dd>
-</dl>
-
-```
-Long, single-line code blocks should not wrap. They should horizontally scroll if they are too long. This line should be long enough to demonstrate this.
-```
-
-```
-The final element.
-```
+DistCoz: Tell Me What to Optimize in My Distributed Application<br />
+Steffen Mass, **Mohan Kumar**, and Taesoo Kim<br />
+The 14th USENIX Symposium on Networked Systems Design and Implementation (NSDI'17) Poster, 2017, Boston, MA, USA.<br />

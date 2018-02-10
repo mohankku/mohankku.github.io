@@ -1,5 +1,6 @@
-title: Minimal theme
-description: Minimal is a theme for GitHub Pages.
-show_downloads: true
+theme: minimal-mistakes-jekyll
+title: Mohan Kumar
+description: mohankumar@gatech.edu
+show_downloads: false
 google_analytics:
-theme: jekyll-theme-minimal
+image: "./data/mohan.png"
