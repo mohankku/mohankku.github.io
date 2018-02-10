@@ -2,5 +2,5 @@ theme: jekyll-theme-minimal
 title: Mohan Kumar
 description: mohankumar@gatech.edu
 show_downloads: false
-google_analytics:
+google_analytics: UA-113861436-1
 avatar: "./data/mohan.png"
