@@ -1,9 +1,8 @@
 ## About me
 
-I am a Ph.D. student in the School of Computer Science at Georgia Institute of
-technology, advised by [Dr.Taesoo Kim](https://taesoo.gtisc.gatech.edu/).  My
-research interests are in Operating systems, Distributed systems, and Computer
-Networks.
+I am a Ph.D. student in the School of Computer Science at Georgia Institute of technology,
+advised by [Dr.Taesoo Kim](https://taesoo.gtisc.gatech.edu/).  My research interests are
+in Operating systems, Distributed systems, and Computer networks.
 
 [CV](./data/cv.pdf)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[Google Scholar](https://scholar.google.com/citations?user=NVCULdIAAAAJ&hl=en)
 
