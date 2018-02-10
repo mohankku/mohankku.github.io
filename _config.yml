@@ -1,6 +1,5 @@
-theme: minimal-mistakes-jekyll
-title: Mohan Kumar
-description: mohankumar@gatech.edu
-show_downloads: false
+title: Minimal theme
+description: Minimal is a theme for GitHub Pages.
+show_downloads: true
 google_analytics:
-image: "./data/mohan.png"
+theme: jekyll-theme-minimal
