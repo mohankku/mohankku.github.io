@@ -5,8 +5,6 @@ technology, advised by [Dr.Taesoo Kim](https://taesoo.gtisc.gatech.edu/).  My
 research interests are in Operating systems, Distributed systems,
 and Computer networks.
 
-[CV](./data/cv.pdf)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[Google Scholar](https://scholar.google.com/citations?user=NVCULdIAAAAJ&hl=en)
-
 ## Publications
 
 SOLROS: A Data-Centric Operating System Architecture for Heterogeneous Computing<br />
