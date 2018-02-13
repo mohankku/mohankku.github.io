@@ -9,7 +9,7 @@ and Computer networks.
 
 SOLROS: A Data-Centric Operating System Architecture for Heterogeneous Computing<br />
 Changwoo Min, Woon-Hak Kang, **Mohan Kumar**, Sanidhya Kashyap, Steffen Maass, Heeseung Jo, and Taesoo Kim.<br />
-In Proceedings of the thirteenth European conference on computer systems (EUROSYS 2018), Porto, Portugal.<br />
+In Proceedings of the thirteenth European conference on computer systems (EuroSys 2018), Porto, Portugal.<br />
 (acceptance rate of 16.4%) To appear.<br />
 
 [LATR: Lazy Translation Coherence<br />](./data/latr.pdf)
@@ -19,7 +19,7 @@ In proceedings of the 23rd ACM International Conference on Architectural Support
 
 [Mosaic: Processing a Trillion-Edge Graph on a Single Commodity Machine<br />](./data/mosaic.pdf)
 Steffen Maass, Changwoo Min, Sanidhya Kashyap, Woonhak Kang, **Mohan Kumar**, and Taesoo Kim.<br />
-In Proceedings of the twelfth European conference on computer systems (EUROSYS 2017), Belgrade, Serbia.<br />
+In Proceedings of the twelfth European conference on computer systems (EuroSys 2017), Belgrade, Serbia.<br />
 (acceptance rate of 20.5%) Best student paper.<br />
 
 [S-NFV: Securing NFV states by using SGX<br />](./data/snfv.pdf)
