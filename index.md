@@ -35,9 +35,9 @@ In Proceedings of the IEEE international conference on computer communication (I
 ## Posters
 
 [Network Function Fault Isolation in a Single Address Space<br />](./data/nfv-fault-poster.pdf)
-**Mohan Kumar**, Steffen Mass, and Taesoo Kim<br />
+**Mohan Kumar**, Steffen Maass, and Taesoo Kim<br />
 The 14th USENIX Symposium on Networked Systems Design and Implementation (NSDI'17) Poster, 2017, Boston, MA, USA.<br />
 
 [DistCoz: Tell Me What to Optimize in My Distributed Application<br />](./data/dist-coz-poster.pdf)
-Steffen Mass, **Mohan Kumar**, and Taesoo Kim<br />
+Steffen Maass, **Mohan Kumar**, and Taesoo Kim<br />
 The 14th USENIX Symposium on Networked Systems Design and Implementation (NSDI'17) Poster, 2017, Boston, MA, USA.<br />
