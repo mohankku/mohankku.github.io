@@ -23,7 +23,9 @@
         <!-- {% if site.github.is_user_page %} -->
         <!--   <p class="view"><a href="{{ site.github.owner_url }}">View My GitHub Profile</a></p> -->
         <!-- {% endif %} -->
-        <center><p class="view"><a href="https://mohankku.github.io/data/cv.pdf">CV</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <center><p class="view"><a href="https://mohankku.github.io/data/cv.pdf"
+                                   onclick=”var that=this;_gaq.push([‘_trackEvent’,’Download’,’PDF’,this.href]);setTimeout(function(){location.href=that.href;},200);return false;”>
+              CV</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             <a href="https://scholar.google.com/citations?user=NVCULdIAAAAJ&hl=en">Google Scholar</a></p></center>
         {% if site.github.is_user_page %}
         <center><p class="view"><img src=./data/mohan.png></p></center>
