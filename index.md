@@ -13,7 +13,7 @@ EuroSys'18, Porto, Portugal. (acceptance rate of 16.4%) To appear.<br />
 
 [LATR: Lazy Translation Coherence<br />](./data/latr.pdf)
 **Mohan Kumar**, Steffen Maass, Sanidhya Kashyap, Jan Vesely, Zi Yan, Taesoo Kim, Abhishek Bhattacharjee, and Tushar Krishna.<br />
-ASPLOS'18, Williamsburg, VA, USA. (acceptance rate of 17.6%) To appear.<br />
+ASPLOS'18, Williamsburg, VA, USA. (acceptance rate of 17.6%).<br />
 
 [Mosaic: Processing a Trillion-Edge Graph on a Single Commodity Machine<br />](./data/mosaic.pdf)
 Steffen Maass, Changwoo Min, Sanidhya Kashyap, Woonhak Kang, **Mohan Kumar**, and Taesoo Kim.<br />
