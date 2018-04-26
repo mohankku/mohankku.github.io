@@ -9,7 +9,7 @@ and Computer networks.
 
 [SOLROS: A Data-Centric Operating System Architecture for Heterogeneous Computing<br />](./data/solros.pdf)
 Changwoo Min, Woon-Hak Kang, **Mohan Kumar**, Sanidhya Kashyap, Steffen Maass, Heeseung Jo, and Taesoo Kim.<br />
-EuroSys'18, Porto, Portugal. (acceptance rate of 16.4%) To appear.<br />
+EuroSys'18, Porto, Portugal. (acceptance rate of 16.4%).<br />
 
 [LATR: Lazy Translation Coherence<br />](./data/latr.pdf)
 **Mohan Kumar**, Steffen Maass, Sanidhya Kashyap, Jan Vesely, Zi Yan, Taesoo Kim, Abhishek Bhattacharjee, and Tushar Krishna.<br />
