@@ -1,6 +1,6 @@
 ## About me
 
-I am a Ph.D. student in the School of Computer Science at Georgia Institute of
+I am a Ph.D. candidate in the School of Computer Science at Georgia Institute of
 technology, advised by [Dr.Taesoo Kim](https://taesoo.kim/).<br />
 My research interests are in Operating systems, Distributed systems,
 and Computer networks.
