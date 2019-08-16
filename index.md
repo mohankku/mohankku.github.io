@@ -1,10 +1,10 @@
 ## About me
 
 I am a research scientist at Facebook. I got my Ph.D. in computer science from
-the School of Computer Science at Georgia <br /> Institute of technology, advised
+the School of Computer Science at Georgia<br /> Institute of technology, advised
 by [Dr.Taesoo Kim](https://taesoo.kim/).
 My research interests are in Operating systems, Distributed systems,
-and Computer networks.
+and<br /> Computer networks.
 
 ## Publications
 
