@@ -34,6 +34,10 @@ INFOCOM'16, San Francisco, CA, USA. (acceptance rate of 18.25%).<br />
 
 ## Posters
 
+mKPAC: Kernel Packet Processing for Manycore Systems<<br />
+Ramneek, **Mohan Kumar**, Taesoo Kim, and Sungin Jung.
+Middleware'18, Rennes, France.<br />
+
 [Network Function Fault Isolation in a Single Address Space<br />](./data/nfv-fault-poster.pdf)
 **Mohan Kumar**, Steffen Maass, and Taesoo Kim<br />
 NSDI'17 Poster, 2017, Boston, MA, USA.<br />
@@ -41,3 +45,7 @@ NSDI'17 Poster, 2017, Boston, MA, USA.<br />
 [DistCoz: Tell Me What to Optimize in My Distributed Application<br />](./data/dist-coz-poster.pdf)
 Steffen Maass, **Mohan Kumar**, and Taesoo Kim<br />
 NSDI'17 Poster, 2017, Boston, MA, USA.<br />
+
+VNFStore: NFV State Externalizing Framework<br />
+**Mohan Kumar** and Ada Gavrilovska.<br />
+Diversity Workshop at SOSP’15, 2015, Monterey, CA, October.<br />
