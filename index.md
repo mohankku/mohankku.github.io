@@ -34,8 +34,8 @@ INFOCOM'16, San Francisco, CA, USA. (acceptance rate of 18.25%).<br />
 
 ## Posters
 
-mKPAC: Kernel Packet Processing for Manycore Systems<<br />
-Ramneek, **Mohan Kumar**, Taesoo Kim, and Sungin Jung.
+mKPAC: Kernel Packet Processing for Manycore Systems<br />
+Ramneek, **Mohan Kumar**, Taesoo Kim, and Sungin Jung.<br />
 Middleware'18, Rennes, France.<br />
 
 [Network Function Fault Isolation in a Single Address Space<br />](./data/nfv-fault-poster.pdf)
