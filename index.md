@@ -8,7 +8,7 @@ and<br /> Computer networks.
 
 ## Publications
 
-ECOTLB: Eventually Consistent TLBs<br />
+[ECOTLB: Eventually Consistent TLBs<br />](./data/ecotlb.pdf)
 Steffen Maass, **Mohan Kumar**,  Taesoo Kim, Tushar Krishna, and Abhishek Bhattacharjee.<br />
 ACM TACO'20.<br />
 
