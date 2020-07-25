@@ -28,7 +28,7 @@ EuroSys'17, Belgrade, Serbia. (acceptance rate of 20.5%) Best student paper.<br 
 Ming-Wei Shih, **Mohan Kumar**, Taesoo Kim, and Ada Gavrilovska.<br />
 SDN-NFV Security'16, New Orleans, LA, USA. Best Paper and presented in NFV World Congress'16.<br />
 
-TCP Ordo: The cost of ordered processing in TCP Servers<br />
+[TCP Ordo: The cost of ordered processing in TCP Servers<br />](https://ieeexplore.ieee.org/document/7524601)
 **Mohan Kumar** and Ada Gavrilovska.<br />
 INFOCOM'16, San Francisco, CA, USA. (acceptance rate of 18.25%).<br />
 
