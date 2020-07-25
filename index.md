@@ -34,7 +34,7 @@ INFOCOM'16, San Francisco, CA, USA. (acceptance rate of 18.25%).<br />
 
 ## Posters
 
-mKPAC: Kernel Packet Processing for Manycore Systems<br />
+[mKPAC: Kernel Packet Processing for Manycore Systems<br />](https://dl.acm.org/doi/10.1145/3284014.3284022)
 Ramneek, **Mohan Kumar**, Taesoo Kim, and Sungin Jung.<br />
 Middleware'18, Rennes, France.<br />
 
