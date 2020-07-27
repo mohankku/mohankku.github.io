@@ -5,6 +5,7 @@ the School of Computer Science at Georgia<br /> Institute of technology, advised
 by [Dr.Taesoo Kim](https://taesoo.kim/).
 My research interests are in Operating systems, Distributed systems,
 and<br /> Computer networks.
+My thesis is available [here](https://smartech.gatech.edu/handle/1853/61693).
 
 ## Publications
 
