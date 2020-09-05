@@ -1,7 +1,8 @@
 ## About me
 
-I am a research scientist at Facebook. I got my Ph.D. in computer science from
-the School of Computer Science at Georgia<br /> Institute of technology, advised
+I am a research scientist, working on a micro kernel, in Facebook Reality
+Labs (FRL). I got my Ph.D. in computer science from the<br />
+School of Computer Science at Georgia Institute of technology, advised
 by [Dr.Taesoo Kim](https://taesoo.kim/).
 My research interests are in Operating systems, Distributed systems,
 and<br /> Computer networks.
