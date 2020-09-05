@@ -4,8 +4,8 @@ I am a research scientist, working on a micro kernel, in Facebook Reality
 Labs (FRL). I got my Ph.D. in computer science from the<br />
 School of Computer Science at Georgia Institute of technology, advised
 by [Dr.Taesoo Kim](https://taesoo.kim/).
-My research interests are in Operating systems, Distributed systems,
-and<br /> Computer networks.
+My research interests are in Operating systems<br />, Distributed systems,
+and Computer networks.
 My thesis is available [here](https://smartech.gatech.edu/handle/1853/61693).
 
 ## Publications
