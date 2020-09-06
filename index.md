@@ -1,7 +1,6 @@
 ## About me
 
-I am a research scientist, working on a micro kernel, in Facebook Reality
-Labs (FRL). I got my Ph.D. in computer science from the<br />
+I am a research scientist working at Facebook Reality Labs (FRL). I got my Ph.D. in computer science from the<br />
 School of Computer Science at Georgia Institute of technology, advised
 by [Dr.Taesoo Kim](https://taesoo.kim/).
 My research interests are in Operating<br /> systems, Distributed systems,
