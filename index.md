@@ -1,9 +1,9 @@
 ## About me
 
-I am a research scientist working at Facebook Reality Labs (FRL). I got my Ph.D. in computer science from the<br />
-School of Computer Science at Georgia Institute of technology, advised
+I am a research scientist working at Facebook Reality Labs (FRL). I got my Ph.D. in computer science from the
+School of<br /> Computer Science at Georgia Institute of technology, advised
 by [Dr.Taesoo Kim](https://taesoo.kim/).
-My research interests are in Operating<br /> systems, Distributed systems,
+My research interests are in Operating systems,<br /> Distributed systems,
 and Computer networks.
 My thesis is available [here](https://smartech.gatech.edu/handle/1853/61693).
 
