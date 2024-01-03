@@ -1,10 +1,9 @@
 ## About me
 
-I am a research scientist at Meta Reality Labs, where I work on accelerating ML inference on embedded devices. The core
-part of the work is vectorizing ML operators using SIMD intrinsics.<br />
+I am a research scientist at Meta Reality Labs, where I work on accelerating ML inference on embedded devices. The core part<br \>
+of the work is vectorizing ML operators using SIMD intrinsics.<br />
 
-I got my Ph.D. in computer science from the School of<br /> Computer Science at Georgia Institute of technology, advised
-by [Dr.Taesoo Kim](https://taesoo.kim/).
+I got my Ph.D. in computer science from the School of Computer Science at Georgia Institute of technology, advised by<br \> [Dr.Taesoo Kim](https://taesoo.kim/).
 My current research interest is in ML acceleration.
 My thesis is available [here](https://smartech.gatech.edu/handle/1853/61693).
 
