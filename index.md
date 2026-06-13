@@ -45,6 +45,7 @@ NSDI'17 Poster, 2017, Boston, MA, USA.<br />
 Steffen Maass, **Mohan Kumar**, and Taesoo Kim<br />
 NSDI'17 Poster, 2017, Boston, MA, USA.<br />
 
-VNFStore: NFV State Externalizing Framework<br />
-**Mohan Kumar** and Ada Gavrilovska.<br />
-Diversity Workshop at SOSP’15, 2015, Monterey, CA, October.<br />
+VNFStore: NFV State Externalizing Framework<br /
+>
+**Mohan Kumar** and Ada Gavrilovska.<br -- />
+Diversity Workshop at SOSP’15, 20-- 15, Monterey, CA, October.<br />
