@@ -1,51 +1,54 @@
+---
+layout: default
+title: Home
+---
+
 ## About me
 
-I am a research scientist at Meta Reality Labs, where I work on accelerating ML inference on embedded devices. The core part<br />
-of the work is vectorizing ML operators using SIMD intrinsics.<br />
+I am a research scientist at Meta Reality Labs, where I work on accelerating ML inference on embedded devices. The core part of the work is vectorizing ML operators using SIMD intrinsics.
 
-I got my Ph.D. in computer science from the School of Computer Science at Georgia Institute of technology, advised by<br /> [Dr.Taesoo Kim](https://taesoo.kim/). My current research interest is in ML acceleration. My thesis is available [here](https://smartech.gatech.edu/handle/1853/61693).
+I got my Ph.D. in computer science from the School of Computer Science at Georgia Institute of Technology, advised by [Dr. Taesoo Kim](https://taesoo.kim/). My current research interest is in ML acceleration. My thesis is available [here](https://smartech.gatech.edu/handle/1853/61693).
 
 ## Publications
 
-[ECOTLB: Eventually Consistent TLBs<br />](./data/ecotlb.pdf)
-Steffen Maass, **Mohan Kumar**,  Taesoo Kim, Tushar Krishna, and Abhishek Bhattacharjee.<br />
-ACM TACO'20.<br />
+- **[ECOTLB: Eventually Consistent TLBs](./data/ecotlb.pdf)**  
+  Steffen Maass, **Mohan Kumar**, Taesoo Kim, Tushar Krishna, and Abhishek Bhattacharjee.  
+  ACM TACO'20.
 
-[SOLROS: A Data-Centric Operating System Architecture for Heterogeneous Computing<br />](./data/solros.pdf)
-Changwoo Min, Woon-Hak Kang, **Mohan Kumar**, Sanidhya Kashyap, Steffen Maass, Heeseung Jo, and Taesoo Kim.<br />
-EuroSys'18, Porto, Portugal. (acceptance rate of 16.4%).<br />
+- **[SOLROS: A Data-Centric Operating System Architecture for Heterogeneous Computing](./data/solros.pdf)**  
+  Changwoo Min, Woon-Hak Kang, **Mohan Kumar**, Sanidhya Kashyap, Steffen Maass, Heeseung Jo, and Taesoo Kim.  
+  EuroSys'18, Porto, Portugal. (acceptance rate of 16.4%)
 
-[LATR: Lazy Translation Coherence<br />](./data/latr.pdf)
-**Mohan Kumar**, Steffen Maass, Sanidhya Kashyap, Jan Vesely, Zi Yan, Taesoo Kim, Abhishek Bhattacharjee, and Tushar Krishna.<br />
-ASPLOS'18, Williamsburg, VA, USA. (acceptance rate of 17.6%).<br />
+- **[LATR: Lazy Translation Coherence](./data/latr.pdf)**  
+  **Mohan Kumar**, Steffen Maass, Sanidhya Kashyap, Jan Vesely, Zi Yan, Taesoo Kim, Abhishek Bhattacharjee, and Tushar Krishna.  
+  ASPLOS'18, Williamsburg, VA, USA. (acceptance rate of 17.6%)
 
-[Mosaic: Processing a Trillion-Edge Graph on a Single Commodity Machine<br />](./data/mosaic.pdf)
-Steffen Maass, Changwoo Min, Sanidhya Kashyap, Woonhak Kang, **Mohan Kumar**, and Taesoo Kim.<br />
-EuroSys'17, Belgrade, Serbia. (acceptance rate of 20.5%) Best student paper.<br />
+- **[Mosaic: Processing a Trillion-Edge Graph on a Single Commodity Machine](./data/mosaic.pdf)**  
+  Steffen Maass, Changwoo Min, Sanidhya Kashyap, Woonhak Kang, **Mohan Kumar**, and Taesoo Kim.  
+  EuroSys'17, Belgrade, Serbia. (acceptance rate of 20.5%) 🏆 Best student paper
 
-[S-NFV: Securing NFV states by using SGX<br />](./data/snfv.pdf)
-Ming-Wei Shih, **Mohan Kumar**, Taesoo Kim, and Ada Gavrilovska.<br />
-SDN-NFV Security'16, New Orleans, LA, USA. Best Paper and presented in NFV World Congress'16.<br />
+- **[S-NFV: Securing NFV states by using SGX](./data/snfv.pdf)**  
+  Ming-Wei Shih, **Mohan Kumar**, Taesoo Kim, and Ada Gavrilovska.  
+  SDN-NFV Security'16, New Orleans, LA, USA. 🏆 Best Paper and presented in NFV World Congress'16
 
-[TCP Ordo: The cost of ordered processing in TCP Servers<br />](https://ieeexplore.ieee.org/document/7524601)
-**Mohan Kumar** and Ada Gavrilovska.<br />
-INFOCOM'16, San Francisco, CA, USA. (acceptance rate of 18.25%).<br />
+- **[TCP Ordo: The cost of ordered processing in TCP Servers](https://ieeexplore.ieee.org/document/7524601)**  
+  **Mohan Kumar** and Ada Gavrilovska.  
+  INFOCOM'16, San Francisco, CA, USA. (acceptance rate of 18.25%)
 
 ## Posters
 
-[mKPAC: Kernel Packet Processing for Manycore Systems<br />](https://dl.acm.org/doi/10.1145/3284014.3284022)
-Ramneek, **Mohan Kumar**, Taesoo Kim, and Sungin Jung.<br />
-Middleware'18, Rennes, France.<br />
+- **[mKPAC: Kernel Packet Processing for Manycore Systems](https://dl.acm.org/doi/10.1145/3284014.3284022)**  
+  Ramneek, **Mohan Kumar**, Taesoo Kim, and Sungin Jung.  
+  Middleware'18, Rennes, France.
 
-[Network Function Fault Isolation in a Single Address Space<br />](./data/nfv-fault-poster.pdf)
-**Mohan Kumar**, Steffen Maass, and Taesoo Kim<br />
-NSDI'17 Poster, 2017, Boston, MA, USA.<br />
+- **[Network Function Fault Isolation in a Single Address Space](./data/nfv-fault-poster.pdf)**  
+  **Mohan Kumar**, Steffen Maass, and Taesoo Kim  
+  NSDI'17 Poster, Boston, MA, USA.
 
-[DistCoz: Tell Me What to Optimize in My Distributed Application<br />](./data/dist-coz-poster.pdf)
-Steffen Maass, **Mohan Kumar**, and Taesoo Kim<br />
-NSDI'17 Poster, 2017, Boston, MA, USA.<br />
+- **[DistCoz: Tell Me What to Optimize in My Distributed Application](./data/dist-coz-poster.pdf)**  
+  Steffen Maass, **Mohan Kumar**, and Taesoo Kim  
+  NSDI'17 Poster, Boston, MA, USA.
 
-VNFStore: NFV State Externalizing Framework<br /
->
-**Mohan Kumar** and Ada Gavrilovska.<br -- />
-Diversity Workshop at SOSP’15, 20-- 15, Monterey, CA, October.<br />
+- **VNFStore: NFV State Externalizing Framework**  
+  **Mohan Kumar** and Ada Gavrilovska.  
+  Diversity Workshop at SOSP'15, Monterey, CA.

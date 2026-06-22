@@ -1,13 +1,16 @@
 <!doctype html>
 <html lang="{{ site.lang | default: "en-US" }}">
   <head>
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XBGZYNNC5D"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date()); gtag('config', 'G-XBGZYNNC5D');
-    </script>
+    {% if site.google_analytics %}
+      <!-- Google tag (gtag.js) -->
+      <script async src="https://www.googletagmanager.com/gtag/js?id={{ site.google_analytics }}"></script>
+      <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', '{{ site.google_analytics }}');
+      </script>
+    {% endif %}
 
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
@@ -23,29 +26,26 @@
   <body>
     <div class="wrapper">
       <header>
-        <center><p class="view"><h1>{{ site.title | default: site.github.repository_name }}</h1>
-                {{ site.description | default: site.github.project_tagline }}<br />
-        <!-- {% if site.github.is_project_page %} -->
-        <!--   <p class="view"><a href="{{ site.github.repository_url }}">View the Project on GitHub <small>{{ github_name }}</small></a></p> -->
-        <!-- {% endif %} -->
-        <!-- {% if site.github.is_user_page %} -->
-        <!--   <p class="view"><a href="{{ site.github.owner_url }}">View My GitHub Profile</a></p> -->
-        <!-- {% endif %} -->
-            <a href="https://mohankku.github.io/data/cv.pdf">CV</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-            <a href="https://scholar.google.com/citations?user=NVCULdIAAAAJ&hl=en">Google Scholar</a></p></center>
-        {% if site.github.is_user_page %}
-        <center><p class="view"><img src=./data/mohan.png></p></center>
-        <center><p class="view">333 Airport Blvd,
-            <br /> Burlingame CA 94010<br />(404) 312-8995
-        </p></center>
-        {% endif %}
-        {% if site.show_downloads %}
-          <ul>
-            <li><a href="{{ site.github.zip_url }}">Download <strong>ZIP File</strong></a></li>
-            <li><a href="{{ site.github.tar_url }}">Download <strong>TAR Ball</strong></a></li>
-            <li><a href="{{ site.github.repository_url }}">View On <strong>GitHub</strong></a></li>
-          </ul>
-        {% endif %}
+        <div class="header-content">
+          <h1>{{ site.title | default: site.github.repository_name }}</h1>
+          <p class="tagline">{{ site.email }}</p>
+          
+          <nav class="header-nav">
+            <ul>
+              <li><a href="{{ '/data/cv.pdf' | relative_url }}"><strong>CV</strong></a></li>
+              <li><a href="https://scholar.google.com/citations?user=NVCULdIAAAAJ&hl=en"><strong>Google Scholar</strong></a></li>
+            </ul>
+          </nav>
+
+          <div class="profile-section">
+            <img src="{{ site.avatar | relative_url }}" alt="{{ site.title }}" class="profile-pic">
+            <p class="contact-info">
+              <strong>333 Airport Blvd</strong><br>
+              Burlingame CA 94010<br>
+              <a href="tel:+16507094897">(650) 709-4897</a>
+            </p>
+          </div>
+        </div>
       </header>
       <section>
 
@@ -62,34 +62,5 @@
     <script src="{{ '/assets/js/scale.fix.js' | relative_url }}"></script>
 
 
-  {% if site.google_analytics %}
-    <script>
-        (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-        })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
-
-        ga('create', '{{ site.google_analytics }}', 'auto');
-        ga('send', 'pageview');
-    </script>
-
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-    <script type="text/javascript">
-        (function (_) {
-                        jQuery(document).ready(function($) {
-              $("a").mousedown(function(event){
-                if (event.which == 1 || event.which == 2) {
-                    var link = $(this).attr("href");
-                    ga('send', {
-                        hitType: 'pageview',
-                        page: link
-                    });
-                }
-              });
-                        });
-        })(jQuery);
-    </script>
-
-  {% endif %}
   </body>
 </html>

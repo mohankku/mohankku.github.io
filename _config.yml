@@ -1,6 +1,8 @@
 theme: jekyll-theme-minimal
 title: Mohan Kumar
-description: mohan.cbein@gmail.com
+description: "Research Scientist at Meta Reality Labs specializing in machine learning acceleration and SIMD vectorization."
+email: mohan.cbein@gmail.com
 show_downloads: false
 google_analytics: G-XBGZYNNC5D
-avatar: "./data/mohan.png"
+avatar: "/data/mohan.png"
+github_username: mohankku
