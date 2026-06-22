@@ -34,6 +34,13 @@ body {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  white-space: nowrap;
+}
+
+@media (min-width: 961px) {
+  .header-content h1 {
+    font-size: 26px;
+  }
 }
 
 .tagline {
