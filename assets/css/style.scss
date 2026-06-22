@@ -130,6 +130,12 @@ body {
 }
 
 /* Publication styling */
+section > ul {
+  list-style: none;
+  padding-left: 0;
+  margin-left: 0;
+}
+
 section > ul > li {
   margin-bottom: 24px;
   padding: 16px;
