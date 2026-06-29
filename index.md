@@ -5,9 +5,9 @@ title: Home
 
 ## About me
 
-I am a research scientist at Meta Reality Labs, where I work on accelerating ML inference on embedded devices. The core part of the work is vectorizing ML operators using SIMD intrinsics.
+I am a Research Scientist at Meta Reality Labs focused on accelerating machine learning inference on embedded devices. My work encompasses optimizing and deploying diverse ML architectures—including CNNs, RCNNs, RNNs, and transformers—onto resource-constrained hardware platforms. I leverage PyTorch and related frameworks to develop efficient model implementations and quantization techniques for edge deployment. Additionally, I partner with SoC vendors to architect NPU/eNPU specifications that enable more efficient and effective hardware solutions for on-device ML inference.
 
-I got my Ph.D. in computer science from the School of Computer Science at Georgia Institute of Technology, advised by [Dr. Taesoo Kim](https://taesoo.kim/). My current research interest is in ML acceleration. My thesis is available [here](https://smartech.gatech.edu/handle/1853/61693).
+I received my Ph.D. in Computer Science from the Georgia Institute of Technology, where I specialized in Systems under the advisement of [Dr. Taesoo Kim](https://taesoo.kim/). My thesis, *Taming Latency In Data Center Applications*, is available [here](https://smartech.gatech.edu/handle/1853/61693). I also hold an M.S. in Computer Science from Georgia Tech and a B.E. in Computer Science from the University of Madras.
 
 ## Publications
 
