@@ -11,6 +11,8 @@ body {
   header {
     max-height: 100vh;
     overflow-y: auto;
+    position: sticky;
+    top: 0;
   }
 
   section {
@@ -51,8 +53,10 @@ body {
 }
 
 .header-nav ul {
+  display: flex;
   justify-content: center;
   flex-direction: row;
+  flex-wrap: wrap;
   width: 100%;
   gap: 12px;
 }
@@ -70,6 +74,8 @@ body {
   transition: all 0.3s ease;
   border-bottom: none;
   padding-bottom: 8px;
+  text-align: center;
+  box-sizing: border-box;
 
   &:hover {
     background: #3498db;
@@ -81,6 +87,22 @@ body {
   strong {
     font-size: 13px;
     color: inherit;
+  }
+}
+
+@media (min-width: 961px) {
+  .header-nav ul {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .header-nav ul li {
+    width: 100%;
+  }
+
+  .header-nav ul li a {
+    display: block;
+    width: 100%;
   }
 }
 
