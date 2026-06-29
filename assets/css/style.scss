@@ -47,6 +47,10 @@ h1, h2, h3, h4, h5, h6 {
   color: var(--text-color) !important;
 }
 
+section p, section ul, section ol, section li, strong, b, em, i, span {
+  color: var(--text-color);
+}
+
 @media (min-width: 961px) {
   .wrapper {
     display: flex;
