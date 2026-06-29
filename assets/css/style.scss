@@ -8,15 +8,25 @@ body {
 }
 
 @media (min-width: 961px) {
+  .wrapper {
+    display: flex;
+    align-items: flex-start;
+    overflow: visible;
+  }
+
   header {
     max-height: 100vh;
     overflow-y: auto;
     position: sticky;
+    position: -webkit-sticky;
     top: 0;
+    float: none;
+    flex-shrink: 0;
   }
 
   section {
     width: 860px;
+    float: none;
   }
 }
 
