@@ -26,28 +26,29 @@
     <!--[if lt IE 9]>
     <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   </head>
   <body>
     <div class="wrapper">
       <header>
         <div class="header-content">
           <h1>{{ site.title | default: site.github.repository_name }}</h1>
-          <p class="tagline">{{ site.email }}</p>
+          <p class="tagline"><i class="fa-solid fa-envelope"></i> {{ site.email }}</p>
           
           <nav class="header-nav">
             <ul>
-              <li><a href="{{ '/data/cv.pdf' | relative_url }}"><strong>CV</strong></a></li>
-              <li><a href="https://scholar.google.com/citations?user=NVCULdIAAAAJ&hl=en"><strong>Google Scholar</strong></a></li>
-              <li><a href="https://www.linkedin.com/in/mohankkumar/"><strong>LinkedIn</strong></a></li>
+              <li><a href="{{ '/data/cv.pdf' | relative_url }}"><i class="fa-solid fa-file-pdf"></i> <strong>CV</strong></a></li>
+              <li><a href="https://scholar.google.com/citations?user=NVCULdIAAAAJ&hl=en"><i class="fa-solid fa-graduation-cap"></i> <strong>Google Scholar</strong></a></li>
+              <li><a href="https://www.linkedin.com/in/mohankkumar/"><i class="fa-brands fa-linkedin"></i> <strong>LinkedIn</strong></a></li>
             </ul>
           </nav>
 
           <div class="profile-section">
             <img src="{{ site.avatar | relative_url }}" alt="{{ site.title }}" class="profile-pic">
             <p class="contact-info">
-              <strong>10109 Ridgeway Dr</strong><br>
+              <i class="fa-solid fa-location-dot"></i> <strong>10109 Ridgeway Dr</strong><br>
               Cupertino CA 95014<br>
-              <a href="tel:+16507094897">(650) 709-4897</a>
+              <i class="fa-solid fa-phone"></i> <a href="tel:+16507094897">(650) 709-4897</a>
             </p>
           </div>
         </div>
@@ -57,12 +58,11 @@
       {{ content }}
 
       </section>
-      <!-- <footer> -->
-      <!--   {% if site.github.is_project_page %} -->
-      <!--   <p>This project is maintained by <a href="{{ site.github.owner_url }}">{{ site.github.owner_name }}</a></p> -->
-      <!--   {% endif %} -->
-      <!--   <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p> -->
-      <!-- </footer> -->
+      <footer>
+        <div class="footer-content">
+          <p>&copy; {{ "now" | date: "%Y" }} {{ site.title }}. All rights reserved.</p>
+        </div>
+      </footer>
     </div>
     <script src="{{ '/assets/js/scale.fix.js' | relative_url }}"></script>
 
