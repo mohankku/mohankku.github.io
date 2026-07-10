@@ -7,5 +7,10 @@ google_analytics: G-XBGZYNNC5D
 avatar: "/data/mohan_new.jpeg"
 image: "/data/mohan_new.jpeg"
 github_username: mohankku
+url: "https://mohankku.github.io"
+author:
+  name: "Mohan Kumar"
+twitter:
+  username: "mohankku"
 plugins:
   - jekyll-seo-tag

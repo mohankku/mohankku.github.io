@@ -220,14 +220,16 @@ section > ul > li {
   border-left: 4px solid var(--link-color);
   border-radius: 8px;
   transition: all 0.3s ease;
-  animation: fadeInUp 0.6s ease-out both;
+  
+  /* Initial state for scroll animation */
+  opacity: 0;
+  transform: translateY(20px);
 
-  &:nth-child(1) { animation-delay: 0.1s; }
-  &:nth-child(2) { animation-delay: 0.2s; }
-  &:nth-child(3) { animation-delay: 0.3s; }
-  &:nth-child(4) { animation-delay: 0.4s; }
-  &:nth-child(5) { animation-delay: 0.5s; }
-  &:nth-child(6) { animation-delay: 0.6s; }
+  &.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.6s ease-out, transform 0.6s ease-out, box-shadow 0.3s ease, background 0.3s ease;
+  }
 
   &:hover {
     background: var(--card-bg);
@@ -249,14 +251,31 @@ section > h2 {
   margin-top: 40px;
   margin-bottom: 20px;
   padding-bottom: 12px;
-  animation: slideInDown 0.6s ease-out;
   border-bottom: 1px solid var(--border-color);
+  
+  /* Initial state for scroll animation */
+  opacity: 0;
+  transform: translateY(-20px);
+  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+
+  &.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 section > p {
-  animation: fadeInUp 0.6s ease-out both;
-  animation-delay: 0.2s;
   color: var(--text-color);
+  
+  /* Initial state for scroll animation */
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+
+  &.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Animations */
