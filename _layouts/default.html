@@ -39,6 +39,7 @@
             <ul>
               <li><a href="{{ '/data/cv.pdf' | relative_url }}"><i class="fa-solid fa-file-pdf"></i> <strong>CV</strong></a></li>
               <li><a href="https://scholar.google.com/citations?user=NVCULdIAAAAJ&hl=en"><i class="fa-solid fa-graduation-cap"></i> <strong>Google Scholar</strong></a></li>
+              <li><a href="https://github.com/mohankku"><i class="fa-brands fa-github"></i> <strong>GitHub</strong></a></li>
               <li><a href="https://www.linkedin.com/in/mohankkumar/"><i class="fa-brands fa-linkedin"></i> <strong>LinkedIn</strong></a></li>
             </ul>
           </nav>
@@ -64,9 +65,12 @@
         </div>
       </footer>
     </div>
+    
+    <button id="back-to-top" title="Go to top"><i class="fa-solid fa-arrow-up"></i></button>
+    
     <script src="{{ '/assets/js/scale.fix.js' | relative_url }}"></script>
 
-    <!-- Scroll Animation Observer -->
+    <!-- Scroll Animation Observer and Back to Top -->
     <script>
       document.addEventListener("DOMContentLoaded", function() {
         const observer = new IntersectionObserver((entries) => {
@@ -82,8 +86,25 @@
         });
 
         // Target all section paragraphs, headers, and list items
-        const elementsToAnimate = document.querySelectorAll('section > p, section > h2, section > ul > li');
+        const elementsToAnimate = document.querySelectorAll('section > p, section > h2, section > ul > li, .experience-list li');
         elementsToAnimate.forEach(el => observer.observe(el));
+        
+        // Back to top button functionality
+        const backToTopBtn = document.getElementById("back-to-top");
+        window.addEventListener("scroll", () => {
+          if (window.scrollY > 300) {
+            backToTopBtn.classList.add("show");
+          } else {
+            backToTopBtn.classList.remove("show");
+          }
+        });
+        
+        backToTopBtn.addEventListener("click", () => {
+          window.scrollTo({
+            top: 0,
+            behavior: "smooth"
+          });
+        });
       });
     </script>
   </body>

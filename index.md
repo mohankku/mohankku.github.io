@@ -5,9 +5,28 @@ title: Home
 
 ## About me
 
-I am a Research Scientist at Meta Reality Labs focused on accelerating machine learning inference on embedded devices. My work encompasses optimizing and deploying diverse ML architectures—including CNNs, RCNNs, RNNs, and transformers—onto resource-constrained hardware platforms. I leverage PyTorch and related frameworks to develop efficient model implementations and quantization techniques for edge deployment. Additionally, I partner with SoC vendors to architect NPU/eNPU specifications that enable more efficient and effective hardware solutions for on-device ML inference.
+I am a Research Scientist at Meta Reality Labs focused on accelerating machine learning inference on embedded devices. I received my Ph.D. in Computer Science from the Georgia Institute of Technology, where I specialized in Systems under the advisement of [Dr. Taesoo Kim](https://taesoo.kim/). My thesis, *Taming Latency In Data Center Applications*, is available [here](https://smartech.gatech.edu/handle/1853/61693).
 
-I received my Ph.D. in Computer Science from the Georgia Institute of Technology, where I specialized in Systems under the advisement of [Dr. Taesoo Kim](https://taesoo.kim/). My thesis, *Taming Latency In Data Center Applications*, is available [here](https://smartech.gatech.edu/handle/1853/61693). I also hold an M.S. in Computer Science from Georgia Tech and a B.E. in Computer Science from the University of Madras.
+## Experience
+
+<ul class="experience-list">
+  <li>
+    <div class="exp-header">
+      <span class="exp-title">Research Scientist</span>
+      <span class="exp-date">2021 &mdash; Present</span>
+    </div>
+    <div class="exp-company">Meta Reality Labs</div>
+    <p>Focused on accelerating machine learning inference on embedded devices. My work encompasses optimizing and deploying diverse ML architectures—including CNNs, RCNNs, RNNs, and transformers—onto resource-constrained hardware platforms. I leverage PyTorch and related frameworks to develop efficient model implementations and quantization techniques for edge deployment. Additionally, I partner with SoC vendors to architect NPU/eNPU specifications that enable more efficient and effective hardware solutions for on-device ML inference.</p>
+  </li>
+  <li>
+    <div class="exp-header">
+      <span class="exp-title">Graduate Research Assistant</span>
+      <span class="exp-date">2014 &mdash; 2020</span>
+    </div>
+    <div class="exp-company">Georgia Institute of Technology</div>
+    <p>Specialized in Systems under the advisement of Dr. Taesoo Kim. Conducted research on distributed systems, operating systems, and network function virtualization. Also hold an M.S. in Computer Science from Georgia Tech and a B.E. in Computer Science from the University of Madras.</p>
+  </li>
+</ul>
 
 ## Publications
 
