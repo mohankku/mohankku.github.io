@@ -5,7 +5,7 @@ title: Home
 
 ## About me
 
-I am a Research Scientist at Meta Reality Labs focused on accelerating machine learning inference on embedded devices. I received my Ph.D. in Computer Science from the Georgia Institute of Technology, where I specialized in Systems under the advisement of [Dr. Taesoo Kim](https://taesoo.kim/). My thesis, *Taming Latency In Data Center Applications*, is available [here](https://smartech.gatech.edu/handle/1853/61693).
+I am a Research Scientist at Meta Reality Labs focused on accelerating machine learning inference on embedded devices. I received my Ph.D. in Computer Science from the Georgia Institute of Technology, where I specialized in Systems under the advisement of [Dr. Taesoo Kim](https://taesoo.kim/). My thesis, *Taming Latency In Data Center Applications*, is available [here](https://repository.gatech.edu/entities/publication/ab1794f4-1142-4aa0-bb58-37aa7d29d520).
 
 ## Experience
 
