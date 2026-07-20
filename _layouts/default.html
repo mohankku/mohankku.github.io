@@ -41,6 +41,7 @@
               <li><a href="https://scholar.google.com/citations?user=NVCULdIAAAAJ&hl=en"><i class="fa-solid fa-graduation-cap"></i> <strong>Google Scholar</strong></a></li>
               <li><a href="https://github.com/mohankku"><i class="fa-brands fa-github"></i> <strong>GitHub</strong></a></li>
               <li><a href="https://www.linkedin.com/in/mohankkumar/"><i class="fa-brands fa-linkedin"></i> <strong>LinkedIn</strong></a></li>
+              <li><a href="#" id="open-terminal"><i class="fa-solid fa-terminal"></i> <strong>Terminal</strong></a></li>
             </ul>
           </nav>
 
@@ -75,6 +76,30 @@
       </footer>
     </div>
     
+    <!-- Terminal Overlay -->
+    <div id="terminal-overlay" class="terminal-overlay">
+      <div class="terminal-window">
+        <div class="terminal-header">
+          <div class="terminal-buttons">
+            <span class="close" id="close-terminal"></span>
+            <span class="minimize"></span>
+            <span class="maximize"></span>
+          </div>
+          <div class="terminal-title">guest@mohan-macbook:~</div>
+        </div>
+        <div class="terminal-body" id="terminal-body">
+          <div class="terminal-output" id="terminal-output">
+            <div>Welcome to Mohan's interactive terminal!</div>
+            <div>Type <span class="command-highlight">help</span> to see available commands.</div>
+          </div>
+          <div class="terminal-input-line">
+            <span class="prompt">guest@mohan-macbook:~$</span>
+            <input type="text" id="terminal-input" autocomplete="off" spellcheck="false" autofocus>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <button id="back-to-top" title="Go to top"><i class="fa-solid fa-arrow-up"></i></button>
     
     <script src="{{ '/assets/js/scale.fix.js' | relative_url }}"></script>
@@ -142,6 +167,79 @@
         sectionHeaders.forEach(sec => {
           if (sec.id) tocObserver.observe(sec);
         });
+
+        // Terminal Logic
+        const openTerminal = document.getElementById('open-terminal');
+        const closeTerminal = document.getElementById('close-terminal');
+        const terminalOverlay = document.getElementById('terminal-overlay');
+        const terminalInput = document.getElementById('terminal-input');
+        const terminalOutput = document.getElementById('terminal-output');
+        
+        if (openTerminal) {
+          openTerminal.addEventListener('click', (e) => {
+            e.preventDefault();
+            terminalOverlay.classList.add('active');
+            setTimeout(() => terminalInput.focus(), 100);
+          });
+        }
+
+        if (closeTerminal) {
+          closeTerminal.addEventListener('click', () => {
+            terminalOverlay.classList.remove('active');
+          });
+        }
+
+        if (terminalOverlay) {
+          // Close on clicking outside
+          terminalOverlay.addEventListener('click', (e) => {
+            if (e.target === terminalOverlay) terminalOverlay.classList.remove('active');
+          });
+
+          const commands = {
+            'help': 'Available commands: <br> - <span class="command-highlight">whoami</span>: Display basic info<br> - <span class="command-highlight">skills</span>: List technical skills<br> - <span class="command-highlight">publications</span>: Link to publications<br> - <span class="command-highlight">clear</span>: Clear terminal output<br> - <span class="command-highlight">exit</span>: Close terminal',
+            'whoami': 'Mohan Kumar<br>Research Scientist at Meta Reality Labs<br>Ph.D. in Computer Science from Georgia Tech',
+            'skills': 'Languages: C/C++, Python, Rust<br>Frameworks: PyTorch<br>Expertise: Machine Learning Acceleration, SIMD vectorization, Distributed Systems, Operating Systems',
+            'publications': 'Check out the "Publications" section on the main page, or search my Google Scholar profile!',
+            'sudo': 'mohan is not in the sudoers file. This incident will be reported.',
+          };
+
+          terminalInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+              const val = this.value.trim().toLowerCase();
+              this.value = '';
+              
+              if (val === '') return;
+              
+              // Print prompt and command
+              const cmdDiv = document.createElement('div');
+              cmdDiv.innerHTML = `<span class="prompt">guest@mohan-macbook:~$</span> ${val}`;
+              terminalOutput.appendChild(cmdDiv);
+              
+              // Process command
+              if (val === 'clear') {
+                terminalOutput.innerHTML = '';
+              } else if (val === 'exit') {
+                terminalOverlay.classList.remove('active');
+              } else if (commands[val]) {
+                const resDiv = document.createElement('div');
+                resDiv.innerHTML = commands[val];
+                resDiv.style.marginBottom = '10px';
+                resDiv.style.color = '#ccc';
+                terminalOutput.appendChild(resDiv);
+              } else {
+                const resDiv = document.createElement('div');
+                resDiv.innerHTML = `bash: ${val}: command not found. Type 'help' for available commands.`;
+                resDiv.style.marginBottom = '10px';
+                resDiv.style.color = '#ccc';
+                terminalOutput.appendChild(resDiv);
+              }
+              
+              // Scroll to bottom
+              const termBody = document.getElementById('terminal-body');
+              termBody.scrollTop = termBody.scrollHeight;
+            }
+          });
+        }
       });
     </script>
   </body>
