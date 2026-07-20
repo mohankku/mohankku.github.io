@@ -4,32 +4,34 @@
 @import "jekyll-theme-minimal";
 
 :root {
-  --bg-color: #ffffff;
-  --text-color: #333333;
-  --text-muted: #7f8c8d;
-  --link-color: #3498db;
-  --link-hover: #2980b9;
-  --card-bg: #f8f9fa;
-  --card-border: #ecf0f1;
-  --card-shadow: rgba(0, 0, 0, 0.08);
-  --header-bg: rgba(255, 255, 255, 0.95);
-  --profile-bg: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-  --border-color: #ecf0f1;
+  --bg-color: #f8fafc;
+  --text-color: #1e293b;
+  --text-muted: #64748b;
+  --link-color: #3b82f6;
+  --link-hover: #2563eb;
+  --card-bg: rgba(255, 255, 255, 0.7);
+  --card-border: rgba(226, 232, 240, 0.8);
+  --card-shadow: rgba(15, 23, 42, 0.06);
+  --header-bg: rgba(255, 255, 255, 0.65);
+  --profile-bg: linear-gradient(135deg, rgba(241, 245, 249, 0.7) 0%, rgba(226, 232, 240, 0.7) 100%);
+  --border-color: rgba(226, 232, 240, 0.8);
+  --glow-color: rgba(59, 130, 246, 0.5);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg-color: #121212;
-    --text-color: #e0e0e0;
-    --text-muted: #a0a0a0;
-    --link-color: #64b5f6;
-    --link-hover: #90caf9;
-    --card-bg: #1e1e1e;
-    --card-border: #333333;
-    --card-shadow: rgba(0, 0, 0, 0.4);
-    --header-bg: rgba(18, 18, 18, 0.95);
-    --profile-bg: linear-gradient(135deg, #1e1e1e 0%, #2c3e50 100%);
-    --border-color: #333333;
+    --bg-color: #0f172a;
+    --text-color: #f1f5f9;
+    --text-muted: #94a3b8;
+    --link-color: #60a5fa;
+    --link-hover: #93c5fd;
+    --card-bg: rgba(30, 41, 59, 0.7);
+    --card-border: rgba(51, 65, 85, 0.7);
+    --card-shadow: rgba(0, 0, 0, 0.3);
+    --header-bg: rgba(15, 23, 42, 0.65);
+    --profile-bg: linear-gradient(135deg, rgba(30, 41, 59, 0.6) 0%, rgba(15, 23, 42, 0.6) 100%);
+    --border-color: rgba(51, 65, 85, 0.7);
+    --glow-color: rgba(96, 165, 250, 0.4);
   }
 }
 
@@ -37,10 +39,30 @@ body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   background-color: var(--bg-color);
   color: var(--text-color);
+  background-image: 
+    radial-gradient(circle at 15% 50%, rgba(59, 130, 246, 0.12) 0%, transparent 50%),
+    radial-gradient(circle at 85% 30%, rgba(147, 197, 253, 0.12) 0%, transparent 50%);
+  background-attachment: fixed;
 }
 
 .wrapper {
-  background-color: var(--header-bg) !important;
+  background-color: transparent !important;
+}
+
+header {
+  background-color: var(--header-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-right: 1px solid var(--border-color);
+  box-shadow: 2px 0 24px rgba(0,0,0,0.02);
+  z-index: 10;
+}
+@media (max-width: 960px) {
+  header {
+    border-right: none;
+    border-bottom: 1px solid var(--border-color);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.02);
+  }
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -164,7 +186,10 @@ section p, section ul, section ol, section li, strong, b, em, i, span {
   margin-top: 20px;
   padding: 20px;
   background: var(--profile-bg);
-  border-radius: 8px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--card-border);
+  border-radius: 12px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -216,10 +241,12 @@ section > ul > li {
   margin-bottom: 24px;
   padding: 16px;
   background: var(--card-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--card-border);
   border-left: 4px solid var(--link-color);
-  border-radius: 8px;
-  transition: all 0.3s ease;
+  border-radius: 12px;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   
   /* Initial state for scroll animation */
   opacity: 0;
@@ -228,13 +255,15 @@ section > ul > li {
   &.is-visible {
     opacity: 1;
     transform: translateY(0);
-    transition: opacity 0.6s ease-out, transform 0.6s ease-out, box-shadow 0.3s ease, background 0.3s ease;
+    transition: opacity 0.6s ease-out, transform 0.6s ease-out, box-shadow 0.4s ease, background 0.4s ease;
   }
 
   &:hover {
     background: var(--card-bg);
-    box-shadow: 0 8px 24px var(--card-shadow);
-    transform: translateY(-4px);
+    box-shadow: 0 12px 32px var(--card-shadow), 0 0 0 1px var(--link-color);
+    transform: translateY(-6px) scale(1.02);
+    z-index: 2;
+    position: relative;
   }
 
   p:last-child {
@@ -524,10 +553,12 @@ footer {
   margin-bottom: 24px;
   padding: 20px;
   background: var(--card-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--card-border);
   border-left: 4px solid var(--link-color);
-  border-radius: 8px;
-  transition: all 0.3s ease;
+  border-radius: 12px;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   
   /* Initial state for scroll animation */
   opacity: 0;
@@ -536,13 +567,15 @@ footer {
   &.is-visible {
     opacity: 1;
     transform: translateY(0);
-    transition: opacity 0.6s ease-out, transform 0.6s ease-out, box-shadow 0.3s ease, background 0.3s ease;
+    transition: opacity 0.6s ease-out, transform 0.6s ease-out, box-shadow 0.4s ease, background 0.4s ease;
   }
 
   &:hover {
     background: var(--card-bg);
-    box-shadow: 0 8px 24px var(--card-shadow);
-    transform: translateY(-4px);
+    box-shadow: 0 12px 32px var(--card-shadow), 0 0 0 1px var(--link-color);
+    transform: translateY(-6px) scale(1.02);
+    z-index: 2;
+    position: relative;
   }
 
   p {
