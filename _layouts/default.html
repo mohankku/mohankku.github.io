@@ -66,13 +66,13 @@
 
         </div>
       </header>
-      <div class="main-content" style="display: flex; flex-direction: column; width: 100%; max-width: 860px;">
-        <section style="width: 100%;">
+      <div class="main-content">
+        <section>
           {{ content }}
         </section>
-        <footer style="margin-top: auto; padding-top: 40px; clear: both;">
+        <footer>
           <div class="footer-content">
-            <p>&copy; {{ "now" | date: "%Y" }} {{ site.title }}. All rights reserved.</p>
+            <p>&copy; {{ "now" | date: "%Y" }} {{ site.title }} &middot; Built with Jekyll &middot; Hosted on GitHub Pages</p>
           </div>
         </footer>
       </div>
