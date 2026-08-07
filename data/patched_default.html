@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="{{ site.lang | default: "en-US" }}">
+  <head>
+    {% if site.google_analytics %}
+      <!-- Google tag (gtag.js) -->
+      <script async src="https://www.googletagmanager.com/gtag/js?id={{ site.google_analytics }}"></script>
+      <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', '{{ site.google_analytics }}');
+      </script>
+    {% endif %}
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+{% seo %}
+    <link rel="icon" type="image/jpeg" href="{{ site.avatar | relative_url }}">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="{{ '/assets/css/style.css?v=' | append: site.github.build_revision | relative_url }}">
+    <meta name="viewport" content="width=device-width">
+    <script>document.documentElement.classList.add('js');</script>
+    <noscript>
+      <style>
+        section > ul > li, section > h2, section > p, .experience-list li { opacity: 1 !important; transform: none !important; }
+      </style>
+    </noscript>
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <div class="header-content">
+          <h1>{{ site.title | default: site.github.repository_name }}</h1>
+          <p class="tagline"><i class="fa-solid fa-envelope"></i> {{ site.email }}</p>
+          
+          <nav class="header-nav">
+            <ul>
+              <li><a href="{{ '/data/cv.pdf' | relative_url }}"><i class="fa-solid fa-file-pdf"></i> <strong>CV</strong></a></li>
+              <li><a href="https://scholar.google.com/citations?user=NVCULdIAAAAJ&hl=en"><i class="fa-solid fa-graduation-cap"></i> <strong>Google Scholar</strong></a></li>
+              <li><a href="https://github.com/mohankku"><i class="fa-brands fa-github"></i> <strong>GitHub</strong></a></li>
+              <li><a href="https://www.linkedin.com/in/mohankkumar/"><i class="fa-brands fa-linkedin"></i> <strong>LinkedIn</strong></a></li>
+              <li><a href="#" id="open-terminal"><i class="fa-solid fa-terminal"></i> <strong>Terminal</strong></a></li>
+            </ul>
+          </nav>
+
+          <div class="profile-section">
+            <picture>
+              <source srcset="{{ site.avatar | replace: '.jpeg', '.webp' | replace: '.jpg', '.webp' | relative_url }}" type="image/webp">
+              <img src="{{ site.avatar | relative_url }}" alt="{{ site.title }}" class="profile-pic" width="120" height="120" loading="eager" decoding="async">
+            </picture>
+            <p class="contact-info">
+              <i class="fa-solid fa-location-dot" aria-hidden="true"></i> Cupertino, CA
+            </p>
+          </div>
+          
+
+        </div>
+      </header>
+      <section>
+
+      {{ content }}
+
+      </section>
+      <footer>
+        <div class="footer-content">
+          <p>&copy; {{ "now" | date: "%Y" }} {{ site.title }}. All rights reserved.</p>
+        </div>
+      </footer>
+    </div>
+    
+    <!-- Terminal Overlay -->
+    <div id="terminal-overlay" class="terminal-overlay" role="dialog" aria-modal="true" aria-label="Interactive terminal">
+      <div class="terminal-window">
+        <div class="terminal-header">
+          <div class="terminal-buttons">
+            <span class="close" id="close-terminal" role="button" aria-label="Close terminal" tabindex="0"></span>
+            <span class="minimize"></span>
+            <span class="maximize"></span>
+          </div>
+          <div class="terminal-title">guest@mohan-macbook:~</div>
+        </div>
+        <div class="terminal-body" id="terminal-body">
+          <div class="terminal-output" id="terminal-output">
+            <div>Welcome to Mohan's interactive terminal!</div>
+            <div>Type <span class="command-highlight">help</span> to see available commands.</div>
+          </div>
+          <div class="terminal-input-line">
+            <span class="prompt">guest@mohan-macbook:~$</span>
+            <input type="text" id="terminal-input" autocomplete="off" spellcheck="false" autofocus aria-label="Terminal input">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <button id="back-to-top" title="Go to top" aria-label="Back to top"><i class="fa-solid fa-arrow-up" aria-hidden="true"></i></button>
+    
+    <script src="{{ '/assets/js/scale.fix.js' | relative_url }}"></script>
+
+    <!-- Scroll Animation Observer and Back to Top -->
+    <script>
+      document.addEventListener("DOMContentLoaded", function() {
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('is-visible');
+              observer.unobserve(entry.target);
+            }
+          });
+        }, {
+          threshold: 0.1,
+          rootMargin: "0px 0px -50px 0px"
+        });
+
+        // Target all section paragraphs, headers, and list items
+        const elementsToAnimate = document.querySelectorAll('section > p, section > h2, section > ul > li, .experience-list li');
+        elementsToAnimate.forEach(el => observer.observe(el));
+        
+        // Back to top button functionality
+        const backToTopBtn = document.getElementById("back-to-top");
+        window.addEventListener("scroll", () => {
+          if (window.scrollY > 300) {
+            backToTopBtn.classList.add("show");
+          } else {
+            backToTopBtn.classList.remove("show");
+          }
+        });
+        
+        backToTopBtn.addEventListener("click", () => {
+          window.scrollTo({
+            top: 0,
+            behavior: "smooth"
+          });
+        });
+
+        // TOC Highlight
+        const tocLinks = document.querySelectorAll('.toc-link');
+        const sectionHeaders = document.querySelectorAll('section > h2');
+        
+        const tocObserver = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              const id = entry.target.getAttribute('id');
+              if (id) {
+                tocLinks.forEach(link => {
+                  link.classList.toggle('active', link.getAttribute('href') === `#${id}`);
+                });
+              }
+            }
+          });
+        }, {
+          rootMargin: "-10% 0px -80% 0px"
+        });
+
+        // Set initial active state for first item if we are at top
+        if (window.scrollY < 100 && tocLinks.length > 0) {
+          tocLinks[0].classList.add('active');
+        }
+
+        sectionHeaders.forEach(sec => {
+          if (sec.id) tocObserver.observe(sec);
+        });
+
+        // Terminal Logic
+        const openTerminal = document.getElementById('open-terminal');
+        const closeTerminal = document.getElementById('close-terminal');
+        const terminalOverlay = document.getElementById('terminal-overlay');
+        const terminalInput = document.getElementById('terminal-input');
+        const terminalOutput = document.getElementById('terminal-output');
+        
+        if (openTerminal) {
+          openTerminal.addEventListener('click', (e) => {
+            e.preventDefault();
+            terminalOverlay.classList.add('active');
+            setTimeout(() => terminalInput.focus(), 100);
+          });
+        }
+
+        if (closeTerminal) {
+          closeTerminal.addEventListener('click', () => {
+            terminalOverlay.classList.remove('active');
+          });
+        }
+
+        if (terminalOverlay) {
+          // Close on clicking outside
+          terminalOverlay.addEventListener('click', (e) => {
+            if (e.target === terminalOverlay) terminalOverlay.classList.remove('active');
+          });
+
+          // Close on Escape key
+          document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && terminalOverlay.classList.contains('active')) {
+              terminalOverlay.classList.remove('active');
+            }
+          });
+
+          // Allow Enter/Space on close button for accessibility
+          if (closeTerminal) {
+            closeTerminal.addEventListener('keydown', (e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                terminalOverlay.classList.remove('active');
+              }
+            });
+          }
+
+          const commands = {
+            'help': 'Available commands: <br> - <span class="command-highlight">whoami</span>: Display basic info<br> - <span class="command-highlight">skills</span>: List technical skills<br> - <span class="command-highlight">publications</span>: Link to publications<br> - <span class="command-highlight">clear</span>: Clear terminal output<br> - <span class="command-highlight">exit</span>: Close terminal',
+            'whoami': 'Mohan Kumar<br>Research Scientist at Meta Reality Labs<br>Ph.D. in Computer Science from Georgia Tech',
+            'skills': 'Languages: C/C++, Python, Rust<br>Frameworks: PyTorch<br>Expertise: Machine Learning Acceleration, SIMD vectorization, Distributed Systems, Operating Systems',
+            'publications': 'Check out the "Publications" section on the main page, or search my Google Scholar profile!',
+            'sudo': 'mohan is not in the sudoers file. This incident will be reported.',
+          };
+
+          terminalInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+              const val = this.value.trim().toLowerCase();
+              this.value = '';
+              
+              if (val === '') return;
+              
+              // Print prompt and command
+              const cmdDiv = document.createElement('div');
+              cmdDiv.innerHTML = `<span class="prompt">guest@mohan-macbook:~$</span> ${val}`;
+              terminalOutput.appendChild(cmdDiv);
+              
+              // Process command
+              if (val === 'clear') {
+                terminalOutput.innerHTML = '';
+              } else if (val === 'exit') {
+                terminalOverlay.classList.remove('active');
+              } else if (commands[val]) {
+                const resDiv = document.createElement('div');
+                resDiv.innerHTML = commands[val];
+                resDiv.style.marginBottom = '10px';
+                resDiv.style.color = '#ccc';
+                terminalOutput.appendChild(resDiv);
+              } else {
+                const resDiv = document.createElement('div');
+                resDiv.innerHTML = `bash: ${val}: command not found. Type 'help' for available commands.`;
+                resDiv.style.marginBottom = '10px';
+                resDiv.style.color = '#ccc';
+                terminalOutput.appendChild(resDiv);
+              }
+              
+              // Scroll to bottom
+              const termBody = document.getElementById('terminal-body');
+              termBody.scrollTop = termBody.scrollHeight;
+            }
+          });
+        }
+      });
+    </script>
+  </body>
+</html>
