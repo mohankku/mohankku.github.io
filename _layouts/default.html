@@ -66,16 +66,16 @@
 
         </div>
       </header>
-      <section>
-
-      {{ content }}
-
-      <footer>
-        <div class="footer-content">
-          <p>&copy; {{ "now" | date: "%Y" }} {{ site.title }}. All rights reserved.</p>
-        </div>
-      </footer>
-      </section>
+      <div class="main-content" style="display: flex; flex-direction: column; width: 100%; max-width: 860px;">
+        <section style="width: 100%;">
+          {{ content }}
+        </section>
+        <footer style="margin-top: auto; padding-top: 40px; clear: both;">
+          <div class="footer-content">
+            <p>&copy; {{ "now" | date: "%Y" }} {{ site.title }}. All rights reserved.</p>
+          </div>
+        </footer>
+      </div>
     </div>
     
     <!-- Terminal Overlay -->
