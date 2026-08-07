@@ -83,14 +83,12 @@ section p, section ul, section ol, section li, strong, b, em, i, span {
   .main-content {
     width: 100%;
     max-width: 860px;
-    display: flex;
-    flex-direction: column;
-    min-height: calc(100vh - 60px);
+    display: block;
   }
 
   .main-content section {
-    flex: 1;
     width: 100%;
+    display: block;
   }
 
   header {
@@ -522,18 +520,22 @@ section ul li {
 
 /* Footer Styling */
 footer {
-  margin-top: 48px;
-  padding: 20px 0;
+  margin-top: 60px;
+  padding: 24px 0 12px;
   border-top: 1px solid var(--border-color);
   text-align: center;
   color: var(--text-muted);
   font-size: 13px;
   line-height: 1.6;
+  clear: both;
+  position: relative;
+  width: 100%;
+  display: block;
 }
 
 .footer-content p {
   margin: 0;
-  opacity: 0.9;
+  opacity: 0.85;
 }
 
 /* Back to Top Button */
