@@ -19,10 +19,16 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     
     <link rel="stylesheet" href="{{ '/assets/css/style.css?v=' | append: site.github.build_revision | relative_url }}">
     <meta name="viewport" content="width=device-width">
+    <script>document.documentElement.classList.add('js');</script>
+    <noscript>
+      <style>
+        section > ul > li, section > h2, section > p, .experience-list li { opacity: 1 !important; transform: none !important; }
+      </style>
+    </noscript>
     <!--[if lt IE 9]>
     <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
@@ -46,11 +52,12 @@
           </nav>
 
           <div class="profile-section">
-            <img src="{{ site.avatar | relative_url }}" alt="{{ site.title }}" class="profile-pic">
+            <picture>
+              <source srcset="{{ site.avatar | replace: '.jpeg', '.webp' | replace: '.jpg', '.webp' | relative_url }}" type="image/webp">
+              <img src="{{ site.avatar | relative_url }}" alt="{{ site.title }}" class="profile-pic" width="120" height="120" loading="eager" decoding="async">
+            </picture>
             <p class="contact-info">
-              <i class="fa-solid fa-location-dot"></i> <strong>10109 Ridgeway Dr</strong><br>
-              Cupertino CA 95014<br>
-              <i class="fa-solid fa-phone"></i> <a href="tel:+16507094897">(650) 709-4897</a>
+              <i class="fa-solid fa-location-dot" aria-hidden="true"></i> Cupertino, CA
             </p>
           </div>
           
@@ -70,11 +77,11 @@
     </div>
     
     <!-- Terminal Overlay -->
-    <div id="terminal-overlay" class="terminal-overlay">
+    <div id="terminal-overlay" class="terminal-overlay" role="dialog" aria-modal="true" aria-label="Interactive terminal">
       <div class="terminal-window">
         <div class="terminal-header">
           <div class="terminal-buttons">
-            <span class="close" id="close-terminal"></span>
+            <span class="close" id="close-terminal" role="button" aria-label="Close terminal" tabindex="0"></span>
             <span class="minimize"></span>
             <span class="maximize"></span>
           </div>
@@ -87,13 +94,13 @@
           </div>
           <div class="terminal-input-line">
             <span class="prompt">guest@mohan-macbook:~$</span>
-            <input type="text" id="terminal-input" autocomplete="off" spellcheck="false" autofocus>
+            <input type="text" id="terminal-input" autocomplete="off" spellcheck="false" autofocus aria-label="Terminal input">
           </div>
         </div>
       </div>
     </div>
 
-    <button id="back-to-top" title="Go to top"><i class="fa-solid fa-arrow-up"></i></button>
+    <button id="back-to-top" title="Go to top" aria-label="Back to top"><i class="fa-solid fa-arrow-up" aria-hidden="true"></i></button>
     
     <script src="{{ '/assets/js/scale.fix.js' | relative_url }}"></script>
 
@@ -187,6 +194,23 @@
           terminalOverlay.addEventListener('click', (e) => {
             if (e.target === terminalOverlay) terminalOverlay.classList.remove('active');
           });
+
+          // Close on Escape key
+          document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && terminalOverlay.classList.contains('active')) {
+              terminalOverlay.classList.remove('active');
+            }
+          });
+
+          // Allow Enter/Space on close button for accessibility
+          if (closeTerminal) {
+            closeTerminal.addEventListener('keydown', (e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                terminalOverlay.classList.remove('active');
+              }
+            });
+          }
 
           const commands = {
             'help': 'Available commands: <br> - <span class="command-highlight">whoami</span>: Display basic info<br> - <span class="command-highlight">skills</span>: List technical skills<br> - <span class="command-highlight">publications</span>: Link to publications<br> - <span class="command-highlight">clear</span>: Clear terminal output<br> - <span class="command-highlight">exit</span>: Close terminal',

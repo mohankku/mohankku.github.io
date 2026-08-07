@@ -797,3 +797,35 @@ footer {
   flex: 1;
   outline: none;
 }
+
+/* === Fix: progressive enhancement for scroll animations === */
+/* Only hide elements when JS is enabled; without JS they stay visible */
+html:not(.js) section > ul > li,
+html:not(.js) section > h2,
+html:not(.js) section > p,
+html:not(.js) .experience-list li {
+  opacity: 1 !important;
+  transform: none !important;
+}
+
+/* If user prefers reduced motion, disable entrance animation */
+@media (prefers-reduced-motion: reduce) {
+  section > ul > li,
+  section > h2,
+  section > p,
+  .experience-list li,
+  .profile-section {
+    transition: none !important;
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  section > ul > li:hover,
+  .experience-list li:hover,
+  .profile-pic:hover {
+    transform: none !important;
+  }
+}
+
+/* Noscript fallback is also inlined in <head> for FOUC prevention */
+
