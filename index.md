@@ -64,3 +64,7 @@ I am a Research Scientist at Meta Reality Labs focused on accelerating machine l
 - **VNFStore: NFV State Externalizing Framework**  
   **Mohan Kumar** and Ada Gavrilovska.  
   Diversity Workshop at SOSP'15, Monterey, CA.
+
+---
+
+> 📈 **Stock Monitoring Dashboard** — Track the **Top 10 Gainers**, **Top 10 Losers**, and a curated **Watchlist of potential opportunities** in one live-style dashboard. <a href="{{ '/stocks' | relative_url }}"><strong>Open dashboard →</strong></a>

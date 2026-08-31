@@ -1,0 +1,44 @@
+name: Stocks Live Fetch
+
+on:
+  schedule:
+    # Every hour at :05 during NYSE trading hours 9:30-16 ET = 13:30-20 UTC, Mon-Fri
+    - cron: '5 13-20 * * 1-5'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch Alpha Vantage TOP_GAINERS_LOSERS
+        env:
+          ALPHAVANTAGE_API_KEY: ${{ secrets.ALPHAVANTAGE_API_KEY }}
+        run: |
+          if [ -z "$ALPHAVANTAGE_API_KEY" ]; then
+            echo "ALPHAVANTAGE_API_KEY secret not set, skipping"
+            exit 0
+          fi
+          mkdir -p assets
+          curl -s "https://www.alphavantage.co/query?function=TOP_GAINERS_LOSERS&apikey=$ALPHAVANTAGE_API_KEY" -o assets/stocks-live.json
+          echo "Fetched $(wc -c < assets/stocks-live.json) bytes"
+          cat assets/stocks-live.json | head -c 500
+          echo ""
+          # also fetch a tech batch via TwelveData if key present (optional)
+          if [ -n "${{ secrets.TWELVEDATA_API_KEY }}" ]; then
+            echo "TwelveData key present, fetching tech batch would go here"
+          fi
+          # Add fetch timestamp
+          jq --arg ts "$(date -u +%Y-%m-%dT%H:%M:%SZ)" '.fetched_at = $ts' assets/stocks-live.json > assets/stocks-live.tmp && mv assets/stocks-live.tmp assets/stocks-live.json
+      - name: Commit if changed
+        run: |
+          if [ -f assets/stocks-live.json ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add assets/stocks-live.json
+            git diff --staged --quiet || git commit -m "chore: update stocks live data [skip ci]"
+            git push || echo "nothing to push or push failed"
+          fi
