@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Fetch Tech Live (TwelveData preferred, Alpha fallback)
+      - name: Fetch Tech Live (TwelveData preferred, Yahoo fallback, Alpha last resort)
         env:
           ALPHAVANTAGE_API_KEY: ${{ secrets.ALPHAVANTAGE_API_KEY }}
           TWELVEDATA_API_KEY: ${{ secrets.TWELVEDATA_API_KEY }}
@@ -22,6 +22,8 @@ jobs:
           mkdir -p assets
           TECH_SYMS="AAPL,MSFT,GOOGL,META,AMZN,NVDA,AMD,AVGO,ASML,INTC,TSM,MU,QCOM,TXN,NXPI,MRVL,LRCX,KLAC,AMAT,TSLA,ORCL,CRM,PLTR,CRWD"
           fetched=false
+
+          # 1) TwelveData (per-symbol quote, requires TWELVEDATA_API_KEY)
           if [ -n "$TWELVEDATA_API_KEY" ]; then
             echo "Fetching Tech via TwelveData (24 symbols, 1/hour)..."
             rm -f /tmp/tech.json; echo "[]" > /tmp/tech.json
@@ -29,7 +31,6 @@ jobs:
             for sym in "${SYMS[@]}"; do
               curl -s "https://api.twelvedata.com/quote?symbol=$sym&interval=1day&apikey=$TWELVEDATA_API_KEY" -o /tmp/q.json
               if grep -q '"symbol"' /tmp/q.json; then
-                # Extract needed fields via jq
                 price=$(jq -r '.close' /tmp/q.json)
                 chg=$(jq -r '.change' /tmp/q.json)
                 pct=$(jq -r '.percent_change' /tmp/q.json)
@@ -41,35 +42,97 @@ jobs:
               fi
               sleep 2
             done
-            # Build top_gainers/losers sorted
-            cat /tmp/tech.json | jq -c 'sort_by(.change_percentage|tonumber) | reverse' > /tmp/sorted.json
-            # Create final JSON with top 12 each
-            jq -n --slurpfile tech /tmp/sorted.json --arg ts "$(date -u +%Y-%m-%dT%H:%M:%SZ)" --arg lu "$(TZ='America/New_York' date '+%Y-%m-%d %H:%M:%S US/Eastern')" '{metadata:"Tech Top gainers/losers — Big Tech / Chip / Memory", last_updated:$lu, fetched_at:$ts, top_gainers: ($tech[0][:12] | sort_by(.change_percentage|tonumber) | reverse | .[:12]), top_losers: ($tech[0] | sort_by(.change_percentage|tonumber) | .[:12]) }' > assets/stocks-live.json
-            # Filter to positive/negative for gainers/losers
-            jq '.top_gainers |= map(select(.change_percentage|tonumber > 0)) | .top_losers |= map(select(.change_percentage|tonumber < 0))' assets/stocks-live.json > /tmp/f.json && mv /tmp/f.json assets/stocks-live.json
-            # Ensure at least 10 each by padding if needed (jq already)
-            echo "TwelveData Tech fetched $(jq '.top_gainers|length' assets/stocks-live.json) gainers, $(jq '.top_losers|length' assets/stocks-live.json) losers"
-            fetched=true
+            if [ "$(jq 'length' /tmp/tech.json)" -ge 5 ]; then
+              cat /tmp/tech.json | jq -c 'sort_by(.change_percentage|tonumber) | reverse' > /tmp/sorted.json
+              jq -n --slurpfile tech /tmp/sorted.json --arg ts "$(date -u +%Y-%m-%dT%H:%M:%SZ)" --arg lu "$(TZ='America/New_York' date '+%Y-%m-%d %H:%M:%S US/Eastern')" '{metadata:"Tech Top gainers/losers — Big Tech / Chip / Memory", last_updated:$lu, fetched_at:$ts, top_gainers: ($tech[0][:12] | sort_by(.change_percentage|tonumber) | reverse | .[:12]), top_losers: ($tech[0] | sort_by(.change_percentage|tonumber) | .[:12]) }' > assets/stocks-live.json
+              jq '.top_gainers |= map(select(.change_percentage|tonumber > 0)) | .top_losers |= map(select(.change_percentage|tonumber < 0))' assets/stocks-live.json > /tmp/f.json && mv /tmp/f.json assets/stocks-live.json
+              echo "TwelveData Tech fetched $(jq '.top_gainers|length' assets/stocks-live.json) gainers, $(jq '.top_losers|length' assets/stocks-live.json) losers"
+              fetched=true
+            else
+              echo "TwelveData yielded too few symbols, falling through"
+            fi
           fi
+
+          # 2) Yahoo Finance fallback (no key, free) — fetch each tech symbol
+          if [ "$fetched" = false ]; then
+            echo "Trying Yahoo Finance for 24 tech symbols (no key needed)..."
+            python3 << 'PY'
+          import json, urllib.request, time
+          syms = "AAPL,MSFT,GOOGL,META,AMZN,NVDA,AMD,AVGO,ASML,INTC,TSM,MU,QCOM,TXN,NXPI,MRVL,LRCX,KLAC,AMAT,TSLA,ORCL,CRM,PLTR,CRWD".split(",")
+          results=[]
+          for sym in syms:
+              url = f'https://query1.finance.yahoo.com/v8/finance/chart/{sym}?interval=1d&range=1d'
+              try:
+                  req = urllib.request.Request(url, headers={"User-Agent":"Mozilla/5.0"})
+                  with urllib.request.urlopen(req, timeout=10) as r:
+                      data=json.load(r)
+                      meta=data['chart']['result'][0]['meta']
+                      price=meta['regularMarketPrice']
+                      prev=meta['chartPreviousClose']
+                      chg=price-prev
+                      pct=(chg/prev*100) if prev else 0
+                      vol=str(meta.get('regularMarketVolume',0))
+                      results.append({"ticker":sym,"price":f"{price:.2f}","change_amount":f"{chg:.2f}","change_percentage":f"{pct:.4f}%","volume":vol})
+                      print(f"Yahoo {sym} {price} {pct:.2f}%")
+              except Exception as e:
+                  print(f"Yahoo failed {sym}: {e}")
+              time.sleep(0.3)
+          if len(results) >= 5:
+              pos = sorted([r for r in results if float(r['change_percentage'].replace('%',''))>0], key=lambda x: float(x['change_percentage'].replace('%','')), reverse=True)
+              neg = sorted([r for r in results if float(r['change_percentage'].replace('%',''))<0], key=lambda x: float(x['change_percentage'].replace('%','')))
+              import datetime, zoneinfo
+              now_utc = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+              tz = zoneinfo.ZoneInfo("America/New_York")
+              now_et = datetime.datetime.now(tz).strftime("%Y-%m-%d %H:%M:%S US/Eastern")
+              out={"metadata":"Tech Top gainers/losers — Big Tech / Chip / Memory","last_updated":now_et,"fetched_at":now_utc,"top_gainers":pos[:12],"top_losers":neg[:12]}
+              open("assets/stocks-live.json","w").write(json.dumps(out, indent=2))
+              print(f"Yahoo wrote {len(pos)} gainers {len(neg)} losers")
+          else:
+              print(f"Yahoo insufficient {len(results)} results")
+              import sys; sys.exit(1)
+          PY
+            if [ $? -eq 0 ] && [ -f assets/stocks-live.json ] && [ "$(jq '.top_gainers|length + .top_losers|length' assets/stocks-live.json)" -ge 5 ]; then
+              echo "Yahoo succeeded: $(jq '.top_gainers|length' assets/stocks-live.json) gainers, $(jq '.top_losers|length' assets/stocks-live.json) losers"
+              fetched=true
+            else
+              echo "Yahoo fallback failed, trying Alpha"
+            fi
+          fi
+
+          # 3) Alpha Vantage TOP_GAINERS_LOSERS last resort — only if tech-filtered
           if [ "$fetched" = false ]; then
             if [ -z "$ALPHAVANTAGE_API_KEY" ]; then
-              echo "No API keys set, keeping existing assets/stocks-live.json"
+              echo "No API keys and Yahoo failed, keeping existing assets/stocks-live.json"
               exit 0
             fi
-            echo "Fetching Alpha TOP_GAINERS_LOSERS as fallback..."
+            echo "Fetching Alpha TOP_GAINERS_LOSERS as last resort..."
             curl -s "https://www.alphavantage.co/query?function=TOP_GAINERS_LOSERS&apikey=$ALPHAVANTAGE_API_KEY" -o /tmp/alpha.json
-            # Filter to tech only, keep full if no tech
+            if grep -q '"Information"' /tmp/alpha.json; then
+              echo "Alpha rate-limited or error: $(cat /tmp/alpha.json | head -c 300)"
+              echo "Keeping existing file"
+              exit 0
+            fi
             TECH_LIST="AAPL,MSFT,GOOGL,META,AMZN,NVDA,AMD,AVGO,ASML,INTC,TSM,MU,QCOM,TXN,NXPI,MRVL,LRCX,KLAC,AMAT,TSLA,ORCL,CRM,PLTR,CRWD"
             jq --arg tech "$TECH_LIST" --arg ts "$(date -u +%Y-%m-%dT%H:%M:%SZ)" '
               .fetched_at = $ts |
               .metadata = "Tech Top gainers/losers — Big Tech / Chip / Memory (Alpha filtered)" |
               (.top_gainers | map(select(.ticker as $t | ($tech | split(",")) | index($t)))) as $g |
               (.top_losers | map(select(.ticker as $t | ($tech | split(",")) | index($t)))) as $l |
-              .top_gainers = (if ($g|length) >=3 then $g else .top_gainers end) |
-              .top_losers = (if ($l|length) >=3 then $l else .top_losers end)
-            ' /tmp/alpha.json > assets/stocks-live.json
-            echo "Alpha fetched $(wc -c < assets/stocks-live.json) bytes"
+              .top_gainers = $g |
+              .top_losers = $l
+            ' /tmp/alpha.json > /tmp/alpha_filtered.json
+            gcount=$(jq '.top_gainers|length' /tmp/alpha_filtered.json)
+            lcount=$(jq '.top_losers|length' /tmp/alpha_filtered.json)
+            if [ "$gcount" -ge 3 ] && [ "$lcount" -ge 3 ]; then
+              mv /tmp/alpha_filtered.json assets/stocks-live.json
+              echo "Alpha filtered kept: $gcount gainers $lcount losers"
+              fetched=true
+            else
+              echo "Alpha filtered has insufficient tech ($gcount/$lcount), keeping existing file"
+              exit 0
+            fi
           fi
+
           cat assets/stocks-live.json | head -c 800
           echo ""
       - name: Commit if changed
