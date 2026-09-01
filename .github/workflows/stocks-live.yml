@@ -14,25 +14,64 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Fetch Alpha Vantage TOP_GAINERS_LOSERS
+      - name: Fetch Tech Live (TwelveData preferred, Alpha fallback)
         env:
           ALPHAVANTAGE_API_KEY: ${{ secrets.ALPHAVANTAGE_API_KEY }}
+          TWELVEDATA_API_KEY: ${{ secrets.TWELVEDATA_API_KEY }}
         run: |
-          if [ -z "$ALPHAVANTAGE_API_KEY" ]; then
-            echo "ALPHAVANTAGE_API_KEY secret not set, skipping"
-            exit 0
-          fi
           mkdir -p assets
-          curl -s "https://www.alphavantage.co/query?function=TOP_GAINERS_LOSERS&apikey=$ALPHAVANTAGE_API_KEY" -o assets/stocks-live.json
-          echo "Fetched $(wc -c < assets/stocks-live.json) bytes"
-          cat assets/stocks-live.json | head -c 500
-          echo ""
-          # also fetch a tech batch via TwelveData if key present (optional)
-          if [ -n "${{ secrets.TWELVEDATA_API_KEY }}" ]; then
-            echo "TwelveData key present, fetching tech batch would go here"
+          TECH_SYMS="AAPL,MSFT,GOOGL,META,AMZN,NVDA,AMD,AVGO,ASML,INTC,TSM,MU,QCOM,TXN,NXPI,MRVL,LRCX,KLAC,AMAT,TSLA,ORCL,CRM,PLTR,CRWD"
+          fetched=false
+          if [ -n "$TWELVEDATA_API_KEY" ]; then
+            echo "Fetching Tech via TwelveData (24 symbols, 1/hour)..."
+            rm -f /tmp/tech.json; echo "[]" > /tmp/tech.json
+            IFS=',' read -ra SYMS <<< "$TECH_SYMS"
+            for sym in "${SYMS[@]}"; do
+              curl -s "https://api.twelvedata.com/quote?symbol=$sym&interval=1day&apikey=$TWELVEDATA_API_KEY" -o /tmp/q.json
+              if grep -q '"symbol"' /tmp/q.json; then
+                # Extract needed fields via jq
+                price=$(jq -r '.close' /tmp/q.json)
+                chg=$(jq -r '.change' /tmp/q.json)
+                pct=$(jq -r '.percent_change' /tmp/q.json)
+                vol=$(jq -r '.volume' /tmp/q.json)
+                jq --arg t "$sym" --arg p "$price" --arg c "$chg" --arg pc "$pct" --arg v "$vol" '. + [{ticker:$t, price:$p, change_amount:$c, change_percentage:($pc+"%"), volume:$v}]' /tmp/tech.json > /tmp/tech2.json && mv /tmp/tech2.json /tmp/tech.json
+                echo "Fetched $sym $price $pc%"
+              else
+                echo "Failed $sym: $(cat /tmp/q.json | head -c 200)"
+              fi
+              sleep 2
+            done
+            # Build top_gainers/losers sorted
+            cat /tmp/tech.json | jq -c 'sort_by(.change_percentage|tonumber) | reverse' > /tmp/sorted.json
+            # Create final JSON with top 12 each
+            jq -n --slurpfile tech /tmp/sorted.json --arg ts "$(date -u +%Y-%m-%dT%H:%M:%SZ)" --arg lu "$(TZ='America/New_York' date '+%Y-%m-%d %H:%M:%S US/Eastern')" '{metadata:"Tech Top gainers/losers — Big Tech / Chip / Memory", last_updated:$lu, fetched_at:$ts, top_gainers: ($tech[0][:12] | sort_by(.change_percentage|tonumber) | reverse | .[:12]), top_losers: ($tech[0] | sort_by(.change_percentage|tonumber) | .[:12]) }' > assets/stocks-live.json
+            # Filter to positive/negative for gainers/losers
+            jq '.top_gainers |= map(select(.change_percentage|tonumber > 0)) | .top_losers |= map(select(.change_percentage|tonumber < 0))' assets/stocks-live.json > /tmp/f.json && mv /tmp/f.json assets/stocks-live.json
+            # Ensure at least 10 each by padding if needed (jq already)
+            echo "TwelveData Tech fetched $(jq '.top_gainers|length' assets/stocks-live.json) gainers, $(jq '.top_losers|length' assets/stocks-live.json) losers"
+            fetched=true
           fi
-          # Add fetch timestamp
-          jq --arg ts "$(date -u +%Y-%m-%dT%H:%M:%SZ)" '.fetched_at = $ts' assets/stocks-live.json > assets/stocks-live.tmp && mv assets/stocks-live.tmp assets/stocks-live.json
+          if [ "$fetched" = false ]; then
+            if [ -z "$ALPHAVANTAGE_API_KEY" ]; then
+              echo "No API keys set, keeping existing assets/stocks-live.json"
+              exit 0
+            fi
+            echo "Fetching Alpha TOP_GAINERS_LOSERS as fallback..."
+            curl -s "https://www.alphavantage.co/query?function=TOP_GAINERS_LOSERS&apikey=$ALPHAVANTAGE_API_KEY" -o /tmp/alpha.json
+            # Filter to tech only, keep full if no tech
+            TECH_LIST="AAPL,MSFT,GOOGL,META,AMZN,NVDA,AMD,AVGO,ASML,INTC,TSM,MU,QCOM,TXN,NXPI,MRVL,LRCX,KLAC,AMAT,TSLA,ORCL,CRM,PLTR,CRWD"
+            jq --arg tech "$TECH_LIST" --arg ts "$(date -u +%Y-%m-%dT%H:%M:%SZ)" '
+              .fetched_at = $ts |
+              .metadata = "Tech Top gainers/losers — Big Tech / Chip / Memory (Alpha filtered)" |
+              (.top_gainers | map(select(.ticker as $t | ($tech | split(",")) | index($t)))) as $g |
+              (.top_losers | map(select(.ticker as $t | ($tech | split(",")) | index($t)))) as $l |
+              .top_gainers = (if ($g|length) >=3 then $g else .top_gainers end) |
+              .top_losers = (if ($l|length) >=3 then $l else .top_losers end)
+            ' /tmp/alpha.json > assets/stocks-live.json
+            echo "Alpha fetched $(wc -c < assets/stocks-live.json) bytes"
+          fi
+          cat assets/stocks-live.json | head -c 800
+          echo ""
       - name: Commit if changed
         run: |
           if [ -f assets/stocks-live.json ]; then

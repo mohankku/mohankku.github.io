@@ -670,14 +670,35 @@ title: Stock Dashboard
       throw new Error("invalid local");
     } catch(e){ throw e; }
   }
-  async function doLiveRefresh(force=false){
-    if(!liveEnabled) return false;
-    if(!isMarketOpen()){
-      liveMsg.textContent = "Market closed — live refresh paused.";
-      liveMsg.style.color = "#b42318";
-      setTimeout(()=> liveMsg.textContent="", 4000);
+  async function tryCachedTech(){
+    try{
+      const j = await fetchLocalLive();
+      const techSet = new Set(techSymbols);
+      const g = j.top_gainers.filter(r=> techSet.has(r.ticker)).slice(0,10).map(mapAlphaRow);
+      const l = j.top_losers.filter(r=> techSet.has(r.ticker)).slice(0,10).map(mapAlphaRow);
+      // if cached has no tech (old market-wide penny), fall back to using raw top lists
+      const gg = g.length>=3 ? g : j.top_gainers.slice(0,10).map(mapAlphaRow);
+      const ll = l.length>=3 ? l : j.top_losers.slice(0,10).map(mapAlphaRow);
+      while(gg.length<10) gg.push(gainersData[gg.length % gainersData.length]);
+      while(ll.length<10) ll.push(losersData[ll.length % losersData.length]);
+      renderGainers(gg);
+      renderLosers(ll);
+      filterTable("search-gainers","table-gainers");
+      filterTable("search-losers","table-losers");
+      const ts = j.fetched_at || j.last_updated || "";
+      liveMsg.textContent = `Tech live (cached ${ts ? new Date(ts).toLocaleString() : ""}) • server-side`;
+      liveMsg.style.color = "#0a7a4b";
+      setTimeout(()=> liveMsg.textContent="", 6000);
+      liveDot.className = "status-dot dot-green";
+      liveStatus.textContent = "Live (Tech cached)";
+      setUpdated();
+      return true;
+    } catch(e){
+      console.warn("Cached not available", e.message);
       return false;
     }
+  }
+  async function doLiveRefresh(force=false){
     const now = Date.now();
     if(!force && now - lastLiveFetch < LIVE_MIN_INTERVAL){
       const wait = Math.ceil((LIVE_MIN_INTERVAL - (now-lastLiveFetch))/60000);
@@ -686,30 +707,37 @@ title: Stock Dashboard
       setTimeout(()=> liveMsg.textContent="", 4000);
       return false;
     }
+    // If market closed, still allow cached/manual to show Friday data — only block fresh API fetches when not forced
+    if(!isMarketOpen() && !force){
+      liveMsg.textContent = "Market closed — showing last cached tech movers.";
+      liveMsg.style.color = "#b42318";
+      setTimeout(()=> liveMsg.textContent="", 4000);
+      const ok = await tryCachedTech();
+      return ok;
+    }
     liveMsg.textContent = "Fetching live Tech (Big Tech/Chip/Memory)…";
     liveMsg.style.color = "#1a56db";
-    // Try server-side cached JSON first (no key exposed, via GitHub Action), then TwelveData, then Alpha
+    // Try server-side cached JSON first (no key exposed, via GitHub Action)
     try{
       const j = await fetchLocalLive();
       lastLiveFetch = now;
       const techSet = new Set(techSymbols);
       const g = j.top_gainers.filter(r=> techSet.has(r.ticker)).slice(0,10).map(mapAlphaRow);
       const l = j.top_losers.filter(r=> techSet.has(r.ticker)).slice(0,10).map(mapAlphaRow);
-      if(g.length>=3 || l.length>=3){
-        while(g.length<10) g.push(gainersData[g.length % gainersData.length]);
-        while(l.length<10) l.push(losersData[l.length % losersData.length]);
-        renderGainers(g);
-        renderLosers(l);
-        filterTable("search-gainers","table-gainers");
-        filterTable("search-losers","table-losers");
-        liveMsg.textContent = `Tech live (cached ${j.fetched_at ? new Date(j.fetched_at).toLocaleString() : ""}) • server-side`;
-        liveMsg.style.color = "#0a7a4b";
-        setTimeout(()=> liveMsg.textContent="", 6000);
-        liveDot.className = "status-dot dot-green";
-        liveStatus.textContent = "Live (Tech cached)";
-        return true;
-      }
-      throw new Error("cached has no tech");
+      const gg = g.length>=3 ? g : j.top_gainers.slice(0,10).map(mapAlphaRow);
+      const ll = l.length>=3 ? l : j.top_losers.slice(0,10).map(mapAlphaRow);
+      while(gg.length<10) gg.push(gainersData[gg.length % gainersData.length]);
+      while(ll.length<10) ll.push(losersData[ll.length % losersData.length]);
+      renderGainers(gg);
+      renderLosers(ll);
+      filterTable("search-gainers","table-gainers");
+      filterTable("search-losers","table-losers");
+      liveMsg.textContent = `Tech live (cached ${j.fetched_at ? new Date(j.fetched_at).toLocaleString() : j.last_updated}) • server-side`;
+      liveMsg.style.color = "#0a7a4b";
+      setTimeout(()=> liveMsg.textContent="", 6000);
+      liveDot.className = "status-dot dot-green";
+      liveStatus.textContent = "Live (Tech cached)";
+      return true;
     } catch(e){
       console.warn("Local live not available, trying Twelve", e.message);
     }
@@ -789,7 +817,8 @@ title: Stock Dashboard
   renderWatch(watchData);
   setUpdated();
   updateMarketPill();
-  // try live on load if enabled and market open
+  // A: show cached live immediately even if toggle off / market closed
+  tryCachedTech();
   if(liveEnabled && isMarketOpen()){
     doLiveRefresh();
   }
@@ -836,8 +865,9 @@ title: Stock Dashboard
         autoEl.textContent = "paused (closed)";
         return;
       }
-      // manual refresh outside hours: still allow demo jitter but warn
-      shuffleTick();
+      // A: outside hours, still show cached tech for manual refresh
+      const ok = await tryCachedTech();
+      if(!ok) shuffleTick();
       setUpdated();
       countdown = 60;
       btnRefresh.innerHTML = '<i class="fa-solid fa-check"></i> Updated (market closed)';
@@ -846,10 +876,14 @@ title: Stock Dashboard
     }
     // market open
     if(liveEnabled){
-      const ok = await doLiveRefresh(!isAuto); // manual forces live, auto respects 15min throttle
-      if(!ok) shuffleTick();
+      const ok = await doLiveRefresh(!isAuto);
+      if(!ok) {
+        const c = await tryCachedTech();
+        if(!c) shuffleTick();
+      }
     } else {
-      shuffleTick();
+      const c = await tryCachedTech();
+      if(!c) shuffleTick();
     }
     setUpdated();
     countdown = 60;

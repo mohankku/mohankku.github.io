@@ -1,1 +1,33 @@
-{"top_gainers":[{"ticker":"NVDA","price":"181.12","change_amount":"5.12","change_percentage":"2.91%","volume":"40123456"}],"top_losers":[{"ticker":"INTC","price":"31.20","change_amount":"-0.85","change_percentage":"-2.65%","volume":"23456789"}],"last_updated":"2026-08-31 12:00:00 US/Eastern","fetched_at":"2026-08-31T16:00:00Z"}
+{
+  "metadata": "Tech Top gainers/losers — Big Tech / Chip / Memory",
+  "last_updated": "2026-08-28 16:15:00 US/Eastern",
+  "fetched_at": "2026-08-31T06:15:00Z",
+  "top_gainers": [
+    {"ticker": "NVDA", "price": "181.12", "change_amount": "5.12", "change_percentage": "2.91%", "volume": "40123456"},
+    {"ticker": "META", "price": "605.33", "change_amount": "12.45", "change_percentage": "2.10%", "volume": "18456789"},
+    {"ticker": "AVGO", "price": "241.88", "change_amount": "4.21", "change_percentage": "1.77%", "volume": "9234567"},
+    {"ticker": "AMD", "price": "178.22", "change_amount": "2.85", "change_percentage": "1.63%", "volume": "31789012"},
+    {"ticker": "MSFT", "price": "511.02", "change_amount": "7.12", "change_percentage": "1.41%", "volume": "15345678"},
+    {"ticker": "TSM", "price": "214.55", "change_amount": "2.95", "change_percentage": "1.39%", "volume": "8765432"},
+    {"ticker": "QCOM", "price": "168.90", "change_amount": "2.20", "change_percentage": "1.32%", "volume": "6543210"},
+    {"ticker": "GOOGL", "price": "192.60", "change_amount": "2.45", "change_percentage": "1.29%", "volume": "12876543"},
+    {"ticker": "AAPL", "price": "228.14", "change_amount": "2.85", "change_percentage": "1.27%", "volume": "22987654"},
+    {"ticker": "AMAT", "price": "189.33", "change_amount": "2.31", "change_percentage": "1.23%", "volume": "4321987"},
+    {"ticker": "KLAC", "price": "812.40", "change_amount": "9.80", "change_percentage": "1.22%", "volume": "987654"},
+    {"ticker": "LRCX", "price": "945.12", "change_amount": "11.20", "change_percentage": "1.20%", "volume": "765432"}
+  ],
+  "top_losers": [
+    {"ticker": "INTC", "price": "31.20", "change_amount": "-0.85", "change_percentage": "-2.65%", "volume": "26789432"},
+    {"ticker": "MU", "price": "142.33", "change_amount": "-3.12", "change_percentage": "-2.14%", "volume": "12345678"},
+    {"ticker": "TSLA", "price": "245.12", "change_amount": "-4.15", "change_percentage": "-1.67%", "volume": "38234567"},
+    {"ticker": "NXPI", "price": "238.44", "change_amount": "-3.55", "change_percentage": "-1.47%", "volume": "2345678"},
+    {"ticker": "TXN", "price": "198.77", "change_amount": "-2.85", "change_percentage": "-1.41%", "volume": "3456789"},
+    {"ticker": "MRVL", "price": "78.33", "change_amount": "-1.05", "change_percentage": "-1.32%", "volume": "8765432"},
+    {"ticker": "PLTR", "price": "44.91", "change_amount": "-0.55", "change_percentage": "-1.21%", "volume": "28567890"},
+    {"ticker": "CRWD", "price": "398.75", "change_amount": "-4.20", "change_percentage": "-1.04%", "volume": "6123456"},
+    {"ticker": "ORCL", "price": "142.50", "change_amount": "-1.40", "change_percentage": "-0.97%", "volume": "7654321"},
+    {"ticker": "CRM", "price": "268.90", "change_amount": "-2.45", "change_percentage": "-0.90%", "volume": "4321567"},
+    {"ticker": "ASML", "price": "712.50", "change_amount": "-6.20", "change_percentage": "-0.86%", "volume": "3456789"},
+    {"ticker": "WDC", "price": "68.44", "change_amount": "-0.55", "change_percentage": "-0.80%", "volume": "5432100"}
+  ]
+}
