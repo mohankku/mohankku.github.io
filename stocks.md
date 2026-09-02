@@ -117,6 +117,11 @@ title: Stock Dashboard
       <div style="overflow:auto;"><table class="stock-table" id="table-sector-software"><thead><tr><th scope="col">#</th><th scope="col">Symbol</th><th scope="col">Price</th><th scope="col">Change</th></tr></thead><tbody></tbody></table></div>
       <div class="legend">Top 3 by % change in sector</div>
     </div>
+    <div class="stock-card sector-card" data-sector="biotech">
+      <div class="card-head"><h3><i class="fa-solid fa-dna" style="color:#0e9f6e;"></i> Biotech</h3><span class="badge" style="background:#e6f7f0;color:#0a7a4b;border:1px solid #b6e8d5;">MRNA · REGN · VRTX · AMGN · GILD · BIIB</span></div>
+      <div style="overflow:auto;"><table class="stock-table" id="table-sector-biotech"><thead><tr><th scope="col">#</th><th scope="col">Symbol</th><th scope="col">Price</th><th scope="col">Change</th></tr></thead><tbody></tbody></table></div>
+      <div class="legend">Top 3 by % change in sector</div>
+    </div>
   </div>
 
   <!-- WATCHLIST / OPPORTUNITIES -->

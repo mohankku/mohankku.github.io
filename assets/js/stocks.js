@@ -38,15 +38,17 @@
     { sym: "MSFT / GOOGL", sector: "Hyperscale AI", reason: "Cash-flow + AI infra monetization.", risk: "Low", action: "Core" }
   ];
   const techSymbols = [
-    "AAPL","MSFT","GOOGL","META","AMZN","NVDA","AMD","AVGO","ASML","INTC","TSM","MU","QCOM","TXN","NXPI","MRVL","LRCX","KLAC","AMAT","TSLA","ORCL","CRM","PLTR","CRWD"
+    "AAPL","MSFT","GOOGL","META","AMZN","NVDA","AMD","AVGO","ASML","INTC","TSM","MU","QCOM","TXN","NXPI","MRVL","LRCX","KLAC","AMAT","TSLA","ORCL","CRM","PLTR","CRWD",
+    "MRNA","REGN","VRTX","AMGN","GILD","BIIB"
   ];
-  // P2 sectors — top 3 per sector (5 sectors cover all 24)
+  // P2 sectors — top 3 per sector (6 sectors, 30 tickers)
   const SECTORS = [
     { id: "bigtech",  name: "Big Tech",        symbols: ["AAPL","MSFT","GOOGL","META","AMZN"] },
     { id: "aichips",  name: "AI Chips",        symbols: ["NVDA","AMD","AVGO","TSM","MU","INTC"] },
     { id: "equipment",name: "Equipment",       symbols: ["ASML","LRCX","KLAC","AMAT"] },
     { id: "connect",  name: "Connectivity",    symbols: ["QCOM","TXN","NXPI","MRVL"] },
-    { id: "software", name: "Software & Cloud",symbols: ["ORCL","CRM","PLTR","CRWD","TSLA"] }
+    { id: "software", name: "Software & Cloud",symbols: ["ORCL","CRM","PLTR","CRWD","TSLA"] },
+    { id: "biotech",  name: "Biotech",         symbols: ["MRNA","REGN","VRTX","AMGN","GILD","BIIB"] }
   ];
 
   // current displayed data (mutated on refresh so sort operates on live data)

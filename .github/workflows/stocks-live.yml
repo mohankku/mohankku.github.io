@@ -20,12 +20,12 @@ jobs:
           TWELVEDATA_API_KEY: ${{ secrets.TWELVEDATA_API_KEY }}
         run: |
           mkdir -p assets
-          TECH_SYMS="AAPL,MSFT,GOOGL,META,AMZN,NVDA,AMD,AVGO,ASML,INTC,TSM,MU,QCOM,TXN,NXPI,MRVL,LRCX,KLAC,AMAT,TSLA,ORCL,CRM,PLTR,CRWD"
+          TECH_SYMS="AAPL,MSFT,GOOGL,META,AMZN,NVDA,AMD,AVGO,ASML,INTC,TSM,MU,QCOM,TXN,NXPI,MRVL,LRCX,KLAC,AMAT,TSLA,ORCL,CRM,PLTR,CRWD,MRNA,REGN,VRTX,AMGN,GILD,BIIB"
           fetched=false
 
           # 1) TwelveData (per-symbol quote, requires TWELVEDATA_API_KEY)
           if [ -n "$TWELVEDATA_API_KEY" ]; then
-            echo "Fetching Tech via TwelveData (24 symbols, 1/hour)..."
+            echo "Fetching Tech via TwelveData (30 symbols, 1/hour)..."
             rm -f /tmp/tech.json; echo "[]" > /tmp/tech.json
             IFS=',' read -ra SYMS <<< "$TECH_SYMS"
             for sym in "${SYMS[@]}"; do
@@ -55,10 +55,10 @@ jobs:
 
           # 2) Yahoo Finance fallback (no key, free) — fetch each tech symbol
           if [ "$fetched" = false ]; then
-            echo "Trying Yahoo Finance for 24 tech symbols (no key needed)..."
+            echo "Trying Yahoo Finance for 30 symbols (no key needed)..."
             python3 << 'PY'
           import json, urllib.request, time
-          syms = "AAPL,MSFT,GOOGL,META,AMZN,NVDA,AMD,AVGO,ASML,INTC,TSM,MU,QCOM,TXN,NXPI,MRVL,LRCX,KLAC,AMAT,TSLA,ORCL,CRM,PLTR,CRWD".split(",")
+          syms = "AAPL,MSFT,GOOGL,META,AMZN,NVDA,AMD,AVGO,ASML,INTC,TSM,MU,QCOM,TXN,NXPI,MRVL,LRCX,KLAC,AMAT,TSLA,ORCL,CRM,PLTR,CRWD,MRNA,REGN,VRTX,AMGN,GILD,BIIB".split(",")
           results=[]
           for sym in syms:
               url = f'https://query1.finance.yahoo.com/v8/finance/chart/{sym}?interval=1d&range=1d'
@@ -113,7 +113,7 @@ jobs:
               echo "Keeping existing file"
               exit 0
             fi
-            TECH_LIST="AAPL,MSFT,GOOGL,META,AMZN,NVDA,AMD,AVGO,ASML,INTC,TSM,MU,QCOM,TXN,NXPI,MRVL,LRCX,KLAC,AMAT,TSLA,ORCL,CRM,PLTR,CRWD"
+            TECH_LIST="AAPL,MSFT,GOOGL,META,AMZN,NVDA,AMD,AVGO,ASML,INTC,TSM,MU,QCOM,TXN,NXPI,MRVL,LRCX,KLAC,AMAT,TSLA,ORCL,CRM,PLTR,CRWD,MRNA,REGN,VRTX,AMGN,GILD,BIIB"
             jq --arg tech "$TECH_LIST" --arg ts "$(date -u +%Y-%m-%dT%H:%M:%SZ)" '
               .fetched_at = $ts |
               .metadata = "Tech Top gainers/losers — Big Tech / Chip / Memory (Alpha filtered)" |

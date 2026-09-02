@@ -1,8 +1,22 @@
 {
-  "metadata": "Tech Top gainers/losers \u2014 Big Tech / Chip / Memory",
-  "last_updated": "2026-09-01 23:07:57 US/Eastern",
-  "fetched_at": "2026-09-02T03:07:57Z",
+  "metadata": "Tech + Biotech \u2014 Big Tech / Chip / Memory / Biotech",
+  "last_updated": "2026-09-01 23:17:12 US/Eastern",
+  "fetched_at": "2026-09-02T03:17:12Z",
   "top_gainers": [
+    {
+      "ticker": "MRNA",
+      "price": "154.27",
+      "change_amount": "13.93",
+      "change_percentage": "9.9259%",
+      "volume": "25690832"
+    },
+    {
+      "ticker": "REGN",
+      "price": "823.82",
+      "change_amount": "24.74",
+      "change_percentage": "3.0961%",
+      "volume": "673082"
+    },
     {
       "ticker": "AAPL",
       "price": "325.13",
@@ -11,11 +25,32 @@
       "volume": "52432411"
     },
     {
+      "ticker": "GILD",
+      "price": "149.92",
+      "change_amount": "3.58",
+      "change_percentage": "2.4464%",
+      "volume": "4833660"
+    },
+    {
+      "ticker": "AMGN",
+      "price": "438.12",
+      "change_amount": "8.24",
+      "change_percentage": "1.9168%",
+      "volume": "2353940"
+    },
+    {
       "ticker": "META",
       "price": "578.54",
       "change_amount": "6.20",
       "change_percentage": "1.0833%",
       "volume": "15369187"
+    },
+    {
+      "ticker": "VRTX",
+      "price": "547.65",
+      "change_amount": "3.13",
+      "change_percentage": "0.5748%",
+      "volume": "732552"
     },
     {
       "ticker": "CRM",
@@ -113,6 +148,20 @@
   ],
   "tech_all": [
     {
+      "ticker": "MRNA",
+      "price": "154.27",
+      "change_amount": "13.93",
+      "change_percentage": "9.9259%",
+      "volume": "25690832"
+    },
+    {
+      "ticker": "REGN",
+      "price": "823.82",
+      "change_amount": "24.74",
+      "change_percentage": "3.0961%",
+      "volume": "673082"
+    },
+    {
       "ticker": "AAPL",
       "price": "325.13",
       "change_amount": "8.28",
@@ -120,11 +169,32 @@
       "volume": "52432411"
     },
     {
+      "ticker": "GILD",
+      "price": "149.92",
+      "change_amount": "3.58",
+      "change_percentage": "2.4464%",
+      "volume": "4833660"
+    },
+    {
+      "ticker": "AMGN",
+      "price": "438.12",
+      "change_amount": "8.24",
+      "change_percentage": "1.9168%",
+      "volume": "2353940"
+    },
+    {
       "ticker": "META",
       "price": "578.54",
       "change_amount": "6.20",
       "change_percentage": "1.0833%",
       "volume": "15369187"
+    },
+    {
+      "ticker": "VRTX",
+      "price": "547.65",
+      "change_amount": "3.13",
+      "change_percentage": "0.5748%",
+      "volume": "732552"
     },
     {
       "ticker": "CRM",
@@ -139,6 +209,13 @@
       "change_amount": "-0.66",
       "change_percentage": "-0.1782%",
       "volume": "18744535"
+    },
+    {
+      "ticker": "BIIB",
+      "price": "216.04",
+      "change_amount": "-0.61",
+      "change_percentage": "-0.2816%",
+      "volume": "742044"
     },
     {
       "ticker": "TSM",
