@@ -44,7 +44,7 @@ jobs:
             done
             if [ "$(jq 'length' /tmp/tech.json)" -ge 5 ]; then
               cat /tmp/tech.json | jq -c 'sort_by(.change_percentage|tonumber) | reverse' > /tmp/sorted.json
-              jq -n --slurpfile tech /tmp/sorted.json --arg ts "$(date -u +%Y-%m-%dT%H:%M:%SZ)" --arg lu "$(TZ='America/New_York' date '+%Y-%m-%d %H:%M:%S US/Eastern')" '{metadata:"Tech Top gainers/losers — Big Tech / Chip / Memory", last_updated:$lu, fetched_at:$ts, top_gainers: ($tech[0][:12] | sort_by(.change_percentage|tonumber) | reverse | .[:12]), top_losers: ($tech[0] | sort_by(.change_percentage|tonumber) | .[:12]) }' > assets/stocks-live.json
+              jq -n --slurpfile tech /tmp/sorted.json --arg ts "$(date -u +%Y-%m-%dT%H:%M:%SZ)" --arg lu "$(TZ='America/New_York' date '+%Y-%m-%d %H:%M:%S US/Eastern')" '{metadata:"Tech Top gainers/losers — Big Tech / Chip / Memory", last_updated:$lu, fetched_at:$ts, top_gainers: ($tech[0][:12] | sort_by(.change_percentage|tonumber) | reverse | .[:12]), top_losers: ($tech[0] | sort_by(.change_percentage|tonumber) | .[:12]), tech_all: $tech[0] }' > assets/stocks-live.json
               jq '.top_gainers |= map(select(.change_percentage|tonumber > 0)) | .top_losers |= map(select(.change_percentage|tonumber < 0))' assets/stocks-live.json > /tmp/f.json && mv /tmp/f.json assets/stocks-live.json
               echo "TwelveData Tech fetched $(jq '.top_gainers|length' assets/stocks-live.json) gainers, $(jq '.top_losers|length' assets/stocks-live.json) losers"
               fetched=true
@@ -80,13 +80,14 @@ jobs:
           if len(results) >= 5:
               pos = sorted([r for r in results if float(r['change_percentage'].replace('%',''))>0], key=lambda x: float(x['change_percentage'].replace('%','')), reverse=True)
               neg = sorted([r for r in results if float(r['change_percentage'].replace('%',''))<0], key=lambda x: float(x['change_percentage'].replace('%','')))
+              all_sorted = sorted(results, key=lambda x: float(x['change_percentage'].replace('%','')), reverse=True)
               import datetime, zoneinfo
               now_utc = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
               tz = zoneinfo.ZoneInfo("America/New_York")
               now_et = datetime.datetime.now(tz).strftime("%Y-%m-%d %H:%M:%S US/Eastern")
-              out={"metadata":"Tech Top gainers/losers — Big Tech / Chip / Memory","last_updated":now_et,"fetched_at":now_utc,"top_gainers":pos[:12],"top_losers":neg[:12]}
+              out={"metadata":"Tech Top gainers/losers — Big Tech / Chip / Memory","last_updated":now_et,"fetched_at":now_utc,"top_gainers":pos[:12],"top_losers":neg[:12],"tech_all":all_sorted}
               open("assets/stocks-live.json","w").write(json.dumps(out, indent=2))
-              print(f"Yahoo wrote {len(pos)} gainers {len(neg)} losers")
+              print(f"Yahoo wrote {len(pos)} gainers {len(neg)} losers all {len(all_sorted)}")
           else:
               print(f"Yahoo insufficient {len(results)} results")
               import sys; sys.exit(1)

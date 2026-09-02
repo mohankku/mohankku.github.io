@@ -90,6 +90,35 @@ title: Stock Dashboard
     </div>
   </div>
 
+  <!-- SECTORS — Top 3 per sector (P2) -->
+  <div class="sector-grid" id="sector-grid">
+    <div class="stock-card sector-card" data-sector="bigtech">
+      <div class="card-head"><h3><i class="fa-solid fa-building" style="color:#1a56db;"></i> Big Tech</h3><span class="badge badge-blue">AAPL · MSFT · GOOGL · META · AMZN</span></div>
+      <div style="overflow:auto;"><table class="stock-table" id="table-sector-bigtech"><thead><tr><th scope="col">#</th><th scope="col">Symbol</th><th scope="col">Price</th><th scope="col">Change</th></tr></thead><tbody></tbody></table></div>
+      <div class="legend">Top 3 by % change in sector</div>
+    </div>
+    <div class="stock-card sector-card" data-sector="aichips">
+      <div class="card-head"><h3><i class="fa-solid fa-microchip" style="color:#0a7a4b;"></i> AI Chips</h3><span class="badge badge-green">NVDA · AMD · AVGO · TSM · MU · INTC</span></div>
+      <div style="overflow:auto;"><table class="stock-table" id="table-sector-aichips"><thead><tr><th scope="col">#</th><th scope="col">Symbol</th><th scope="col">Price</th><th scope="col">Change</th></tr></thead><tbody></tbody></table></div>
+      <div class="legend">Top 3 by % change in sector</div>
+    </div>
+    <div class="stock-card sector-card" data-sector="equipment">
+      <div class="card-head"><h3><i class="fa-solid fa-screwdriver-wrench" style="color:#7c3aed;"></i> Equipment</h3><span class="badge badge-amber">ASML · LRCX · KLAC · AMAT</span></div>
+      <div style="overflow:auto;"><table class="stock-table" id="table-sector-equipment"><thead><tr><th scope="col">#</th><th scope="col">Symbol</th><th scope="col">Price</th><th scope="col">Change</th></tr></thead><tbody></tbody></table></div>
+      <div class="legend">Top 3 by % change in sector</div>
+    </div>
+    <div class="stock-card sector-card" data-sector="connect">
+      <div class="card-head"><h3><i class="fa-solid fa-wifi" style="color:#0891b2;"></i> Connectivity</h3><span class="badge" style="background:#e0f7fa;color:#0e7490;border:1px solid #a5e3ef;">QCOM · TXN · NXPI · MRVL</span></div>
+      <div style="overflow:auto;"><table class="stock-table" id="table-sector-connect"><thead><tr><th scope="col">#</th><th scope="col">Symbol</th><th scope="col">Price</th><th scope="col">Change</th></tr></thead><tbody></tbody></table></div>
+      <div class="legend">Top 3 by % change in sector</div>
+    </div>
+    <div class="stock-card sector-card" data-sector="software">
+      <div class="card-head"><h3><i class="fa-solid fa-cloud" style="color:#b45309;"></i> Software & Cloud</h3><span class="badge badge-amber">ORCL · CRM · PLTR · CRWD · TSLA</span></div>
+      <div style="overflow:auto;"><table class="stock-table" id="table-sector-software"><thead><tr><th scope="col">#</th><th scope="col">Symbol</th><th scope="col">Price</th><th scope="col">Change</th></tr></thead><tbody></tbody></table></div>
+      <div class="legend">Top 3 by % change in sector</div>
+    </div>
+  </div>
+
   <!-- WATCHLIST / OPPORTUNITIES -->
   <div class="stock-card full">
     <div class="card-head">

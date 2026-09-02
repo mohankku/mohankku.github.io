@@ -40,6 +40,14 @@
   const techSymbols = [
     "AAPL","MSFT","GOOGL","META","AMZN","NVDA","AMD","AVGO","ASML","INTC","TSM","MU","QCOM","TXN","NXPI","MRVL","LRCX","KLAC","AMAT","TSLA","ORCL","CRM","PLTR","CRWD"
   ];
+  // P2 sectors — top 3 per sector (5 sectors cover all 24)
+  const SECTORS = [
+    { id: "bigtech",  name: "Big Tech",        symbols: ["AAPL","MSFT","GOOGL","META","AMZN"] },
+    { id: "aichips",  name: "AI Chips",        symbols: ["NVDA","AMD","AVGO","TSM","MU","INTC"] },
+    { id: "equipment",name: "Equipment",       symbols: ["ASML","LRCX","KLAC","AMAT"] },
+    { id: "connect",  name: "Connectivity",    symbols: ["QCOM","TXN","NXPI","MRVL"] },
+    { id: "software", name: "Software & Cloud",symbols: ["ORCL","CRM","PLTR","CRWD","TSLA"] }
+  ];
 
   // current displayed data (mutated on refresh so sort operates on live data)
   let currentGainers = [...gainersData];
@@ -142,6 +150,37 @@
       const tb = document.querySelector(`#${id} tbody`);
       if(!tb) return;
       tb.innerHTML = `<tr class="skeleton"><td colspan="6" style="padding:14px;">Loading live data…</td></tr>`.repeat(3);
+    });
+    SECTORS.forEach(s=>{
+      const tb = document.querySelector(`#table-sector-${s.id} tbody`);
+      if(tb) tb.innerHTML = `<tr class="skeleton"><td colspan="4" style="padding:10px;">Loading…</td></tr>`.repeat(2);
+    });
+  }
+  function renderSectors(allRows){
+    // allRows: mapped rows {sym, price, pct, chg, vol} for all tech (from tech_all or g+l)
+    const bySym = new Map(allRows.map(r=>[r.sym, r]));
+    SECTORS.forEach(sec=>{
+      const tbody = document.querySelector(`#table-sector-${sec.id} tbody`);
+      if(!tbody) return;
+      const rows = sec.symbols.map(sym=> bySym.get(sym)).filter(Boolean)
+        .sort((a,b)=> b.pct - a.pct)
+        .slice(0,3);
+      if(rows.length===0){
+        tbody.innerHTML = `<tr class="empty-row"><td colspan="4" style="text-align:center; padding:12px; color:#6b7a8a;">No data</td></tr>`;
+        return;
+      }
+      tbody.innerHTML = rows.map((r,i)=>{
+        const isUp = r.pct >= 0;
+        const pill = isUp ? `pill-up` : `pill-down`;
+        const icon = isUp ? `fa-caret-up` : `fa-caret-down`;
+        const sign = isUp ? `+` : ``;
+        return `<tr>
+          <td><span class="rank" style="${isUp?'background:#e6f7f0;color:#0a7a4b':'background:#fdecea;color:#b42318'}">${i+1}</span></td>
+          <td>${symCell(r.sym, r.sym)}</td>
+          <td class="price">$${Number(r.price).toFixed(2)}</td>
+          <td><span class="pill ${pill}"><i class="fa-solid ${icon}"></i> ${sign}${Number(r.pct).toFixed(2)}%</span></td>
+        </tr>`;
+      }).join("");
     });
   }
   function filterTable(inputId, tableId){
@@ -382,15 +421,23 @@
       const techSet = new Set(techSymbols);
       let g = j.top_gainers.filter(r=> techSet.has(r.ticker)).slice(0,10).map(mapAlphaRow);
       let l = j.top_losers.filter(r=> techSet.has(r.ticker)).slice(0,10).map(mapAlphaRow);
-      // build live price map for watchlist
+      // build live price map for watchlist + sectors (prefer tech_all with full 24)
+      const allRaw = j.tech_all && Array.isArray(j.tech_all) && j.tech_all.length ? j.tech_all : [...j.top_gainers, ...j.top_losers];
       livePriceMap = new Map();
-      [...j.top_gainers, ...j.top_losers].forEach(r=>{
+      allRaw.forEach(r=>{
         if(techSet.has(r.ticker)){
           livePriceMap.set(r.ticker, { price: parseFloat(r.price), pct: parseFloat(String(r.change_percentage).replace("%","").replace("+","")), chg: parseFloat(r.change_amount) });
         }
       });
+      const allRows = [...livePriceMap.entries()].map(([sym, v])=> ({ sym, price: v.price, pct: v.pct, chg: v.chg, vol: v.vol || "—" }));
+      // also ensure mapped g/l have vol formatted; allRows currently missing vol — patch from raw
+      allRaw.forEach(r=>{ const m=livePriceMap.get(r.ticker); if(m) m.vol = formatVol(r.volume); });
+      // fix allRows vol after patch
+      const allRowsFixed = [...livePriceMap.entries()].map(([sym, v])=> ({ sym, price: v.price, pct: v.pct, chg: v.chg, vol: v.vol }));
+
       renderGainers(g);
       renderLosers(l);
+      renderSectors(allRowsFixed.length ? allRowsFixed : [...g, ...l]);
       renderWatch(watchData);
       filterTable("search-gainers","table-gainers");
       filterTable("search-losers","table-losers");
@@ -402,6 +449,9 @@
       console.warn("Cached not available", e.message);
       showLiveError("Live unavailable — showing demo • "+e.message);
       shuffleTick();
+      // demo sectors from gainersData/losersData
+      const demoAll = [...gainersData, ...losersData].map(r=> ({ sym: r.sym, price: r.price, pct: r.pct, chg: r.chg, vol: r.vol }));
+      renderSectors(demoAll);
       livePriceMap = new Map();
       renderWatch(watchData);
       lastFetchedAt = null;
@@ -432,6 +482,7 @@
   // initial render
   renderGainers(gainersData);
   renderLosers(losersData);
+  renderSectors([...gainersData, ...losersData].map(r=> ({ sym: r.sym, price: r.price, pct: r.pct, chg: r.chg, vol: r.vol })));
   renderWatch(watchData);
   setUpdated();
   updateMarketPill();
