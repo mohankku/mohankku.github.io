@@ -15,17 +15,21 @@ title: Stock Dashboard
       <span class="meta-pill"><span class="status-dot dot-amber" id="live-dot"></span> <span id="live-status">Demo data</span></span>
       <span class="meta-pill"><i class="fa-solid fa-repeat"></i> Auto-refresh <span id="auto-count">—</span></span>
       <div class="dash-actions">
-        <button class="btn btn-ghost" id="btn-fullscreen" title="Toggle fullscreen (F)"><i class="fa-solid fa-expand"></i> Fullscreen</button>
-        <button class="btn btn-ghost" id="btn-pause"><i class="fa-solid fa-pause"></i> Pause</button>
-        <button class="btn btn-primary" id="btn-refresh"><i class="fa-solid fa-rotate"></i> Refresh</button>
+        <button class="btn btn-ghost" id="btn-fullscreen" title="Toggle fullscreen (F)" aria-label="Toggle fullscreen"><i class="fa-solid fa-expand"></i> Fullscreen</button>
+        <button class="btn btn-ghost" id="btn-pause" aria-label="Pause auto-refresh"><i class="fa-solid fa-pause"></i> Pause</button>
+        <button class="btn btn-primary" id="btn-refresh" aria-label="Refresh now"><i class="fa-solid fa-rotate"></i> Refresh</button>
       </div>
     </div>
   </div>
 
     <div class="live-bar">
-    <span class="live-toggle"><input type="checkbox" id="live-toggle"> <label for="live-toggle">Live data</label> <span style="color:#6b7a8a; font-weight:400;">(cached hourly)</span></span>
-    <span id="live-msg" style="color:#6b7a8a;"></span>
-    <span style="margin-left:auto; font-size:11px; color:#6b7a8a;">Cached via GitHub Actions • Hourly 9:30am–4pm ET • No API key needed</span>
+    <span class="live-toggle"><input type="checkbox" id="live-toggle"> <label for="live-toggle">Live data</label></span>
+    <span id="live-msg" style="color:#6b7a8a; font-weight:600;"></span>
+    <span style="margin-left:auto; display:inline-flex; gap:8px; align-items:center;">
+      <button class="btn btn-ghost" id="btn-export" style="padding:6px 10px; font-size:11px; color:#344054; border:1px solid #dde3e8; background:#fff;" title="Export gainers/losers as CSV"><i class="fa-solid fa-download"></i> CSV</button>
+      <button class="btn btn-ghost" id="btn-share" style="padding:6px 10px; font-size:11px; color:#344054; border:1px solid #dde3e8; background:#fff;" title="Copy link to this dashboard"><i class="fa-solid fa-link"></i> Share</button>
+      <span style="font-size:11px; color:#6b7a8a;">Yahoo Finance via GitHub Actions • Hourly 9:30–16 ET • NYSE holidays</span>
+    </span>
   </div>
 
   <div class="dash-grid">
@@ -33,22 +37,22 @@ title: Stock Dashboard
     <div class="stock-card gainers">
       <div class="card-head">
         <h3><i class="fa-solid fa-microchip" style="color:#0a7a4b;"></i> Top 10 Tech Gainers</h3>
-        <span class="badge badge-green">▲ Big Tech · Chip · Memory</span>
+        <span class="badge badge-green" id="count-gainers">—</span>
       </div>
       <div class="card-sub">
         <span>Big Tech / Chip / Memory — live sorted</span>
-        <input class="search-input" id="search-gainers" placeholder="Filter gainers...">
+        <input class="search-input" id="search-gainers" placeholder="Filter gainers..." aria-label="Filter gainers">
       </div>
       <div style="overflow:auto;">
         <table class="stock-table" id="table-gainers">
           <thead>
             <tr>
-              <th>#</th>
-              <th>Symbol</th>
-              <th>Price</th>
-              <th>Volume</th>
-              <th>Change</th>
-              <th>Momentum</th>
+              <th scope="col">#</th>
+              <th scope="col">Symbol</th>
+              <th scope="col">Price</th>
+              <th scope="col">Volume</th>
+              <th scope="col">Change</th>
+              <th scope="col">Momentum</th>
             </tr>
           </thead>
           <tbody></tbody>
@@ -61,22 +65,22 @@ title: Stock Dashboard
     <div class="stock-card losers">
       <div class="card-head">
         <h3><i class="fa-solid fa-memory" style="color:#b42318;"></i> Top 10 Tech Losers</h3>
-        <span class="badge badge-red">▼ Big Tech · Chip · Memory</span>
+        <span class="badge badge-red" id="count-losers">—</span>
       </div>
       <div class="card-sub">
         <span>Big Tech / Chip / Memory — live sorted</span>
-        <input class="search-input" id="search-losers" placeholder="Filter losers...">
+        <input class="search-input" id="search-losers" placeholder="Filter losers..." aria-label="Filter losers">
       </div>
       <div style="overflow:auto;">
         <table class="stock-table" id="table-losers">
           <thead>
             <tr>
-              <th>#</th>
-              <th>Symbol</th>
-              <th>Price</th>
-              <th>Volume</th>
-              <th>Change</th>
-              <th>Momentum</th>
+              <th scope="col">#</th>
+              <th scope="col">Symbol</th>
+              <th scope="col">Price</th>
+              <th scope="col">Volume</th>
+              <th scope="col">Change</th>
+              <th scope="col">Momentum</th>
             </tr>
           </thead>
           <tbody></tbody>
@@ -94,7 +98,7 @@ title: Stock Dashboard
     </div>
     <div class="card-sub">
       <span>Themes & names on radar — not recommendations</span>
-      <input class="search-input" id="search-watch" placeholder="Filter watchlist...">
+      <input class="search-input" id="search-watch" placeholder="Filter watchlist..." aria-label="Filter watchlist">
     </div>
     <div style="overflow:auto;">
       <table class="stock-table" id="table-watch">

@@ -1,4 +1,4 @@
-/* Stock Dashboard — externalized from stocks.md | P0 fixes: no direct Twelve/Alpha fetches, 60s cached poll, per-column sort */
+/* Stock Dashboard — P0: honest live (no demo padding), persistent freshness, 1h poll, NYSE holidays */
 (function(){
   // --- Mock fallback data (demo) ---
   const gainersData = [
@@ -45,57 +45,132 @@
   let currentGainers = [...gainersData];
   let currentLosers = [...losersData];
 
+  // P2: momentum bar calibrated to 0-8% -> 0-100% (was pct*18+40, clipped weirdly)
+  const MOMENTUM_MAX = 8;
+  function barWidth(pct){ return Math.min(100, Math.max(6, Math.abs(Number(pct))/MOMENTUM_MAX*100)); }
+  function yahooLink(sym){
+    const clean = String(sym).split('/')[0].split(' ')[0].replace(/[^A-Z]/g,'');
+    if(!clean || clean.length<1 || clean.length>5) return null;
+    return `https://finance.yahoo.com/quote/${clean}`;
+  }
+  function symCell(sym, name){
+    const link = yahooLink(sym);
+    const label = `<span class="sym">${sym}</span>`;
+    const sub = name && name!==sym ? `<span class="name">${name}</span>` : "";
+    if(link && /^[A-Z]{1,5}$/.test(sym)){
+      return `<a href="${link}" target="_blank" rel="noopener" title="Open ${sym} on Yahoo Finance" style="text-decoration:none;">${label}</a>${sub}`;
+    }
+    return `${label}${sub}`;
+  }
+  function updateCountBadges(){
+    const cg = document.getElementById("count-gainers");
+    const cl = document.getElementById("count-losers");
+    if(cg) cg.textContent = currentGainers.length ? `${currentGainers.length} live` : "0 today";
+    if(cl) cl.textContent = currentLosers.length ? `${currentLosers.length} live` : "0 today";
+  }
   function renderGainers(data){
     currentGainers = [...data];
     const tbody = document.querySelector("#table-gainers tbody");
     if(!tbody) return;
+    if(!data || data.length===0){
+      tbody.innerHTML = `<tr class="empty-row"><td colspan="6" style="text-align:center; padding:18px; color:#6b7a8a;">No tech gainers right now — all 24 tracked names in red. Showing 0 of 10.</td></tr>`;
+      updateCountBadges();
+      return;
+    }
     tbody.innerHTML = data.map((r,i)=> `
       <tr>
         <td><span class="rank">${i+1}</span></td>
-        <td><span class="sym">${r.sym}</span><span class="name">${r.name}</span></td>
+        <td>${symCell(r.sym, r.name||r.sym)}</td>
         <td class="price">$${Number(r.price).toFixed(2)}</td>
         <td style="color:#6b7a8a;">${r.vol}</td>
         <td><span class="pill pill-up"><i class="fa-solid fa-caret-up"></i> +${Number(r.pct).toFixed(2)}% • +$${Number(r.chg).toFixed(2)}</span></td>
-        <td><span class="mini-bar bar-green"><span style="width:${Math.min(100, Number(r.pct)*18+40)}%"></span></span> <span class="chg-pos" style="margin-left:6px;">+${Number(r.pct).toFixed(2)}%</span></td>
+        <td><span class="mini-bar bar-green"><span style="width:${barWidth(r.pct)}%"></span></span> <span class="chg-pos" style="margin-left:6px;">+${Number(r.pct).toFixed(2)}%</span></td>
       </tr>
     `).join("");
+    if(data.length<10){
+      tbody.insertAdjacentHTML('beforeend', `<tr class="empty-hint"><td colspan="6" style="text-align:center; padding:10px; font-size:11px; color:#98a2b3; background:#fafbfc;">${data.length} live gainers • ${10-data.length} slots empty (not padded with demo)</td></tr>`);
+    }
+    updateCountBadges();
   }
   function renderLosers(data){
     currentLosers = [...data];
     const tbody = document.querySelector("#table-losers tbody");
     if(!tbody) return;
+    if(!data || data.length===0){
+      tbody.innerHTML = `<tr class="empty-row"><td colspan="6" style="text-align:center; padding:18px; color:#6b7a8a;">No tech losers — all green today.</td></tr>`;
+      updateCountBadges();
+      return;
+    }
     tbody.innerHTML = data.map((r,i)=> `
       <tr>
         <td><span class="rank">${i+1}</span></td>
-        <td><span class="sym">${r.sym}</span><span class="name">${r.name}</span></td>
+        <td>${symCell(r.sym, r.name||r.sym)}</td>
         <td class="price">$${Number(r.price).toFixed(2)}</td>
         <td style="color:#6b7a8a;">${r.vol}</td>
         <td><span class="pill pill-down"><i class="fa-solid fa-caret-down"></i> ${Number(r.pct).toFixed(2)}% • -$${Math.abs(Number(r.chg)).toFixed(2)}</span></td>
-        <td><span class="mini-bar bar-red"><span style="width:${Math.min(100, Math.abs(Number(r.pct))*18+40)}%"></span></span> <span class="chg-neg" style="margin-left:6px;">${Number(r.pct).toFixed(2)}%</span></td>
+        <td><span class="mini-bar bar-red"><span style="width:${barWidth(r.pct)}%"></span></span> <span class="chg-neg" style="margin-left:6px;">${Number(r.pct).toFixed(2)}%</span></td>
       </tr>
     `).join("");
+    if(data.length<10){
+      tbody.insertAdjacentHTML('beforeend', `<tr class="empty-hint"><td colspan="6" style="text-align:center; padding:10px; font-size:11px; color:#98a2b3; background:#fafbfc;">${data.length} live losers</td></tr>`);
+    }
+    updateCountBadges();
   }
+  // P2: live watchlist — merge live prices for single-ticker watch entries
+  let livePriceMap = new Map(); // ticker -> {price, pct, chg}
   function renderWatch(data){
     const tbody = document.querySelector("#table-watch tbody");
     if(!tbody) return;
     const riskClass = r => r==="Low" ? "risk-low" : r==="High" ? "risk-high" : "risk-med";
-    tbody.innerHTML = data.map(r=> `
+    tbody.innerHTML = data.map(r=> {
+      const tick = String(r.sym).split('/')[0].trim().split(' ')[0];
+      const live = livePriceMap.get(tick);
+      const liveBadge = live ? `<br><span class="price" style="font-size:12px;">$${Number(live.price).toFixed(2)} <span class="${live.pct>=0?'chg-pos':'chg-neg'}" style="font-size:11px;">${live.pct>=0?'+':''}${Number(live.pct).toFixed(2)}%</span></span>` : "";
+      const symHtml = (()=>{ const link=yahooLink(tick); if(link && /^[A-Z]{1,5}$/.test(tick)) return `<a href="${link}" target="_blank" rel="noopener" style="text-decoration:none;"><span class="sym">${r.sym}</span></a>${liveBadge}`; return `<span class="sym">${r.sym}</span>${liveBadge}`; })();
+      return `
       <tr>
-        <td><span class="sym">${r.sym}</span></td>
+        <td>${symHtml}</td>
         <td><span class="sector">${r.sector}</span></td>
         <td class="watch-reason">${r.reason}</td>
         <td><span class="risk ${riskClass(r.risk)}">${r.risk}</span></td>
         <td><span class="pill pill-flat">${r.action}</span></td>
-      </tr>
-    `).join("");
+      </tr>`;
+    }).join("");
+  }
+  function showSkeleton(){
+    ["table-gainers","table-losers"].forEach(id=>{
+      const tb = document.querySelector(`#${id} tbody`);
+      if(!tb) return;
+      tb.innerHTML = `<tr class="skeleton"><td colspan="6" style="padding:14px;">Loading live data…</td></tr>`.repeat(3);
+    });
   }
   function filterTable(inputId, tableId){
     const inp = document.getElementById(inputId);
     const q = inp ? inp.value.trim().toLowerCase() : "";
+    const tbody = document.querySelector(`#${tableId} tbody`);
     const rows = document.querySelectorAll(`#${tableId} tbody tr`);
+    let visible = 0;
     rows.forEach(tr=>{
-      tr.style.display = !q || tr.innerText.toLowerCase().includes(q) ? "" : "none";
+      if(tr.classList.contains('filter-empty') || tr.classList.contains('empty-hint') || tr.classList.contains('empty-row') || tr.classList.contains('skeleton')) return;
+      const show = !q || tr.innerText.toLowerCase().includes(q);
+      tr.style.display = show ? "" : "none";
+      if(show) visible++;
     });
+    // empty search state
+    let emptyEl = tbody ? tbody.querySelector('tr.filter-empty') : null;
+    if(q && visible===0){
+      if(!emptyEl && tbody){
+        const tr = document.createElement('tr');
+        tr.className = 'filter-empty';
+        tr.innerHTML = `<td colspan="6">No matches for “${q.replace(/</g,'&lt;')}”</td>`;
+        tbody.appendChild(tr);
+      } else if(emptyEl){
+        emptyEl.style.display = "";
+        emptyEl.querySelector('td').textContent = `No matches for “${q}”`;
+      }
+    } else if(emptyEl){
+      emptyEl.style.display = "none";
+    }
   }
   function setUpdated(){
     const el = document.getElementById("last-updated");
@@ -104,24 +179,36 @@
     el.textContent = now.toLocaleString(undefined,{ dateStyle:"medium", timeStyle:"medium" });
   }
 
-  // --- Trading hours (America/New_York, 9:30-16:00 Mon-Fri) ---
+  // --- Trading hours (America/New_York, 9:30-16:00 Mon-Fri) + NYSE holidays ---
+  // Source: NYSE 2026 holidays — update yearly
+  const NYSE_HOLIDAYS_2026 = new Set([
+    "2026-01-01","2026-01-19","2026-02-16","2026-04-03","2026-05-25","2026-06-19","2026-07-03","2026-09-07","2026-11-26","2026-12-25"
+  ]);
   function getETParts(now = new Date()){
     const etStr = now.toLocaleString("en-US", { timeZone: "America/New_York" });
     const et = new Date(etStr);
-    return { et, day: et.getDay(), mins: et.getHours()*60 + et.getMinutes(), str: et.toLocaleString("en-US", { timeZone: "America/New_York", weekday:"short", hour:"2-digit", minute:"2-digit", timeZoneName:"short" }) };
+    const y = et.getFullYear(), m = String(et.getMonth()+1).padStart(2,'0'), d = String(et.getDate()).padStart(2,'0');
+    const iso = `${y}-${m}-${d}`;
+    return { et, day: et.getDay(), mins: et.getHours()*60 + et.getMinutes(), iso, str: et.toLocaleString("en-US", { timeZone: "America/New_York", weekday:"short", hour:"2-digit", minute:"2-digit", timeZoneName:"short" }) };
+  }
+  function isHoliday(now = new Date()){
+    const { iso } = getETParts(now);
+    return NYSE_HOLIDAYS_2026.has(iso);
   }
   function isMarketOpen(now = new Date()){
     const { day, mins } = getETParts(now);
     if(day===0 || day===6) return false;
+    if(isHoliday(now)) return false;
     const open = 9*60+30, close = 16*60;
     return mins >= open && mins < close;
   }
   function nextOpenLabel(now = new Date()){
     let d = new Date(now);
-    for(let i=0;i<7;i++){
-      const { day, mins } = getETParts(d);
-      const openMins = 9*60+30;
-      if(day!==0 && day!==6){
+    for(let i=0;i<10;i++){
+      const { day } = getETParts(d);
+      if(day!==0 && day!==6 && !isHoliday(d)){
+        const { mins } = getETParts(d);
+        const openMins = 9*60+30;
         if(i===0 && mins < openMins) return "today at 9:30am ET";
         if(i===0 && mins >= 16*60) { /* after close */ }
         else if(i>0) {
@@ -139,14 +226,20 @@
     const el = document.getElementById("market-status");
     if(!dot || !el) return false;
     const open = isMarketOpen();
+    const holiday = isHoliday();
     if(open){
       dot.className = "status-dot dot-green";
       el.textContent = "Market Open \u2022 Live trading hours";
       el.title = getETParts().str;
     } else {
       dot.className = "status-dot dot-red";
-      el.textContent = "Market Closed \u2022 Paused (opens " + nextOpenLabel() + ")";
-      el.title = getETParts().str + " \u2014 outside 9:30am-4pm ET Mon-Fri";
+      if(holiday){
+        el.textContent = "Market Closed \u2022 NYSE holiday (opens " + nextOpenLabel() + ")";
+        el.title = getETParts().str + " \u2014 NYSE holiday";
+      } else {
+        el.textContent = "Market Closed \u2022 Paused (opens " + nextOpenLabel() + ")";
+        el.title = getETParts().str + " \u2014 outside 9:30am-4pm ET Mon-Fri";
+      }
     }
     return open;
   }
@@ -200,22 +293,78 @@
       liveEnabled = liveToggle.checked;
       try{ localStorage.setItem("stocks_live", liveEnabled?"1":"0"); }catch(e){}
       updateLivePill();
-      if(liveMsg){
-        liveMsg.textContent = liveEnabled ? "Live (cached) enabled." : "Demo mode.";
-        setTimeout(()=> liveMsg.textContent="", 3000);
+      updateLiveFreshness();
+      if(!liveEnabled){
+        // Demo mode: show jitter immediately
+        shuffleTick();
+        setUpdated();
+      } else {
+        tryCachedTech();
       }
-      if(liveEnabled) tryCachedTech();
     });
   }
 
+  function formatVol(v){
+    if(!v || v==="0" || v==="—") return "—";
+    const n = Number(String(v).replace(/,/g,""));
+    if(isNaN(n)) return String(v);
+    if(n>=1e9) return (n/1e9).toFixed(2)+"B";
+    if(n>=1e6) return (n/1e6).toFixed(1)+"M";
+    if(n>=1e3) return (n/1e3).toFixed(1)+"K";
+    return n.toLocaleString();
+  }
   function mapAlphaRow(r){
-    return { sym: r.ticker, name: r.ticker, price: parseFloat(r.price), chg: parseFloat(r.change_amount), pct: parseFloat(String(r.change_percentage).replace("%","").replace("+","")), vol: r.volume && r.volume!=="0" ? (Number(r.volume) > 1e6 ? (Number(r.volume)/1e6).toFixed(1)+"M" : Number(r.volume).toLocaleString()) : "\u2014" };
+    return { sym: r.ticker, name: r.ticker, price: parseFloat(r.price), chg: parseFloat(r.change_amount), pct: parseFloat(String(r.change_percentage).replace("%","").replace("+","")), vol: formatVol(r.volume) };
   }
   function getLiveUrl(){
     const dash = document.getElementById("stock-dashboard");
     if(dash && dash.dataset.liveUrl) return dash.dataset.liveUrl;
     return "/assets/stocks-live.json";
   }
+  // --- Loading/error banner (P1) ---
+  function showLiveError(msg){
+    if(!liveMsg) return;
+    liveMsg.textContent = msg;
+    liveMsg.style.color = "#b42318";
+    liveMsg.style.fontWeight = "700";
+    if(liveDot) liveDot.className = "status-dot dot-red";
+    if(liveStatus){ liveStatus.textContent = "Live error"; liveStatus.title = msg; }
+  }
+  // --- Persistent freshness (P0): keep liveMsg always visible, color by age ---
+  let lastFetchedAt = null;
+  function freshnessMeta(ts){
+    if(!ts) return { label: "Live", ageMin: Infinity, stale: true };
+    const t = new Date(ts);
+    if(isNaN(t)) return { label: "Live", ageMin: Infinity, stale: true };
+    const ageMin = (Date.now() - t.getTime())/60000;
+    if(ageMin < 75) return { label: `Live • ${Math.max(0,Math.floor(ageMin))}m ago`, ageMin, stale: false };
+    if(ageMin < 1440) return { label: `Stale • ${Math.floor(ageMin/60)}h ago`, ageMin, stale: true };
+    return { label: `Stale • ${Math.floor(ageMin/1440)}d ago`, ageMin, stale: true };
+  }
+  function updateLiveFreshness(){
+    if(!liveMsg) return;
+    if(!liveEnabled){
+      liveMsg.textContent = "Demo mode — toggle Live for cached market data";
+      liveMsg.style.color = "#6b7a8a";
+      liveMsg.title = "Demo jitter";
+      if(liveDot) liveDot.className = "status-dot dot-amber";
+      if(liveStatus){ liveStatus.textContent = "Demo data"; liveStatus.title = "Demo jitter"; }
+      return;
+    }
+    const fm = freshnessMeta(lastFetchedAt);
+    const src = "via Yahoo Finance / GitHub Actions";
+    liveMsg.textContent = `${fm.label} • ${src}`;
+    liveMsg.title = lastFetchedAt ? new Date(lastFetchedAt).toLocaleString() + ` • ${src}` : src;
+    liveMsg.style.color = fm.stale ? "#b54708" : "#0a7a4b";
+    if(liveDot) liveDot.className = fm.stale ? "status-dot dot-amber" : "status-dot dot-green";
+    if(liveStatus){
+      liveStatus.textContent = fm.stale ? "Live (stale)" : "Live (cached)";
+      liveStatus.title = liveMsg.title;
+    }
+  }
+  // refresh freshness every minute even when not fetching
+  setInterval(updateLiveFreshness, 60000);
+
   async function fetchLocalLive(){
     const url = getLiveUrl();
     const res = await fetch(url, { cache: "no-store" });
@@ -225,32 +374,38 @@
     throw new Error("invalid local");
   }
   async function tryCachedTech(){
-    if(!liveEnabled) return false;
+    if(!liveEnabled){ updateLiveFreshness(); return false; }
+    showSkeleton();
     try{
       const j = await fetchLocalLive();
+      lastFetchedAt = j.fetched_at || j.last_updated || null;
       const techSet = new Set(techSymbols);
-      const g = j.top_gainers.filter(r=> techSet.has(r.ticker)).slice(0,10).map(mapAlphaRow);
-      const l = j.top_losers.filter(r=> techSet.has(r.ticker)).slice(0,10).map(mapAlphaRow);
-      const gg = g.length>=3 ? g : j.top_gainers.slice(0,10).map(mapAlphaRow);
-      const ll = l.length>=3 ? l : j.top_losers.slice(0,10).map(mapAlphaRow);
-      while(gg.length<10) gg.push(gainersData[gg.length % gainersData.length]);
-      while(ll.length<10) ll.push(losersData[ll.length % losersData.length]);
-      renderGainers(gg);
-      renderLosers(ll);
+      let g = j.top_gainers.filter(r=> techSet.has(r.ticker)).slice(0,10).map(mapAlphaRow);
+      let l = j.top_losers.filter(r=> techSet.has(r.ticker)).slice(0,10).map(mapAlphaRow);
+      // build live price map for watchlist
+      livePriceMap = new Map();
+      [...j.top_gainers, ...j.top_losers].forEach(r=>{
+        if(techSet.has(r.ticker)){
+          livePriceMap.set(r.ticker, { price: parseFloat(r.price), pct: parseFloat(String(r.change_percentage).replace("%","").replace("+","")), chg: parseFloat(r.change_amount) });
+        }
+      });
+      renderGainers(g);
+      renderLosers(l);
+      renderWatch(watchData);
       filterTable("search-gainers","table-gainers");
       filterTable("search-losers","table-losers");
-      const ts = j.fetched_at || j.last_updated || "";
-      if(liveMsg){
-        liveMsg.textContent = `Live (cached ${ts ? new Date(ts).toLocaleString() : ""})`;
-        liveMsg.style.color = "#0a7a4b";
-        setTimeout(()=> liveMsg.textContent="", 6000);
-      }
-      if(liveDot) liveDot.className = "status-dot dot-green";
-      if(liveStatus) liveStatus.textContent = "Live (cached)";
+      filterTable("search-watch","table-watch");
+      updateLiveFreshness();
       setUpdated();
       return true;
     } catch(e){
       console.warn("Cached not available", e.message);
+      showLiveError("Live unavailable — showing demo • "+e.message);
+      shuffleTick();
+      livePriceMap = new Map();
+      renderWatch(watchData);
+      lastFetchedAt = null;
+      setTimeout(updateLiveFreshness, 4000);
       return false;
     }
   }
@@ -292,24 +447,34 @@
       filterTable(id, tableMap[id]);
     });
   });
-  // sortable — fixed: per-column dir and sort current data (not stale mock)
+  // sortable — per-column dir, sort current live data, visual arrows via CSS
+  function parseVolNum(s){
+    if(!s || s==="—") return -1;
+    const t = String(s).trim().toUpperCase();
+    if(t.endsWith('B')) return parseFloat(t)*1e9;
+    if(t.endsWith('M')) return parseFloat(t)*1e6;
+    if(t.endsWith('K')) return parseFloat(t)*1e3;
+    return Number(String(s).replace(/,/g,"")) || 0;
+  }
   function makeSortable(tableId){
     const table = document.getElementById(tableId);
     if(!table) return;
     const ths = table.querySelectorAll("th");
     const dirs = new Map(); // col idx -> 1/-1
     ths.forEach((th, idx)=>{
-      // only these columns are sortable: Symbol(1), Price(2), Change(4)
-      const sortable = (idx===1 || idx===2 || idx===4);
+      // sortable: Symbol(1), Price(2), Volume(3), Change(4), Momentum(5)
+      const sortable = (idx===1 || idx===2 || idx===3 || idx===4 || idx===5);
       if(!sortable) return;
       th.style.cursor = "pointer";
       th.title = "Click to sort";
       th.setAttribute("aria-sort","none");
-      th.addEventListener("click", ()=>{
+      th.setAttribute("role","columnheader");
+      th.setAttribute("tabindex","0");
+      th.setAttribute("aria-label", th.textContent.trim()+" sortable");
+      function doSort(){
         const cur = dirs.get(idx) || 1;
         const next = cur * -1;
         dirs.set(idx, next);
-        // reset other headers aria-sort
         ths.forEach((o,i)=>{ if(i!==idx) o.setAttribute("aria-sort","none"); });
         th.setAttribute("aria-sort", next===1 ? "ascending" : "descending");
         const isGainers = tableId==="table-gainers";
@@ -317,22 +482,33 @@
         let sorted = [...src];
         if(idx===1) sorted.sort((a,b)=> next*a.sym.localeCompare(b.sym));
         else if(idx===2) sorted.sort((a,b)=> next*(a.price-b.price));
-        else if(idx===4) sorted.sort((a,b)=> next*(a.pct-b.pct));
+        else if(idx===3) sorted.sort((a,b)=> next*(parseVolNum(a.vol)-parseVolNum(b.vol)));
+        else if(idx===4 || idx===5) sorted.sort((a,b)=> next*(a.pct-b.pct));
         if(isGainers) renderGainers(sorted);
         else renderLosers(sorted);
         filterTable(isGainers ? "search-gainers" : "search-losers", tableId);
-      });
+      }
+      th.addEventListener("click", doSort);
+      th.addEventListener("keydown", (e)=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); doSort(); }});
     });
   }
   makeSortable("table-gainers");
   makeSortable("table-losers");
 
-  // refresh / auto (trading-hours aware) — 60s polls cached JSON, no 1-hour throttle
+  // refresh / auto — hourly poll (matches GitHub Action), trading-hours aware
+  const POLL_SEC = 3600;
   let paused = false;
-  let countdown = 60;
+  let countdown = POLL_SEC;
   const autoEl = document.getElementById("auto-count");
   const btnPause = document.getElementById("btn-pause");
   const btnRefresh = document.getElementById("btn-refresh");
+
+  function fmtCountdown(s){
+    if(s<=0) return "now";
+    if(s>=3600) return Math.floor(s/3600)+"h "+Math.floor((s%3600)/60)+"m";
+    if(s>=60) return Math.floor(s/60)+"m "+(s%60)+"s";
+    return s+"s";
+  }
 
   async function doRefresh(isAuto=false){
     const marketOpen = isMarketOpen();
@@ -345,14 +521,14 @@
       const ok = await tryCachedTech();
       if(!ok) shuffleTick();
       setUpdated();
-      countdown = 60;
+      countdown = POLL_SEC;
       if(btnRefresh){
         btnRefresh.innerHTML = '<i class="fa-solid fa-check"></i> Updated (market closed)';
         setTimeout(()=> btnRefresh.innerHTML = '<i class="fa-solid fa-rotate"></i> Refresh', 1200);
       }
       return;
     }
-    // market open: poll cached every 60s; liveToggle gates cached vs demo
+    // market open: poll cached hourly; liveToggle gates cached vs demo
     if(liveEnabled){
       const ok = await tryCachedTech();
       if(!ok) shuffleTick();
@@ -360,7 +536,7 @@
       shuffleTick();
     }
     setUpdated();
-    countdown = 60;
+    countdown = POLL_SEC;
     if(!isAuto && btnRefresh){
       btnRefresh.innerHTML = '<i class="fa-solid fa-check"></i> Updated';
       setTimeout(()=> btnRefresh.innerHTML = '<i class="fa-solid fa-rotate"></i> Refresh', 900);
@@ -371,8 +547,65 @@
   if(btnPause) btnPause.addEventListener("click", ()=>{
     paused = !paused;
     btnPause.innerHTML = paused ? '<i class="fa-solid fa-play"></i> Resume' : '<i class="fa-solid fa-pause"></i> Pause';
-    if(autoEl) autoEl.textContent = paused ? "paused" : countdown+"s";
+    if(autoEl) autoEl.textContent = paused ? "paused" : fmtCountdown(countdown);
   });
+  // P2: export/share
+  const btnExport = document.getElementById("btn-export");
+  const btnShare = document.getElementById("btn-share");
+  function toCsv(rows, header){
+    const esc = v => `"${String(v).replace(/"/g,'""')}"`;
+    return [header.map(esc).join(",")].concat(rows.map(r=>r.map(esc).join(","))).join("\n");
+  }
+  if(btnExport){
+    btnExport.addEventListener("click", ()=>{
+      const header = ["type","rank","symbol","price","volume","change_pct","change_amt"];
+      const rows = [];
+      currentGainers.forEach((r,i)=> rows.push(["gainer", i+1, r.sym, r.price, r.vol, r.pct, r.chg]));
+      currentLosers.forEach((r,i)=> rows.push(["loser", i+1, r.sym, r.price, r.vol, r.pct, r.chg]));
+      const csv = toCsv(rows, header);
+      const blob = new Blob([csv], {type:"text/csv"});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url; a.download = `stocks-${new Date().toISOString().slice(0,10)}.csv`;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(()=> URL.revokeObjectURL(url), 1000);
+      const old = btnExport.innerHTML; btnExport.innerHTML = '<i class="fa-solid fa-check"></i> Saved';
+      setTimeout(()=> btnExport.innerHTML = old, 1200);
+    });
+  }
+  if(btnShare){
+    btnShare.addEventListener("click", async ()=>{
+      const url = location.href.split('#')[0];
+      try{
+        if(navigator.clipboard) await navigator.clipboard.writeText(url);
+        else { const t=document.createElement("input"); t.value=url; document.body.appendChild(t); t.select(); document.execCommand("copy"); t.remove(); }
+        const old = btnShare.innerHTML; btnShare.innerHTML = '<i class="fa-solid fa-check"></i> Copied';
+        setTimeout(()=> btnShare.innerHTML = old, 1200);
+      } catch(e){
+        prompt("Copy link:", url);
+      }
+    });
+  }
+  // URL state: ?live=0 / ?live=1 and ?q=gainers or losers filter
+  try{
+    const params = new URLSearchParams(location.search);
+    if(params.has("live")){
+      const v = params.get("live");
+      if(v==="0"||v==="1"){
+        liveEnabled = v==="1";
+        if(liveToggle) liveToggle.checked = liveEnabled;
+        try{ localStorage.setItem("stocks_live", liveEnabled?"1":"0"); }catch(e){}
+        updateLivePill(); updateLiveFreshness();
+      }
+    }
+    if(params.get("q")){
+      const q = params.get("q");
+      ["search-gainers","search-losers","search-watch"].forEach(id=>{
+        const el=document.getElementById(id);
+        if(el){ el.value=q; }
+      });
+    }
+  }catch(e){}
 
   // fullscreen toggle
   const dashEl = document.getElementById("stock-dashboard");
@@ -406,22 +639,25 @@
     }
   });
 
-  // auto timer: only tick when market open and not paused — now 60s interval aligns with poll
+  // auto timer: hourly poll to match GitHub Action
   setInterval(()=>{
     updateMarketPill();
+    updateLiveFreshness();
     const marketOpen = isMarketOpen();
     if(paused || !marketOpen){
       if(autoEl) autoEl.textContent = paused ? "paused" : "paused (closed)";
       return;
     }
     countdown--;
-    if(autoEl) autoEl.textContent = countdown+"s";
+    if(autoEl) autoEl.textContent = fmtCountdown(countdown);
     if(countdown<=0){
       doRefresh(true);
     }
   },1000);
   // refresh market pill every minute even when paused
-  setInterval(updateMarketPill, 60000);
+  setInterval(()=>{ updateMarketPill(); updateLiveFreshness(); }, 60000);
   // initial auto text
-  if(autoEl) autoEl.textContent = isMarketOpen() && !paused ? countdown+"s" : "paused (closed)";
+  if(autoEl) autoEl.textContent = isMarketOpen() && !paused ? fmtCountdown(countdown) : "paused (closed)";
+  // init freshness display
+  updateLiveFreshness();
 })();
