@@ -2,8 +2,13 @@ name: Stocks Live Fetch
 
 on:
   schedule:
-    # Every hour at :05 during NYSE trading hours 9:30-16 ET = 13:30-20 UTC, Mon-Fri
-    - cron: '5 13-20 * * 1-5'
+    # Hourly during NYSE trading hours 9:30-16 ET = 13:30-20 UTC, Mon-Fri.
+    # :23 chosen over :05 to dodge scheduler contention (schedules are best-effort).
+    - cron: '23 13-20 * * 1-5'
+  # External cron (e.g. cron-job.org) POSTs {"event_type":"stocks-refresh"} here
+  # for reliable hourly runs — dispatch events are never skipped like schedules.
+  repository_dispatch:
+    types: [stocks-refresh]
   workflow_dispatch:
 
 permissions:
