@@ -20,12 +20,12 @@ jobs:
           TWELVEDATA_API_KEY: ${{ secrets.TWELVEDATA_API_KEY }}
         run: |
           mkdir -p assets
-          TECH_SYMS="AAPL,MSFT,GOOGL,META,AMZN,NVDA,AMD,AVGO,ASML,INTC,TSM,MU,QCOM,TXN,NXPI,MRVL,LRCX,KLAC,AMAT,TSLA,ORCL,CRM,PLTR,CRWD,MRNA,REGN,VRTX,AMGN,GILD,BIIB"
+          TECH_SYMS="AAPL,MSFT,GOOGL,META,AMZN,NFLX,ADBE,CSCO,IBM,NOW,NVDA,AMD,AVGO,TSM,MU,INTC,ARM,SMCI,DELL,ON,ASML,LRCX,KLAC,AMAT,ENTG,TER,SNPS,CDNS,COHR,MKSI,QCOM,TXN,NXPI,MRVL,ANET,CIEN,CRDO,LITE,FFIV,EXTR,ORCL,CRM,PLTR,CRWD,TSLA,SNOW,DDOG,PANW,ZS,TEAM,MRNA,REGN,VRTX,AMGN,GILD,BIIB,LLY,NVO,PFE,MRK"
           fetched=false
 
           # 1) TwelveData (per-symbol quote, requires TWELVEDATA_API_KEY)
           if [ -n "$TWELVEDATA_API_KEY" ]; then
-            echo "Fetching Tech via TwelveData (30 symbols, 1/hour)..."
+            echo "Fetching Tech via TwelveData (60 symbols, 1/hour)..."
             rm -f /tmp/tech.json; echo "[]" > /tmp/tech.json
             IFS=',' read -ra SYMS <<< "$TECH_SYMS"
             for sym in "${SYMS[@]}"; do
@@ -44,7 +44,7 @@ jobs:
             done
             if [ "$(jq 'length' /tmp/tech.json)" -ge 5 ]; then
               cat /tmp/tech.json | jq -c 'sort_by(.change_percentage|tonumber) | reverse' > /tmp/sorted.json
-              jq -n --slurpfile tech /tmp/sorted.json --arg ts "$(date -u +%Y-%m-%dT%H:%M:%SZ)" --arg lu "$(TZ='America/New_York' date '+%Y-%m-%d %H:%M:%S US/Eastern')" '{metadata:"Tech Top gainers/losers — Big Tech / Chip / Memory", last_updated:$lu, fetched_at:$ts, top_gainers: ($tech[0][:12] | sort_by(.change_percentage|tonumber) | reverse | .[:12]), top_losers: ($tech[0] | sort_by(.change_percentage|tonumber) | .[:12]), tech_all: $tech[0] }' > assets/stocks-live.json
+              jq -n --slurpfile tech /tmp/sorted.json --arg ts "$(date -u +%Y-%m-%dT%H:%M:%SZ)" --arg lu "$(TZ='America/New_York' date '+%Y-%m-%d %H:%M:%S US/Eastern')" '{metadata:"Sector stocks — 6 sectors x 10", last_updated:$lu, fetched_at:$ts, top_gainers: ($tech[0][:12] | sort_by(.change_percentage|tonumber) | reverse | .[:12]), top_losers: ($tech[0] | sort_by(.change_percentage|tonumber) | .[:12]), tech_all: $tech[0] }' > assets/stocks-live.json
               jq '.top_gainers |= map(select(.change_percentage|tonumber > 0)) | .top_losers |= map(select(.change_percentage|tonumber < 0))' assets/stocks-live.json > /tmp/f.json && mv /tmp/f.json assets/stocks-live.json
               echo "TwelveData Tech fetched $(jq '.top_gainers|length' assets/stocks-live.json) gainers, $(jq '.top_losers|length' assets/stocks-live.json) losers"
               fetched=true
@@ -55,10 +55,10 @@ jobs:
 
           # 2) Yahoo Finance fallback (no key, free) — fetch each tech symbol
           if [ "$fetched" = false ]; then
-            echo "Trying Yahoo Finance for 30 symbols (no key needed)..."
+            echo "Trying Yahoo Finance for 60 symbols (no key needed)..."
             python3 << 'PY'
           import json, urllib.request, time
-          syms = "AAPL,MSFT,GOOGL,META,AMZN,NVDA,AMD,AVGO,ASML,INTC,TSM,MU,QCOM,TXN,NXPI,MRVL,LRCX,KLAC,AMAT,TSLA,ORCL,CRM,PLTR,CRWD,MRNA,REGN,VRTX,AMGN,GILD,BIIB".split(",")
+          syms = "AAPL,MSFT,GOOGL,META,AMZN,NFLX,ADBE,CSCO,IBM,NOW,NVDA,AMD,AVGO,TSM,MU,INTC,ARM,SMCI,DELL,ON,ASML,LRCX,KLAC,AMAT,ENTG,TER,SNPS,CDNS,COHR,MKSI,QCOM,TXN,NXPI,MRVL,ANET,CIEN,CRDO,LITE,FFIV,EXTR,ORCL,CRM,PLTR,CRWD,TSLA,SNOW,DDOG,PANW,ZS,TEAM,MRNA,REGN,VRTX,AMGN,GILD,BIIB,LLY,NVO,PFE,MRK".split(",")
           results=[]
           for sym in syms:
               url = f'https://query1.finance.yahoo.com/v8/finance/chart/{sym}?interval=1d&range=1d'
@@ -85,7 +85,7 @@ jobs:
               now_utc = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
               tz = zoneinfo.ZoneInfo("America/New_York")
               now_et = datetime.datetime.now(tz).strftime("%Y-%m-%d %H:%M:%S US/Eastern")
-              out={"metadata":"Tech Top gainers/losers — Big Tech / Chip / Memory","last_updated":now_et,"fetched_at":now_utc,"top_gainers":pos[:12],"top_losers":neg[:12],"tech_all":all_sorted}
+              out={"metadata":"Sector stocks — 6 sectors x 10","last_updated":now_et,"fetched_at":now_utc,"top_gainers":pos[:12],"top_losers":neg[:12],"tech_all":all_sorted}
               open("assets/stocks-live.json","w").write(json.dumps(out, indent=2))
               print(f"Yahoo wrote {len(pos)} gainers {len(neg)} losers all {len(all_sorted)}")
           else:
@@ -113,10 +113,10 @@ jobs:
               echo "Keeping existing file"
               exit 0
             fi
-            TECH_LIST="AAPL,MSFT,GOOGL,META,AMZN,NVDA,AMD,AVGO,ASML,INTC,TSM,MU,QCOM,TXN,NXPI,MRVL,LRCX,KLAC,AMAT,TSLA,ORCL,CRM,PLTR,CRWD,MRNA,REGN,VRTX,AMGN,GILD,BIIB"
+            TECH_LIST="AAPL,MSFT,GOOGL,META,AMZN,NFLX,ADBE,CSCO,IBM,NOW,NVDA,AMD,AVGO,TSM,MU,INTC,ARM,SMCI,DELL,ON,ASML,LRCX,KLAC,AMAT,ENTG,TER,SNPS,CDNS,COHR,MKSI,QCOM,TXN,NXPI,MRVL,ANET,CIEN,CRDO,LITE,FFIV,EXTR,ORCL,CRM,PLTR,CRWD,TSLA,SNOW,DDOG,PANW,ZS,TEAM,MRNA,REGN,VRTX,AMGN,GILD,BIIB,LLY,NVO,PFE,MRK"
             jq --arg tech "$TECH_LIST" --arg ts "$(date -u +%Y-%m-%dT%H:%M:%SZ)" '
               .fetched_at = $ts |
-              .metadata = "Tech Top gainers/losers — Big Tech / Chip / Memory (Alpha filtered)" |
+              .metadata = "Sector stocks — 6 sectors x 10 (Alpha filtered)" |
               (.top_gainers | map(select(.ticker as $t | ($tech | split(",")) | index($t)))) as $g |
               (.top_losers | map(select(.ticker as $t | ($tech | split(",")) | index($t)))) as $l |
               .top_gainers = $g |

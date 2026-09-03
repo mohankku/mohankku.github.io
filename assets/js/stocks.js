@@ -1,29 +1,38 @@
 /* Stock Dashboard — P0: honest live (no demo padding), persistent freshness, 1h poll, NYSE holidays */
 (function(){
-  // --- Mock fallback data (demo) ---
-  const gainersData = [
-    { sym: "NVDA", name: "NVIDIA Corp.", price: 182.45, chg: 7.82, pct: 4.48, vol: "42.1M" },
-    { sym: "META", name: "Meta Platforms", price: 612.33, chg: 18.21, pct: 3.07, vol: "18.4M" },
-    { sym: "AVGO", name: "Broadcom Inc.", price: 241.88, chg: 6.91, pct: 2.94, vol: "9.2M" },
-    { sym: "AMD", name: "Advanced Micro Devices", price: 178.22, chg: 4.83, pct: 2.79, vol: "31.7M" },
-    { sym: "MSFT", name: "Microsoft Corp.", price: 511.02, chg: 12.44, pct: 2.49, vol: "15.3M" },
-    { sym: "PLTR", name: "Palantir Tech", price: 44.91, chg: 1.05, pct: 2.40, vol: "28.5M" },
-    { sym: "CRWD", name: "CrowdStrike", price: 398.75, chg: 8.66, pct: 2.22, vol: "6.1M" },
-    { sym: "AAPL", name: "Apple Inc.", price: 228.14, chg: 4.81, pct: 2.15, vol: "22.9M" },
-    { sym: "ASML", name: "ASML Holding", price: 712.50, chg: 14.20, pct: 2.03, vol: "3.4M" },
-    { sym: "GOOGL", name: "Alphabet Inc.", price: 192.60, chg: 3.71, pct: 1.96, vol: "12.8M" }
-  ];
-  const losersData = [
-    { sym: "TSLA", name: "Tesla Inc.", price: 245.12, chg: -9.45, pct: -3.71, vol: "38.2M" },
-    { sym: "NKE", name: "Nike Inc.", price: 72.30, chg: -2.41, pct: -3.23, vol: "11.4M" },
-    { sym: "INTC", name: "Intel Corp.", price: 31.45, chg: -0.98, pct: -3.02, vol: "26.7M" },
-    { sym: "PFE", name: "Pfizer Inc.", price: 27.88, chg: -0.76, pct: -2.65, vol: "19.3M" },
-    { sym: "BA", name: "Boeing Co.", price: 168.40, chg: -4.55, pct: -2.63, vol: "8.9M" },
-    { sym: "DIS", name: "Walt Disney Co.", price: 112.05, chg: -2.88, pct: -2.51, vol: "10.2M" },
-    { sym: "PYPL", name: "PayPal Holdings", price: 68.22, chg: -1.74, pct: -2.49, vol: "9.8M" },
-    { sym: "SNAP", name: "Snap Inc.", price: 11.04, chg: -0.27, pct: -2.39, vol: "14.6M" },
-    { sym: "UBER", name: "Uber Technologies", price: 74.18, chg: -1.82, pct: -2.40, vol: "13.1M" },
-    { sym: "SHOP", name: "Shopify Inc.", price: 88.90, chg: -2.10, pct: -2.31, vol: "7.3M" }
+  // --- Mock fallback data (demo) — one entry per tracked ticker (60).
+  // Shown only when live data is off/unavailable; values jitter on each demo refresh.
+  const demoStocks = [
+    { sym: "AAPL", price: 228.14, pct: 2.15 }, { sym: "MSFT", price: 511.02, pct: 2.49 },
+    { sym: "GOOGL", price: 192.60, pct: 1.96 }, { sym: "META", price: 612.33, pct: 3.07 },
+    { sym: "AMZN", price: 224.50, pct: 1.42 }, { sym: "NFLX", price: 1180.00, pct: 1.85 },
+    { sym: "ADBE", price: 445.20, pct: -1.24 }, { sym: "CSCO", price: 68.40, pct: 0.86 },
+    { sym: "IBM", price: 256.30, pct: 0.64 }, { sym: "NOW", price: 890.50, pct: 2.66 },
+    { sym: "NVDA", price: 182.45, pct: 4.48 }, { sym: "AMD", price: 178.22, pct: 2.79 },
+    { sym: "AVGO", price: 241.88, pct: 2.94 }, { sym: "TSM", price: 268.40, pct: 1.73 },
+    { sym: "MU", price: 132.55, pct: 2.21 }, { sym: "INTC", price: 31.45, pct: -3.02 },
+    { sym: "ARM", price: 158.90, pct: 3.35 }, { sym: "SMCI", price: 42.18, pct: 5.12 },
+    { sym: "DELL", price: 118.64, pct: 1.28 }, { sym: "ON", price: 62.37, pct: -1.86 },
+    { sym: "ASML", price: 712.50, pct: 2.03 }, { sym: "LRCX", price: 98.45, pct: 1.67 },
+    { sym: "KLAC", price: 845.30, pct: 1.92 }, { sym: "AMAT", price: 178.90, pct: 2.38 },
+    { sym: "ENTG", price: 102.44, pct: 1.15 }, { sym: "TER", price: 118.72, pct: -0.94 },
+    { sym: "SNPS", price: 512.60, pct: 1.48 }, { sym: "CDNS", price: 298.35, pct: 1.76 },
+    { sym: "COHR", price: 88.20, pct: 2.84 }, { sym: "MKSI", price: 118.05, pct: -1.32 },
+    { sym: "QCOM", price: 168.22, pct: 1.54 }, { sym: "TXN", price: 198.40, pct: 0.72 },
+    { sym: "NXPI", price: 228.15, pct: -0.88 }, { sym: "MRVL", price: 78.44, pct: 2.47 },
+    { sym: "ANET", price: 132.68, pct: 3.18 }, { sym: "CIEN", price: 68.92, pct: 1.93 },
+    { sym: "CRDO", price: 165.22, pct: 2.31 }, { sym: "LITE", price: 870.58, pct: 0.19 },
+    { sym: "FFIV", price: 285.40, pct: 0.98 }, { sym: "EXTR", price: 18.64, pct: 1.36 },
+    { sym: "ORCL", price: 158.30, pct: 1.62 }, { sym: "CRM", price: 332.45, pct: 1.18 },
+    { sym: "PLTR", price: 44.91, pct: 2.40 }, { sym: "CRWD", price: 398.75, pct: 2.22 },
+    { sym: "TSLA", price: 245.12, pct: -3.71 }, { sym: "SNOW", price: 212.80, pct: 3.44 },
+    { sym: "DDOG", price: 128.56, pct: 2.05 }, { sym: "PANW", price: 198.33, pct: 1.87 },
+    { sym: "ZS", price: 228.90, pct: -1.58 }, { sym: "TEAM", price: 188.42, pct: 1.09 },
+    { sym: "MRNA", price: 42.18, pct: -2.36 }, { sym: "REGN", price: 712.40, pct: 0.94 },
+    { sym: "VRTX", price: 468.25, pct: 1.27 }, { sym: "AMGN", price: 298.60, pct: 0.68 },
+    { sym: "GILD", price: 118.44, pct: 1.43 }, { sym: "BIIB", price: 198.72, pct: -0.76 },
+    { sym: "LLY", price: 782.50, pct: 1.95 }, { sym: "NVO", price: 52.38, pct: 1.12 },
+    { sym: "PFE", price: 27.88, pct: -2.65 }, { sym: "MRK", price: 88.64, pct: -0.92 }
   ];
   const watchData = [
     { sym: "AVGO", sector: "AI Semiconductors", reason: "Custom AI silicon + VMware leverage; strong NPU adjacency.", risk: "Medium", action: "Watch" },
@@ -37,27 +46,26 @@
     { sym: "Quantum (IONQ, RGTI)", sector: "Quantum Computing", reason: "High-risk, high-upside; track milestones not hype.", risk: "High", action: "Track" },
     { sym: "MSFT / GOOGL", sector: "Hyperscale AI", reason: "Cash-flow + AI infra monetization.", risk: "Low", action: "Core" }
   ];
-  const techSymbols = [
-    "AAPL","MSFT","GOOGL","META","AMZN","NVDA","AMD","AVGO","ASML","INTC","TSM","MU","QCOM","TXN","NXPI","MRVL","LRCX","KLAC","AMAT","TSLA","ORCL","CRM","PLTR","CRWD",
-    "MRNA","REGN","VRTX","AMGN","GILD","BIIB"
-  ];
-  // P2 sectors — top 3 per sector (6 sectors, 30 tickers)
+  // Sectors — top 3 collapsed, up to 10 expanded (6 sectors x 10 tickers)
   const SECTORS = [
-    { id: "bigtech",  name: "Big Tech",        symbols: ["AAPL","MSFT","GOOGL","META","AMZN"] },
-    { id: "aichips",  name: "AI Chips",        symbols: ["NVDA","AMD","AVGO","TSM","MU","INTC"] },
-    { id: "equipment",name: "Equipment",       symbols: ["ASML","LRCX","KLAC","AMAT"] },
-    { id: "connect",  name: "Connectivity",    symbols: ["QCOM","TXN","NXPI","MRVL"] },
-    { id: "software", name: "Software & Cloud",symbols: ["ORCL","CRM","PLTR","CRWD","TSLA"] },
-    { id: "biotech",  name: "Biotech",         symbols: ["MRNA","REGN","VRTX","AMGN","GILD","BIIB"] }
+    { id: "bigtech",  name: "Big Tech",        symbols: ["AAPL","MSFT","GOOGL","META","AMZN","NFLX","ADBE","CSCO","IBM","NOW"] },
+    { id: "aichips",  name: "AI Chips",        symbols: ["NVDA","AMD","AVGO","TSM","MU","INTC","ARM","SMCI","DELL","ON"] },
+    { id: "equipment",name: "Equipment",       symbols: ["ASML","LRCX","KLAC","AMAT","ENTG","TER","SNPS","CDNS","COHR","MKSI"] },
+    { id: "connect",  name: "Connectivity",    symbols: ["QCOM","TXN","NXPI","MRVL","ANET","CIEN","CRDO","LITE","FFIV","EXTR"] },
+    { id: "software", name: "Software & Cloud",symbols: ["ORCL","CRM","PLTR","CRWD","TSLA","SNOW","DDOG","PANW","ZS","TEAM"] },
+    { id: "biotech",  name: "Biotech",         symbols: ["MRNA","REGN","VRTX","AMGN","GILD","BIIB","LLY","NVO","PFE","MRK"] }
   ];
+  // full tracked universe, derived from SECTORS so the two can't drift apart
+  const techSymbols = SECTORS.reduce(function(acc, s){ return acc.concat(s.symbols); }, []);
 
-  // current displayed data (mutated on refresh so sort operates on live data)
-  let currentGainers = [...gainersData];
-  let currentLosers = [...losersData];
+  // last rendered sector rows (used for CSV export)
+  let lastSectorRows = [];
+  // per-sector expand: collapsed shows top 3, expanded shows up to 10
+  const SECTOR_COLLAPSED = 3;
+  const SECTOR_EXPANDED = 10;
+  const sectorExpanded = new Set();
+  let lastSectorInput = [];
 
-  // P2: momentum bar calibrated to 0-8% -> 0-100% (was pct*18+40, clipped weirdly)
-  const MOMENTUM_MAX = 8;
-  function barWidth(pct){ return Math.min(100, Math.max(6, Math.abs(Number(pct))/MOMENTUM_MAX*100)); }
   function yahooLink(sym){
     const clean = String(sym).split('/')[0].split(' ')[0].replace(/[^A-Z]/g,'');
     if(!clean || clean.length<1 || clean.length>5) return null;
@@ -72,60 +80,7 @@
     }
     return `${label}${sub}`;
   }
-  function updateCountBadges(){
-    const cg = document.getElementById("count-gainers");
-    const cl = document.getElementById("count-losers");
-    if(cg) cg.textContent = currentGainers.length ? `${currentGainers.length} live` : "0 today";
-    if(cl) cl.textContent = currentLosers.length ? `${currentLosers.length} live` : "0 today";
-  }
-  function renderGainers(data){
-    currentGainers = [...data];
-    const tbody = document.querySelector("#table-gainers tbody");
-    if(!tbody) return;
-    if(!data || data.length===0){
-      tbody.innerHTML = `<tr class="empty-row"><td colspan="6" style="text-align:center; padding:18px; color:#6b7a8a;">No tech gainers right now — all 24 tracked names in red. Showing 0 of 10.</td></tr>`;
-      updateCountBadges();
-      return;
-    }
-    tbody.innerHTML = data.map((r,i)=> `
-      <tr>
-        <td><span class="rank">${i+1}</span></td>
-        <td>${symCell(r.sym, r.name||r.sym)}</td>
-        <td class="price">$${Number(r.price).toFixed(2)}</td>
-        <td style="color:#6b7a8a;">${r.vol}</td>
-        <td><span class="pill pill-up"><i class="fa-solid fa-caret-up"></i> +${Number(r.pct).toFixed(2)}% • +$${Number(r.chg).toFixed(2)}</span></td>
-        <td><span class="mini-bar bar-green"><span style="width:${barWidth(r.pct)}%"></span></span> <span class="chg-pos" style="margin-left:6px;">+${Number(r.pct).toFixed(2)}%</span></td>
-      </tr>
-    `).join("");
-    if(data.length<10){
-      tbody.insertAdjacentHTML('beforeend', `<tr class="empty-hint"><td colspan="6" style="text-align:center; padding:10px; font-size:11px; color:#98a2b3; background:#fafbfc;">${data.length} live gainers • ${10-data.length} slots empty (not padded with demo)</td></tr>`);
-    }
-    updateCountBadges();
-  }
-  function renderLosers(data){
-    currentLosers = [...data];
-    const tbody = document.querySelector("#table-losers tbody");
-    if(!tbody) return;
-    if(!data || data.length===0){
-      tbody.innerHTML = `<tr class="empty-row"><td colspan="6" style="text-align:center; padding:18px; color:#6b7a8a;">No tech losers — all green today.</td></tr>`;
-      updateCountBadges();
-      return;
-    }
-    tbody.innerHTML = data.map((r,i)=> `
-      <tr>
-        <td><span class="rank">${i+1}</span></td>
-        <td>${symCell(r.sym, r.name||r.sym)}</td>
-        <td class="price">$${Number(r.price).toFixed(2)}</td>
-        <td style="color:#6b7a8a;">${r.vol}</td>
-        <td><span class="pill pill-down"><i class="fa-solid fa-caret-down"></i> ${Number(r.pct).toFixed(2)}% • -$${Math.abs(Number(r.chg)).toFixed(2)}</span></td>
-        <td><span class="mini-bar bar-red"><span style="width:${barWidth(r.pct)}%"></span></span> <span class="chg-neg" style="margin-left:6px;">${Number(r.pct).toFixed(2)}%</span></td>
-      </tr>
-    `).join("");
-    if(data.length<10){
-      tbody.insertAdjacentHTML('beforeend', `<tr class="empty-hint"><td colspan="6" style="text-align:center; padding:10px; font-size:11px; color:#98a2b3; background:#fafbfc;">${data.length} live losers</td></tr>`);
-    }
-    updateCountBadges();
-  }
+  // Top 10 gainers/losers tables removed — sectors + watchlist only.
   // P2: live watchlist — merge live prices for single-ticker watch entries
   let livePriceMap = new Map(); // ticker -> {price, pct, chg}
   function renderWatch(data){
@@ -148,29 +103,30 @@
     }).join("");
   }
   function showSkeleton(){
-    ["table-gainers","table-losers"].forEach(id=>{
-      const tb = document.querySelector(`#${id} tbody`);
-      if(!tb) return;
-      tb.innerHTML = `<tr class="skeleton"><td colspan="6" style="padding:14px;">Loading live data…</td></tr>`.repeat(3);
-    });
     SECTORS.forEach(s=>{
       const tb = document.querySelector(`#table-sector-${s.id} tbody`);
       if(tb) tb.innerHTML = `<tr class="skeleton"><td colspan="4" style="padding:10px;">Loading…</td></tr>`.repeat(2);
     });
   }
   function renderSectors(allRows){
-    // allRows: mapped rows {sym, price, pct, chg, vol} for all tech (from tech_all or g+l)
+    // allRows: mapped rows {sym, price, pct, chg, vol} for all tech (from live tech_all)
     const bySym = new Map(allRows.map(r=>[r.sym, r]));
+    lastSectorRows = [];
+    lastSectorInput = [...allRows];
+    const sectorCounts = {};
     SECTORS.forEach(sec=>{
       const tbody = document.querySelector(`#table-sector-${sec.id} tbody`);
       if(!tbody) return;
-      const rows = sec.symbols.map(sym=> bySym.get(sym)).filter(Boolean)
-        .sort((a,b)=> b.pct - a.pct)
-        .slice(0,3);
+      const ranked = sec.symbols.map(sym=> bySym.get(sym)).filter(Boolean)
+        .sort((a,b)=> b.pct - a.pct);
+      sectorCounts[sec.id] = ranked.length;
+      const limit = sectorExpanded.has(sec.id) ? SECTOR_EXPANDED : SECTOR_COLLAPSED;
+      const rows = ranked.slice(0, limit);
       if(rows.length===0){
         tbody.innerHTML = `<tr class="empty-row"><td colspan="4" style="text-align:center; padding:12px; color:#6b7a8a;">No data</td></tr>`;
         return;
       }
+      rows.forEach((r,i)=> lastSectorRows.push({ sector: sec.name, rank: i+1, sym: r.sym, price: r.price, pct: r.pct }));
       tbody.innerHTML = rows.map((r,i)=>{
         const isUp = r.pct >= 0;
         const pill = isUp ? `pill-up` : `pill-down`;
@@ -183,6 +139,26 @@
           <td><span class="pill ${pill}"><i class="fa-solid ${icon}"></i> ${sign}${Number(r.pct).toFixed(2)}%</span></td>
         </tr>`;
       }).join("");
+    });
+    updateSectorToggles(sectorCounts);
+  }
+  function updateSectorToggles(counts){
+    SECTORS.forEach(sec=>{
+      const btn = document.querySelector(`.sector-toggle[data-sector="${sec.id}"]`);
+      const range = document.querySelector(`.sector-range[data-range="${sec.id}"]`);
+      const total = counts ? (counts[sec.id] || 0) : 0;
+      const expanded = sectorExpanded.has(sec.id);
+      if(range) range.textContent = total <= SECTOR_COLLAPSED
+        ? (total > 0 ? `Top ${total} by % change in sector` : `No data`)
+        : (expanded ? `Top ${Math.min(total, SECTOR_EXPANDED)} of ${total} in sector` : `Top ${SECTOR_COLLAPSED} of ${total} in sector`);
+      if(!btn) return;
+      if(total <= SECTOR_COLLAPSED){
+        btn.hidden = true;
+        return;
+      }
+      btn.hidden = false;
+      btn.setAttribute("aria-expanded", expanded ? "true" : "false");
+      btn.textContent = expanded ? `Show top ${SECTOR_COLLAPSED} ▴` : `Show all ${Math.min(total, SECTOR_EXPANDED)} ▾`;
     });
   }
   function filterTable(inputId, tableId){
@@ -354,9 +330,6 @@
     if(n>=1e3) return (n/1e3).toFixed(1)+"K";
     return n.toLocaleString();
   }
-  function mapAlphaRow(r){
-    return { sym: r.ticker, name: r.ticker, price: parseFloat(r.price), chg: parseFloat(r.change_amount), pct: parseFloat(String(r.change_percentage).replace("%","").replace("+","")), vol: formatVol(r.volume) };
-  }
   function getLiveUrl(){
     const dash = document.getElementById("stock-dashboard");
     if(dash && dash.dataset.liveUrl) return dash.dataset.liveUrl;
@@ -421,9 +394,7 @@
       const j = await fetchLocalLive();
       lastFetchedAt = j.fetched_at || j.last_updated || null;
       const techSet = new Set(techSymbols);
-      let g = j.top_gainers.filter(r=> techSet.has(r.ticker)).slice(0,10).map(mapAlphaRow);
-      let l = j.top_losers.filter(r=> techSet.has(r.ticker)).slice(0,10).map(mapAlphaRow);
-      // build live price map for watchlist + sectors (prefer tech_all with full 24)
+      // build live price map for watchlist + sectors (prefer tech_all with full 60)
       const allRaw = j.tech_all && Array.isArray(j.tech_all) && j.tech_all.length ? j.tech_all : [...j.top_gainers, ...j.top_losers];
       livePriceMap = new Map();
       allRaw.forEach(r=>{
@@ -431,18 +402,12 @@
           livePriceMap.set(r.ticker, { price: parseFloat(r.price), pct: parseFloat(String(r.change_percentage).replace("%","").replace("+","")), chg: parseFloat(r.change_amount) });
         }
       });
-      const allRows = [...livePriceMap.entries()].map(([sym, v])=> ({ sym, price: v.price, pct: v.pct, chg: v.chg, vol: v.vol || "—" }));
-      // also ensure mapped g/l have vol formatted; allRows currently missing vol — patch from raw
+      // patch formatted volume onto live entries, then build sector rows
       allRaw.forEach(r=>{ const m=livePriceMap.get(r.ticker); if(m) m.vol = formatVol(r.volume); });
-      // fix allRows vol after patch
       const allRowsFixed = [...livePriceMap.entries()].map(([sym, v])=> ({ sym, price: v.price, pct: v.pct, chg: v.chg, vol: v.vol }));
 
-      renderGainers(g);
-      renderLosers(l);
-      renderSectors(allRowsFixed.length ? allRowsFixed : [...g, ...l]);
+      renderSectors(allRowsFixed);
       renderWatch(watchData);
-      filterTable("search-gainers","table-gainers");
-      filterTable("search-losers","table-losers");
       filterTable("search-watch","table-watch");
       updateLiveFreshness();
       setUpdated();
@@ -451,8 +416,8 @@
       console.warn("Cached not available", e.message);
       showLiveError("Live unavailable — showing demo • "+e.message);
       shuffleTick();
-      // demo sectors from gainersData/losersData
-      const demoAll = [...gainersData, ...losersData].map(r=> ({ sym: r.sym, price: r.price, pct: r.pct, chg: r.chg, vol: r.vol }));
+      // demo sectors from the full demo pool
+      const demoAll = demoStocks.map(r=> ({ sym: r.sym, price: r.price, pct: r.pct, chg: 0, vol: "—" }));
       renderSectors(demoAll);
       livePriceMap = new Map();
       renderWatch(watchData);
@@ -463,90 +428,45 @@
   }
 
   function shuffleTick(){
-    function jitter(arr, isGain){
-      return arr.map(r=>{
-        const delta = (Math.random()-0.5)*0.6;
-        let npct = r.pct + delta;
-        if(isGain) npct = Math.max(0.5, npct);
-        else npct = Math.min(-0.5, npct);
-        const nchg = r.price * (npct/100) * 0.25;
-        return { ...r, pct: Number(npct.toFixed(2)), price: Number((r.price + (Math.random()-0.5)*1.2).toFixed(2)), chg: Number(nchg.toFixed(2)) };
-      }).sort((a,b)=> isGain ? b.pct - a.pct : a.pct - b.pct);
-    }
-    const ng = jitter(gainersData, true);
-    const nl = jitter(losersData, false);
-    renderGainers(ng);
-    renderLosers(nl);
-    filterTable("search-gainers","table-gainers");
-    filterTable("search-losers","table-losers");
+    // jitter the demo pool, keeping each ticker on its side of zero
+    const j = demoStocks.map(r=>{
+      const delta = (Math.random()-0.5)*0.6;
+      let npct = r.pct + delta;
+      npct = r.pct >= 0 ? Math.max(0.5, npct) : Math.min(-0.5, npct);
+      const nprice = r.price + (Math.random()-0.5)*r.price*0.005;
+      return { sym: r.sym, price: Number(nprice.toFixed(2)), pct: Number(npct.toFixed(2)), chg: 0, vol: "—" };
+    });
+    renderSectors(j);
   }
 
   // initial render
-  renderGainers(gainersData);
-  renderLosers(losersData);
-  renderSectors([...gainersData, ...losersData].map(r=> ({ sym: r.sym, price: r.price, pct: r.pct, chg: r.chg, vol: r.vol })));
+  renderSectors(demoStocks.map(r=> ({ sym: r.sym, price: r.price, pct: r.pct, chg: 0, vol: "—" })));
   renderWatch(watchData);
   setUpdated();
   updateMarketPill();
   // try cached immediately (respects live toggle)
   tryCachedTech();
 
+  // per-sector expand toggles
+  document.querySelectorAll(".sector-toggle").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      const id = btn.dataset.sector;
+      if(!id) return;
+      if(sectorExpanded.has(id)) sectorExpanded.delete(id);
+      else sectorExpanded.add(id);
+      renderSectors(lastSectorInput);
+    });
+  });
   // search listeners
-  ["search-gainers","search-losers","search-watch"].forEach(id=>{
+  ["search-watch"].forEach(id=>{
     const el = document.getElementById(id);
     if(!el) return;
     el.addEventListener("input", ()=>{
-      const tableMap = { "search-gainers":"table-gainers", "search-losers":"table-losers", "search-watch":"table-watch" };
+      const tableMap = { "search-watch":"table-watch" };
       filterTable(id, tableMap[id]);
     });
   });
-  // sortable — per-column dir, sort current live data, visual arrows via CSS
-  function parseVolNum(s){
-    if(!s || s==="—") return -1;
-    const t = String(s).trim().toUpperCase();
-    if(t.endsWith('B')) return parseFloat(t)*1e9;
-    if(t.endsWith('M')) return parseFloat(t)*1e6;
-    if(t.endsWith('K')) return parseFloat(t)*1e3;
-    return Number(String(s).replace(/,/g,"")) || 0;
-  }
-  function makeSortable(tableId){
-    const table = document.getElementById(tableId);
-    if(!table) return;
-    const ths = table.querySelectorAll("th");
-    const dirs = new Map(); // col idx -> 1/-1
-    ths.forEach((th, idx)=>{
-      // sortable: Symbol(1), Price(2), Volume(3), Change(4), Momentum(5)
-      const sortable = (idx===1 || idx===2 || idx===3 || idx===4 || idx===5);
-      if(!sortable) return;
-      th.style.cursor = "pointer";
-      th.title = "Click to sort";
-      th.setAttribute("aria-sort","none");
-      th.setAttribute("role","columnheader");
-      th.setAttribute("tabindex","0");
-      th.setAttribute("aria-label", th.textContent.trim()+" sortable");
-      function doSort(){
-        const cur = dirs.get(idx) || 1;
-        const next = cur * -1;
-        dirs.set(idx, next);
-        ths.forEach((o,i)=>{ if(i!==idx) o.setAttribute("aria-sort","none"); });
-        th.setAttribute("aria-sort", next===1 ? "ascending" : "descending");
-        const isGainers = tableId==="table-gainers";
-        const src = isGainers ? currentGainers : currentLosers;
-        let sorted = [...src];
-        if(idx===1) sorted.sort((a,b)=> next*a.sym.localeCompare(b.sym));
-        else if(idx===2) sorted.sort((a,b)=> next*(a.price-b.price));
-        else if(idx===3) sorted.sort((a,b)=> next*(parseVolNum(a.vol)-parseVolNum(b.vol)));
-        else if(idx===4 || idx===5) sorted.sort((a,b)=> next*(a.pct-b.pct));
-        if(isGainers) renderGainers(sorted);
-        else renderLosers(sorted);
-        filterTable(isGainers ? "search-gainers" : "search-losers", tableId);
-      }
-      th.addEventListener("click", doSort);
-      th.addEventListener("keydown", (e)=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); doSort(); }});
-    });
-  }
-  makeSortable("table-gainers");
-  makeSortable("table-losers");
+  // Column sorting retired with the Top 10 tables — sector tables are pre-sorted by % change.
 
   // refresh / auto — hourly poll (matches GitHub Action), trading-hours aware
   const POLL_SEC = 3600;
@@ -611,10 +531,9 @@
   }
   if(btnExport){
     btnExport.addEventListener("click", ()=>{
-      const header = ["type","rank","symbol","price","volume","change_pct","change_amt"];
+      const header = ["sector","rank","symbol","price","change_pct"];
       const rows = [];
-      currentGainers.forEach((r,i)=> rows.push(["gainer", i+1, r.sym, r.price, r.vol, r.pct, r.chg]));
-      currentLosers.forEach((r,i)=> rows.push(["loser", i+1, r.sym, r.price, r.vol, r.pct, r.chg]));
+      lastSectorRows.forEach(r=> rows.push([r.sector, r.rank, r.sym, r.price, r.pct]));
       const csv = toCsv(rows, header);
       const blob = new Blob([csv], {type:"text/csv"});
       const url = URL.createObjectURL(blob);
@@ -653,7 +572,7 @@
     }
     if(params.get("q")){
       const q = params.get("q");
-      ["search-gainers","search-losers","search-watch"].forEach(id=>{
+      ["search-watch"].forEach(id=>{
         const el=document.getElementById(id);
         if(el){ el.value=q; }
       });
