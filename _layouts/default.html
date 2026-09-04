@@ -123,8 +123,8 @@
           rootMargin: "0px 0px -50px 0px"
         });
 
-        // Target all section paragraphs, headers, and list items
-        const elementsToAnimate = document.querySelectorAll('section > p, section > h2, section > ul > li, .experience-list li');
+        // Target all section paragraphs, headers, and cards
+        const elementsToAnimate = document.querySelectorAll('section > p, section > h2, section > ul > li, .experience-list li, .hero-banner, .research-card, .pub-card, .timeline-card');
         elementsToAnimate.forEach(el => observer.observe(el));
         
         // Back to top button functionality
@@ -170,6 +170,61 @@
 
         sectionHeaders.forEach(sec => {
           if (sec.id) tocObserver.observe(sec);
+        });
+
+        // Publications Filter Handler
+        const filterBtns = document.querySelectorAll('.pub-filter-btn');
+        const pubCards = document.querySelectorAll('.pub-card');
+
+        filterBtns.forEach(btn => {
+          btn.addEventListener('click', () => {
+            filterBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            const filter = btn.getAttribute('data-filter');
+
+            pubCards.forEach(card => {
+              const categories = (card.getAttribute('data-category') || '').split(' ');
+              if (filter === 'all' || categories.includes(filter)) {
+                card.style.display = '';
+              } else {
+                card.style.display = 'none';
+              }
+            });
+          });
+        });
+
+        // BibTeX Toggle & Copy Handler
+        document.addEventListener('click', (e) => {
+          // Toggle BibTeX drawer
+          const toggleBtn = e.target.closest('.pub-toggle-bibtex');
+          if (toggleBtn) {
+            const card = toggleBtn.closest('.pub-card');
+            if (card) {
+              const bibBox = card.querySelector('.pub-bibtex-box');
+              if (bibBox) {
+                const isOpen = bibBox.classList.toggle('open');
+                toggleBtn.setAttribute('aria-expanded', isOpen);
+              }
+            }
+            return;
+          }
+
+          // Copy BibTeX content
+          const copyBtn = e.target.closest('.pub-copy-btn');
+          if (copyBtn) {
+            const pre = copyBtn.parentElement.querySelector('pre');
+            if (pre) {
+              navigator.clipboard.writeText(pre.innerText.trim()).then(() => {
+                const origHtml = copyBtn.innerHTML;
+                copyBtn.innerHTML = '<i class="fa-solid fa-check"></i> Copied!';
+                copyBtn.classList.add('copied');
+                setTimeout(() => {
+                  copyBtn.innerHTML = origHtml;
+                  copyBtn.classList.remove('copied');
+                }, 2000);
+              });
+            }
+          }
         });
 
         // Terminal Logic
