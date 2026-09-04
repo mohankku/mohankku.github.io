@@ -104,6 +104,22 @@ title: Home
   </div>
 </div>
 
+<h2 id="service">Professional Service & Engagement</h2>
+
+<div class="service-grid">
+  <div class="service-card">
+    <div class="service-badge"><i class="fa-solid fa-check-to-slot"></i> Program Committee</div>
+    <div class="service-venue"><a href="https://mlsys26.hotcrp.com/users/pc" target="_blank" rel="noopener">MLSys 2026 <i class="fa-solid fa-arrow-up-right-from-square" style="font-size: 13px; margin-left: 4px;"></i></a></div>
+    <p class="service-desc">Conference on Machine Learning and Systems</p>
+  </div>
+
+  <div class="service-card">
+    <div class="service-badge"><i class="fa-solid fa-check-to-slot"></i> Program Committee</div>
+    <div class="service-venue"><a href="https://www.usenix.org/conference/atc20#organizers" target="_blank" rel="noopener">USENIX ATC 2020 <i class="fa-solid fa-arrow-up-right-from-square" style="font-size: 13px; margin-left: 4px;"></i></a></div>
+    <p class="service-desc">USENIX Annual Technical Conference</p>
+  </div>
+</div>
+
 <h2 id="publications">Publications</h2>
 
 <div class="pub-filter-bar">
