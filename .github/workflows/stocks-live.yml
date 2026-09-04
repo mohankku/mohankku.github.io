@@ -25,6 +25,12 @@ jobs:
           TWELVEDATA_API_KEY: ${{ secrets.TWELVEDATA_API_KEY }}
         run: |
           mkdir -p assets
+          # Skip NYSE holidays (schedule covers Mon-Fri only; holidays would burn fetches)
+          ET_D=$(TZ='America/New_York' date +%F)
+          case "$ET_D" in
+            2026-09-07|2026-11-26|2026-12-25|2027-01-01|2027-01-18|2027-02-15|2027-04-02|2027-05-31|2027-06-18|2027-07-05|2027-09-06|2027-11-25|2027-12-24)
+              echo "NYSE holiday ($ET_D), skipping fetch"; exit 0;;
+          esac
           TECH_SYMS="AAPL,MSFT,GOOGL,META,AMZN,NFLX,ADBE,CSCO,IBM,NOW,NVDA,AMD,AVGO,TSM,MU,INTC,ARM,SMCI,DELL,ON,ASML,LRCX,KLAC,AMAT,ENTG,TER,SNPS,CDNS,COHR,MKSI,QCOM,TXN,NXPI,MRVL,ANET,CIEN,CRDO,LITE,FFIV,EXTR,ORCL,CRM,PLTR,CRWD,TSLA,SNOW,DDOG,PANW,ZS,TEAM,MRNA,REGN,VRTX,AMGN,GILD,BIIB,LLY,NVO,PFE,MRK"
           fetched=false
 
@@ -40,7 +46,8 @@ jobs:
                 chg=$(jq -r '.change' /tmp/q.json)
                 pct=$(jq -r '.percent_change' /tmp/q.json)
                 vol=$(jq -r '.volume' /tmp/q.json)
-                jq --arg t "$sym" --arg p "$price" --arg c "$chg" --arg pc "$pct" --arg v "$vol" '. + [{ticker:$t, price:$p, change_amount:$c, change_percentage:($pc+"%"), volume:$v}]' /tmp/tech.json > /tmp/tech2.json && mv /tmp/tech2.json /tmp/tech.json
+                mc=$(jq -r '.market_cap // 0' /tmp/q.json)
+                jq --arg t "$sym" --arg p "$price" --arg c "$chg" --arg pc "$pct" --arg v "$vol" --argjson mc "$mc" '. + [{ticker:$t, price:$p, change_amount:$c, change_percentage:($pc+"%"), volume:$v, market_cap:$mc}]' /tmp/tech.json > /tmp/tech2.json && mv /tmp/tech2.json /tmp/tech.json
                 echo "Fetched $sym $price $pc%"
               else
                 echo "Failed $sym: $(cat /tmp/q.json | head -c 200)"
@@ -62,9 +69,9 @@ jobs:
           if [ "$fetched" = false ]; then
             echo "Trying Yahoo Finance for 60 symbols (no key needed)..."
             python3 << 'PY'
-          import json, urllib.request, time
+          import json, urllib.request, time, os, sys
           syms = "AAPL,MSFT,GOOGL,META,AMZN,NFLX,ADBE,CSCO,IBM,NOW,NVDA,AMD,AVGO,TSM,MU,INTC,ARM,SMCI,DELL,ON,ASML,LRCX,KLAC,AMAT,ENTG,TER,SNPS,CDNS,COHR,MKSI,QCOM,TXN,NXPI,MRVL,ANET,CIEN,CRDO,LITE,FFIV,EXTR,ORCL,CRM,PLTR,CRWD,TSLA,SNOW,DDOG,PANW,ZS,TEAM,MRNA,REGN,VRTX,AMGN,GILD,BIIB,LLY,NVO,PFE,MRK".split(",")
-          results=[]
+          results=[]; dropped=[]
           for sym in syms:
               url = f'https://query1.finance.yahoo.com/v8/finance/chart/{sym}?interval=1d&range=1d'
               try:
@@ -72,17 +79,29 @@ jobs:
                   with urllib.request.urlopen(req, timeout=10) as r:
                       data=json.load(r)
                       meta=data['chart']['result'][0]['meta']
-                      price=meta['regularMarketPrice']
-                      prev=meta['chartPreviousClose']
+                      price=float(meta['regularMarketPrice'])
+                      prev=float(meta['chartPreviousClose'])
+                      if price<=0 or prev<=0:
+                          raise ValueError(f"non-positive price {price}/{prev}")
                       chg=price-prev
-                      pct=(chg/prev*100) if prev else 0
+                      pct=(chg/prev*100)
+                      if abs(pct) > 50:
+                          # Almost certainly a bad quote (bad tick, split, corrupt meta) — drop the symbol, keep the batch
+                          dropped.append(sym)
+                          print(f"Yahoo outlier {sym} {price} {pct:.2f}% — dropped")
+                          continue
                       vol=str(meta.get('regularMarketVolume',0))
-                      results.append({"ticker":sym,"price":f"{price:.2f}","change_amount":f"{chg:.2f}","change_percentage":f"{pct:.4f}%","volume":vol})
-                      print(f"Yahoo {sym} {price} {pct:.2f}%")
+                      try:
+                          mcap=int(meta.get('marketCap') or 0)
+                      except (TypeError, ValueError):
+                          mcap=0
+                      results.append({"ticker":sym,"price":f"{price:.2f}","change_amount":f"{chg:.2f}","change_percentage":f"{pct:.4f}%","volume":vol,"market_cap":mcap})
+                      print(f"Yahoo {sym} {price} {pct:.2f}% mcap={mcap}")
               except Exception as e:
                   print(f"Yahoo failed {sym}: {e}")
               time.sleep(0.3)
-          if len(results) >= 5:
+          MIN_OK=45
+          if len(results) >= MIN_OK:
               pos = sorted([r for r in results if float(r['change_percentage'].replace('%',''))>0], key=lambda x: float(x['change_percentage'].replace('%','')), reverse=True)
               neg = sorted([r for r in results if float(r['change_percentage'].replace('%',''))<0], key=lambda x: float(x['change_percentage'].replace('%','')))
               all_sorted = sorted(results, key=lambda x: float(x['change_percentage'].replace('%','')), reverse=True)
@@ -92,12 +111,36 @@ jobs:
               now_et = datetime.datetime.now(tz).strftime("%Y-%m-%d %H:%M:%S US/Eastern")
               out={"metadata":"Sector stocks — 6 sectors x 10","last_updated":now_et,"fetched_at":now_utc,"top_gainers":pos[:12],"top_losers":neg[:12],"tech_all":all_sorted}
               open("assets/stocks-live.json","w").write(json.dumps(out, indent=2))
-              print(f"Yahoo wrote {len(pos)} gainers {len(neg)} losers all {len(all_sorted)}")
+              print(f"Yahoo wrote {len(pos)} gainers {len(neg)} losers all {len(all_sorted)} (dropped outliers: {dropped or 'none'})")
+              # Rolling price history for sparklines (bounded: last 40 points per ticker ≈ 5 trading days)
+              hist_path="assets/stocks-history.json"
+              hist={}
+              if os.path.exists(hist_path):
+                  try:
+                      hist=json.load(open(hist_path))
+                      if not isinstance(hist.get("points"), dict):
+                          hist={}
+                  except Exception as e:
+                      print(f"History unreadable, starting fresh: {e}")
+                      hist={}
+              pts=hist.get("points",{})
+              for r in all_sorted:
+                  try:
+                      px=float(r["price"])
+                  except (TypeError, ValueError):
+                      continue
+                  seq=pts.get(r["ticker"],[])
+                  if not seq or seq[-1]!=px:
+                      seq.append(px)
+                  pts[r["ticker"]]=seq[-40:]
+              hist={"updated":now_utc,"points":pts}
+              open(hist_path,"w").write(json.dumps(hist))
+              print(f"History updated: {len(pts)} tickers")
           else:
-              print(f"Yahoo insufficient {len(results)} results")
-              import sys; sys.exit(1)
+              print(f"Yahoo insufficient {len(results)} results (< {MIN_OK}), keeping existing file")
+              sys.exit(1)
           PY
-            if [ $? -eq 0 ] && [ -f assets/stocks-live.json ] && [ "$(jq '.top_gainers|length + .top_losers|length' assets/stocks-live.json)" -ge 5 ]; then
+            if [ $? -eq 0 ] && [ -f assets/stocks-live.json ] && [ "$(jq '(.top_gainers|length) + (.top_losers|length)' assets/stocks-live.json)" -ge 5 ]; then
               echo "Yahoo succeeded: $(jq '.top_gainers|length' assets/stocks-live.json) gainers, $(jq '.top_losers|length' assets/stocks-live.json) losers"
               fetched=true
             else
@@ -147,6 +190,7 @@ jobs:
             git config user.name "github-actions[bot]"
             git config user.email "github-actions[bot]@users.noreply.github.com"
             git add assets/stocks-live.json
+            [ -f assets/stocks-history.json ] && git add assets/stocks-history.json
             git diff --staged --quiet || git commit -m "chore: update stocks live data [skip ci]"
             git push || echo "nothing to push or push failed"
           fi

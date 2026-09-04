@@ -105,14 +105,14 @@
   outline: none;
 }
 .live-bar input:focus { border-color: #4ecdc4; box-shadow: 0 0 0 3px rgba(78,205,196,0.15); }
-.live-toggle {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-weight: 600;
+.mcap, .vol {
+  font-variant-numeric: tabular-nums;
   color: #344054;
+  font-size: 12px;
+  white-space: nowrap;
 }
-.live-toggle input { accent-color: #0a7a4b; }
+canvas.spark { display: block; }
+.stock-table th[data-sort]:hover { color: #0f2027; }
 .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
 .dot-green { background: #12b981; box-shadow: 0 0 6px rgba(18,185,129,0.6); }
 .dot-red { background: #f2554d; }
@@ -336,7 +336,7 @@
 }
 .btn-active { background: #4ecdc4 !important; color: #0f2027 !important; border-color: transparent !important; }
 @media (max-width: 600px) {
-  .stock-table th:nth-child(4), .stock-table td:nth-child(4) { display: none; }
+  .sector-card .stock-table th:nth-child(n+5), .sector-card .stock-table td:nth-child(n+5) { display: none; }
   .search-input { width: 120px; }
   .live-bar input { width: 140px; }
 }
