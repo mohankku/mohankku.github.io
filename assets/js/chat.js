@@ -4,7 +4,25 @@
   var DEFAULT_ENDPOINT = "http://localhost:11434";
   var LS_ENDPOINT = "ollama-chat:endpoint";
   var LS_HISTORY = "ollama-chat:history";
+  var LS_SEARCH = "ollama-chat:search";
   var HISTORY_LIMIT = 100;
+  var MAX_SEARCH_ROUNDS = 3;
+  var SEARCH_MAX_RESULTS = 5;
+
+  var WEB_TOOLS = [{
+    type: "function",
+    "function": {
+      name: "web_search",
+      description: "Search the internet for current information (prices, products, availability, reviews, news). Use it whenever the user asks about anything that may have changed since your training data.",
+      parameters: {
+        type: "object",
+        properties: {
+          query: { type: "string", description: "The search query, e.g. a product name plus 'price'." }
+        },
+        required: ["query"]
+      }
+    }
+  }];
 
   var log = document.getElementById("chat-log");
   var emptyState = document.getElementById("chat-empty");
@@ -16,6 +34,9 @@
   var endpointInput = document.getElementById("endpoint");
   var modelSelect = document.getElementById("model");
   var systemInput = document.getElementById("system");
+  var searchEnabled = document.getElementById("search-enabled");
+  var searchProvider = document.getElementById("search-provider");
+  var searchKey = document.getElementById("search-key");
   var statusText = document.getElementById("ollama-status");
   var statusDot = document.getElementById("ollama-dot");
   var modelCount = document.getElementById("model-count");
@@ -202,13 +223,214 @@
     setBusy(true);
     setStatus("busy", "Generating…");
 
+    if (searchOn()) {
+      agenticSend(model, bodyEl);
+      return;
+    }
+    streamAnswer(model, buildMessages(), bodyEl);
+  }
+
+  function searchOn() {
+    return !!(searchEnabled && searchEnabled.checked && searchKey && searchKey.value.trim() !== "");
+  }
+
+  function saveSearchSettings() {
+    if (!searchEnabled) return;
+    try {
+      localStorage.setItem(LS_SEARCH, JSON.stringify({
+        on: searchEnabled.checked,
+        provider: searchProvider.value,
+        key: searchKey.value
+      }));
+    } catch (e) {}
+  }
+
+  function loadSearchSettings() {
+    if (!searchEnabled) return;
+    try {
+      var raw = localStorage.getItem(LS_SEARCH);
+      if (!raw) return;
+      var s = JSON.parse(raw);
+      searchEnabled.checked = !!s.on;
+      if (s.provider) searchProvider.value = s.provider;
+      if (s.key) searchKey.value = s.key;
+    } catch (e) {}
+  }
+
+  function trunc(s, n) {
+    s = String(s == null ? "" : s);
+    return s.length > n ? s.slice(0, n) + "…" : s;
+  }
+
+  function formatTavily(data) {
+    var results = (data && data.results) || [];
+    if (!results.length) return "No results.";
+    return results.slice(0, SEARCH_MAX_RESULTS).map(function (r, i) {
+      return (i + 1) + ". " + (r.title || "untitled") + "\n" +
+        trunc(r.content, 600) + "\n" + (r.url || "");
+    }).join("\n\n");
+  }
+
+  function formatBrave(data) {
+    var results = (data && data.web && data.web.results) || [];
+    if (!results.length) return "No results.";
+    return results.slice(0, SEARCH_MAX_RESULTS).map(function (r, i) {
+      return (i + 1) + ". " + (r.title || "untitled") + "\n" +
+        trunc(r.description, 600) + "\n" + (r.url || "");
+    }).join("\n\n");
+  }
+
+  function runSearch(query) {
+    var provider = searchProvider.value;
+    var key = searchKey.value.trim();
+    var req;
+    if (provider === "brave") {
+      req = fetch("https://api.search.brave.com/res/v1/web/search?q=" +
+        encodeURIComponent(query) + "&count=" + SEARCH_MAX_RESULTS, {
+        headers: { "X-Subscription-Token": key },
+        signal: aborter.signal
+      }).then(function (res) {
+        if (!res.ok) throw new Error("Brave Search HTTP " + res.status);
+        return res.json();
+      }).then(formatBrave);
+    } else {
+      req = fetch("https://api.tavily.com/search", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          api_key: key,
+          query: query,
+          max_results: SEARCH_MAX_RESULTS,
+          search_depth: "basic"
+        }),
+        signal: aborter.signal
+      }).then(function (res) {
+        if (!res.ok) throw new Error("Tavily HTTP " + res.status);
+        return res.json();
+      }).then(formatTavily);
+    }
+    return req.then(function (text) {
+      return "Search results for \"" + query + "\":\n" + text;
+    });
+  }
+
+  // Native tool_calls (e.g. Devstral) plus a best-effort fallback for models
+  // that emit the call as JSON in the message text (e.g. Qwen2.5-coder).
+  function extractToolCalls(msg) {
+    var calls = [];
+    (msg.tool_calls || []).forEach(function (tc) {
+      var fn = tc["function"] || {};
+      var args = fn.arguments;
+      if (typeof args === "string") {
+        try { args = JSON.parse(args); } catch (e) { args = {}; }
+      }
+      if (fn.name === "web_search" && args && args.query) {
+        calls.push({ id: tc.id || ("call_" + calls.length), query: String(args.query) });
+      }
+    });
+    if (!calls.length && msg.content) {
+      var m = /\{\s*"name"\s*:\s*"web_search"\s*,\s*"arguments"\s*:\s*\{([^}]*)\}\s*\}/.exec(msg.content);
+      if (m) {
+        var q = /"query"\s*:\s*"((?:[^"\\]|\\.)*)"/.exec(m[1]);
+        if (q) {
+          var query;
+          try { query = JSON.parse('"' + q[1] + '"'); } catch (e) { query = q[1]; }
+          calls.push({ id: "call_0", query: query });
+        }
+      }
+    }
+    return calls;
+  }
+
+  function addSearchNote(text) {
+    var div = document.createElement("div");
+    div.className = "msg msg-search";
+    div.textContent = text;
+    log.appendChild(div);
+    scrollBottom();
+  }
+
+  function agenticSend(model, bodyEl) {
+    var msgs = buildMessages();
+    var rounds = 0;
+
+    function finish(content) {
+      history.push({ role: "assistant", content: content });
+      saveHistory();
+      aborter = null;
+      setBusy(false);
+      setStatus("ok", "Connected");
+      composer.focus();
+    }
+
+    function decide() {
+      setStatus("busy", "Thinking…");
+      return fetch(endpoint() + "/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ model: model, messages: msgs, tools: WEB_TOOLS, stream: false }),
+        signal: aborter.signal
+      }).then(function (res) {
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        return res.json();
+      }).then(function (data) {
+        var msg = data.message || {};
+        var calls = extractToolCalls(msg).filter(function (c) { return c.query; }).slice(0, 3);
+        if (!calls.length || rounds >= MAX_SEARCH_ROUNDS) {
+          if (msg.content && msg.content.trim()) {
+            // Answered directly (or hit the round cap with text to show).
+            bodyEl.innerHTML = renderMarkdown(msg.content);
+            finish(msg.content);
+          } else {
+            // Final answer, streamed, grounded in the gathered results.
+            streamAnswer(model, msgs, bodyEl);
+          }
+          return;
+        }
+        rounds++;
+        var asst = { role: "assistant", content: msg.content || "" };
+        if (msg.tool_calls && msg.tool_calls.length) asst.tool_calls = msg.tool_calls;
+        msgs.push(asst);
+        var chain = Promise.resolve();
+        calls.forEach(function (c) {
+          chain = chain.then(function () {
+            addSearchNote("Searching the web for \"" + c.query + "\"…");
+            setStatus("busy", "Searching…");
+            return runSearch(c.query).then(function (text) {
+              msgs.push({ role: "tool", content: text });
+            }).catch(function (err) {
+              var detail = String((err && err.message) || err);
+              msgs.push({ role: "tool", content: "Search failed for \"" + c.query + "\": " + detail });
+              addSearchNote("Search failed: " + detail);
+            });
+          });
+        });
+        return chain.then(decide);
+      });
+    }
+
+    decide().catch(function (err) {
+      if (err && err.name === "AbortError") {
+        bodyEl.innerHTML = "<p><em>Stopped.</em></p>";
+      } else {
+        bodyEl.parentNode.remove();
+        addError("<strong>Search-assisted request failed:</strong> " + escapeHtml(String((err && err.message) || err)));
+      }
+      aborter = null;
+      setBusy(false);
+      setStatus("ok", "Connected");
+      composer.focus();
+    });
+  }
+
+  function streamAnswer(model, msgs, bodyEl) {
     var full = "";
     var gotToken = false;
 
     fetch(endpoint() + "/api/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ model: model, messages: buildMessages(), stream: true }),
+      body: JSON.stringify({ model: model, messages: msgs, stream: true }),
       signal: aborter.signal
     })
       .then(function (res) {
@@ -308,10 +530,14 @@
     if (savedEndpoint) endpointInput.value = savedEndpoint;
   } catch (e) {}
   history.forEach(function (m) { addMessage(m.role, m.content); });
+  loadSearchSettings();
 
   endpointInput.addEventListener("change", function () {
     try { localStorage.setItem(LS_ENDPOINT, endpoint()); } catch (e) {}
     checkConnection();
+  });
+  [searchEnabled, searchProvider, searchKey].forEach(function (el) {
+    if (el) el.addEventListener("change", saveSearchSettings);
   });
   btnReconnect.addEventListener("click", checkConnection);
   btnSend.addEventListener("click", send);

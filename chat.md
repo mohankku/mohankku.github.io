@@ -32,6 +32,18 @@ title: Chat
       <label for="system">System prompt <span class="opt">(optional)</span></label>
       <input id="system" type="text" placeholder="e.g. You are a concise coding assistant." autocomplete="off">
     </div>
+    <div class="setting setting-wide">
+      <label>Web search <span class="opt">(live prices &amp; products)</span></label>
+      <div class="search-row">
+        <label class="check"><input type="checkbox" id="search-enabled"> Enable</label>
+        <select id="search-provider" aria-label="Search provider">
+          <option value="tavily">Tavily</option>
+          <option value="brave">Brave Search</option>
+        </select>
+        <input id="search-key" type="password" placeholder="API key — stored only in this browser" autocomplete="off" aria-label="Search API key">
+      </div>
+      <p class="setting-hint">Needs a free key from <a href="https://tavily.com" target="_blank" rel="noopener">Tavily</a> or <a href="https://brave.com/search/api/" target="_blank" rel="noopener">Brave Search</a>. Best with the Devstral model (native tool calling).</p>
+    </div>
   </div>
 
   <div class="chat-log" id="chat-log" aria-live="polite">
