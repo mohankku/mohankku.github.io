@@ -37,12 +37,13 @@ title: Chat
       <div class="search-row">
         <label class="check"><input type="checkbox" id="search-enabled"> Enable</label>
         <select id="search-provider" aria-label="Search provider">
-          <option value="tavily">Tavily</option>
-          <option value="brave">Brave Search</option>
+          <option value="proxy">Local proxy</option>
+          <option value="tavily">Tavily (direct)</option>
+          <option value="brave">Brave Search (direct)</option>
         </select>
-        <input id="search-key" type="password" placeholder="API key — stored only in this browser" autocomplete="off" aria-label="Search API key">
+        <input id="search-key" type="password" placeholder="API key — only needed for direct mode" autocomplete="off" aria-label="Search API key">
       </div>
-      <p class="setting-hint">Needs a free key from <a href="https://tavily.com" target="_blank" rel="noopener">Tavily</a> or <a href="https://brave.com/search/api/" target="_blank" rel="noopener">Brave Search</a>. Best with the Devstral model (native tool calling).</p>
+      <p class="setting-hint">Local proxy (default) keeps your API key on this laptop — no key to paste. Direct modes need a free key from <a href="https://tavily.com" target="_blank" rel="noopener">Tavily</a> or <a href="https://brave.com/search/api/" target="_blank" rel="noopener">Brave Search</a>. Best with the Devstral model (native tool calling).</p>
     </div>
   </div>
 

@@ -231,7 +231,9 @@
   }
 
   function searchOn() {
-    return !!(searchEnabled && searchEnabled.checked && searchKey && searchKey.value.trim() !== "");
+    if (!(searchEnabled && searchEnabled.checked)) return false;
+    if (searchProvider && searchProvider.value === "proxy") return true; // key lives in the proxy
+    return !!(searchKey && searchKey.value.trim() !== "");
   }
 
   function saveSearchSettings() {
@@ -280,11 +282,32 @@
     }).join("\n\n");
   }
 
+  var PROXY_URL = "http://127.0.0.1:8765";
+
   function runSearch(query) {
     var provider = searchProvider.value;
     var key = searchKey.value.trim();
     var req;
-    if (provider === "brave") {
+    if (provider === "proxy") {
+      req = fetch(PROXY_URL + "/api/websearch", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query: query, max_results: SEARCH_MAX_RESULTS }),
+        signal: aborter.signal
+      }).then(function (res) {
+        if (!res.ok) throw new Error("proxy HTTP " + res.status);
+        return res.json();
+      }).then(function (data) {
+        if (data.error) throw new Error(data.error);
+        return formatTavily(data);
+      }).catch(function (err) {
+        if (err && err.name === "AbortError") throw err;
+        if (err && err.name === "TypeError") {
+          throw new Error("Local proxy unreachable — start it with: python3 ~/.config/ollama-chat-proxy/proxy.py");
+        }
+        throw err; // HTTP status / proxy-reported errors pass through untouched
+      });
+    } else if (provider === "brave") {
       req = fetch("https://api.search.brave.com/res/v1/web/search?q=" +
         encodeURIComponent(query) + "&count=" + SEARCH_MAX_RESULTS, {
         headers: { "X-Subscription-Token": key },
