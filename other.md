@@ -92,6 +92,21 @@ Small side projects and experiments.
       <p style="margin-top: 12px;"><a href="{{ '/stocks' | relative_url }}" class="pub-btn"><i class="fa-solid fa-chart-simple"></i> Open full dashboard &rarr;</a></p>
     </div>
   </li>
+
+  <!-- Local Chat -->
+  <li class="post-item" data-item>
+    <button class="post-toggle" aria-expanded="false">
+      <span class="post-title"><i class="fa-solid fa-robot"></i> Local Chat</span>
+      <span class="post-hint"><span class="more">Click to expand &#9662;</span><span class="less">Click to collapse &#9652; (or press ESC)</span></span>
+    </button>
+    <p class="post-excerpt">A browser chat interface for Ollama models running on this laptop — streaming responses, model picker, works fully on-device.</p>
+    <div class="post-full" hidden>
+      <p>
+        Talks to your local Ollama server (<code>http://localhost:11434</code>) directly from the browser. Nothing leaves your machine.
+      </p>
+      <p style="margin-top: 12px;"><a href="{{ '/chat' | relative_url }}" class="pub-btn"><i class="fa-solid fa-comments"></i> Open chat &rarr;</a></p>
+    </div>
+  </li>
 </ul>
 
 <script>
