@@ -32,6 +32,8 @@ title: Other
 
 Small side projects and experiments.
 
+<p><input class="search-input" id="filter-projects" placeholder="Filter projects..." aria-label="Filter projects" style="width:220px; font-size:13px; padding:8px 10px; border:1px solid var(--border-color, #dde3e8); border-radius:8px;"></p>
+
 <ul class="post-list">
   <!-- Zenith Coding Agent -->
   <li class="post-item" data-item>
@@ -162,6 +164,17 @@ Small side projects and experiments.
       });
     }
   });
+
+  var filterInput = document.getElementById("filter-projects");
+  if(filterInput){
+    filterInput.addEventListener("input", function(){
+      var q = filterInput.value.trim().toLowerCase();
+      items.forEach(function(item){
+        var text = (item.textContent || "").toLowerCase();
+        item.style.display = (!q || text.indexOf(q) !== -1) ? "" : "none";
+      });
+    });
+  }
 
   function numPct(r){
     return parseFloat(String(r.change_percentage).replace("%", ""));

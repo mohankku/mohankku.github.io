@@ -40,6 +40,7 @@
   var searchProvider = document.getElementById("search-provider");
   var searchKey = document.getElementById("search-key");
   var followupsEnabled = document.getElementById("followups-enabled");
+  var marketEnabled = document.getElementById("market-enabled");
   var btnMic = document.getElementById("btn-mic");
   var btnAttach = document.getElementById("btn-attach");
   var imgInput = document.getElementById("img-input");
@@ -243,12 +244,35 @@
       });
   }
 
-  function buildMessages() {
+  function buildMessages(marketText) {
     var msgs = [];
     var sys = systemInput.value.trim();
     if (sys) msgs.push({ role: "system", content: sys });
+    if (marketText) msgs.push({ role: "system", content: marketText });
     history.forEach(function (m) { msgs.push({ role: m.role, content: m.content }); });
     return msgs;
+  }
+
+  function formatMovers(list) {
+    return (list || []).slice(0, 3).map(function (r) {
+      return r.ticker + " " + r.change_percentage + " @ $" + r.price;
+    }).join(", ");
+  }
+
+  // Best-effort cached market snapshot; null when disabled or unavailable.
+  function fetchMarketSnapshot(cb) {
+    if (!marketEnabled || !marketEnabled.checked) { cb(null); return; }
+    fetch("assets/stocks-live.json", { cache: "no-store" }).then(function (res) {
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      return res.json();
+    }).then(function (d) {
+      var g = formatMovers(d.top_gainers);
+      var l = formatMovers(d.top_losers);
+      if (!g && !l) { cb(null); return; }
+      cb("Market snapshot (cached, updated " + (d.last_updated || "unknown") +
+        "). Top gainers: " + (g || "n/a") + ". Top losers: " + (l || "n/a") +
+        ". For informational purposes only, not financial advice.");
+    }).catch(function () { cb(null); });
   }
 
   function send() {
@@ -289,11 +313,13 @@
       streamAnswer(VISION_MODEL, msgs, bodyEl);
       return;
     }
-    if (searchOn()) {
-      agenticSend(model, bodyEl);
-      return;
-    }
-    streamAnswer(model, buildMessages(), bodyEl);
+    fetchMarketSnapshot(function (marketText) {
+      if (searchOn()) {
+        agenticSend(model, bodyEl, marketText);
+        return;
+      }
+      streamAnswer(model, buildMessages(marketText), bodyEl);
+    });
   }
 
   function searchOn() {
@@ -309,7 +335,8 @@
         on: searchEnabled.checked,
         provider: searchProvider.value,
         key: searchKey.value,
-        followups: !followupsEnabled || followupsEnabled.checked
+        followups: !followupsEnabled || followupsEnabled.checked,
+        market: !!(marketEnabled && marketEnabled.checked)
       }));
     } catch (e) {}
   }
@@ -324,6 +351,7 @@
       if (s.provider) searchProvider.value = s.provider;
       if (s.key) searchKey.value = s.key;
       if (followupsEnabled && s.followups === false) followupsEnabled.checked = false;
+      if (marketEnabled && s.market === true) marketEnabled.checked = true;
     } catch (e) {}
   }
 
@@ -441,8 +469,8 @@
     scrollBottom();
   }
 
-  function agenticSend(model, bodyEl) {
-    var msgs = buildMessages();
+  function agenticSend(model, bodyEl, marketText) {
+    var msgs = buildMessages(marketText);
     var rounds = 0;
 
     function finish(content) {
@@ -725,7 +753,7 @@
     try { localStorage.setItem(LS_ENDPOINT, endpoint()); } catch (e) {}
     checkConnection();
   });
-  [searchEnabled, searchProvider, searchKey, followupsEnabled].forEach(function (el) {
+  [searchEnabled, searchProvider, searchKey, followupsEnabled, marketEnabled].forEach(function (el) {
     if (el) el.addEventListener("change", saveSearchSettings);
   });
   setupVoice();

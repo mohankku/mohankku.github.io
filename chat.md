@@ -1,6 +1,7 @@
 ---
 layout: default
 title: Chat
+noindex: true
 ---
 
 <link rel="stylesheet" href="{{ '/assets/css/chat.css' | relative_url }}">
@@ -49,6 +50,7 @@ title: Chat
       <label>Assistant extras</label>
       <div class="search-row">
         <label class="check"><input type="checkbox" id="followups-enabled" checked> Suggest follow-up questions</label>
+        <label class="check"><input type="checkbox" id="market-enabled"> Include market snapshot (top movers)</label>
       </div>
     </div>
   </div>

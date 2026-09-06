@@ -20,6 +20,8 @@ title: Blogs
 .post-full[hidden] { display: none; }
 </style>
 
+<p style="font-size:13px; color:#6b7a8a;"><a href="{{ '/feed.xml' | relative_url }}"><i class="fa-solid fa-rss"></i> Subscribe via RSS</a></p>
+
 <ul class="post-list">
   {% for post in site.posts %}
     <li class="post-item" data-post>
