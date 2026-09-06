@@ -45,6 +45,12 @@ title: Chat
       </div>
       <p class="setting-hint">Local proxy (default) keeps your API key on this laptop — no key to paste. Direct modes need a free key from <a href="https://tavily.com" target="_blank" rel="noopener">Tavily</a> or <a href="https://brave.com/search/api/" target="_blank" rel="noopener">Brave Search</a>. Best with the Devstral model (native tool calling).</p>
     </div>
+    <div class="setting setting-wide">
+      <label>Assistant extras</label>
+      <div class="search-row">
+        <label class="check"><input type="checkbox" id="followups-enabled" checked> Suggest follow-up questions</label>
+      </div>
+    </div>
   </div>
 
   <div class="chat-log" id="chat-log" aria-live="polite">
@@ -54,9 +60,13 @@ title: Chat
     </div>
   </div>
 
+  <div class="img-strip" id="img-strip" hidden></div>
   <div class="chat-composer">
     <textarea id="composer" rows="2" placeholder="Message your local model… (Enter to send, Shift+Enter for newline)" aria-label="Message"></textarea>
     <div class="composer-btns">
+      <button class="btn btn-ghost" id="btn-attach" aria-label="Attach image" title="Attach image (answered by the vision model)"><i class="fa-solid fa-paperclip"></i></button>
+      <input type="file" id="img-input" accept="image/*" multiple hidden>
+      <button class="btn btn-ghost" id="btn-mic" aria-label="Voice input" title="Voice input"><i class="fa-solid fa-microphone"></i></button>
       <button class="btn btn-primary" id="btn-send" aria-label="Send message"><i class="fa-solid fa-paper-plane"></i> Send</button>
       <button class="btn btn-ghost" id="btn-stop" aria-label="Stop generating" hidden><i class="fa-solid fa-stop"></i> Stop</button>
     </div>
@@ -74,6 +84,19 @@ title: Chat
         </li>
         <li>Ollama only listens on <code>127.0.0.1</code>, so even with the origin allowed, only browsers on this laptop can reach it. Restarting the service unloads models; they reload on first use.</li>
       </ul>
+    </div>
+  </details>
+
+  <details class="chat-help" id="watches-box">
+    <summary><i class="fa-solid fa-tag"></i> Price watches <span class="opt" id="watches-count"></span></summary>
+    <div>
+      <p style="font-size:12.5px;">The proxy re-checks each watch about every 6 hours. Prices come from search snippets, so treat them as approximate.</p>
+      <div class="search-row">
+        <input id="watch-query" type="text" placeholder="Product, e.g. Sony WH-1000XM5" aria-label="Product to watch" style="flex:2; min-width:180px;">
+        <input id="watch-target" type="number" min="0" step="0.01" placeholder="Target $ (optional)" aria-label="Target price" style="flex:1; min-width:130px;">
+        <button class="btn btn-primary" id="btn-watch-add" type="button"><i class="fa-solid fa-plus"></i> Watch</button>
+      </div>
+      <div id="watch-list" style="margin-top:10px;"></div>
     </div>
   </details>
 
