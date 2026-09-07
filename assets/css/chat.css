@@ -479,6 +479,219 @@
 
 @keyframes recpulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.55; } }
 
+/* --- Live Camera --- */
+.live-cam {
+  background: var(--card-bg, #fff);
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 12px;
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+
+.live-cam-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  flex-wrap: wrap;
+  border-bottom: 1px solid var(--border-color, #e2e8f0);
+  background: linear-gradient(180deg, rgba(15,32,39,0.04), transparent);
+}
+
+.live-cam-title {
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--text-color, #0f2027);
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.live-cam-title i { color: #0f766e; }
+
+.live-badge {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 20px;
+  border: 1px solid var(--border-color, #dde3e8);
+  background: #f8fafc;
+  color: #64748b;
+}
+
+.live-badge.on {
+  background: #ecfdf5;
+  border-color: #a7f3d0;
+  color: #065f46;
+}
+
+.live-badge.busy {
+  background: #fef3c7;
+  border-color: #fde68a;
+  color: #92400e;
+}
+
+.live-badge.err {
+  background: #fef2f2;
+  border-color: #fecaca;
+  color: #991b1b;
+}
+
+.live-cam-actions {
+  margin-left: auto;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.btn-sm { padding: 6px 10px; font-size: 11.5px; }
+
+.live-cam-body {
+  padding: 12px 14px;
+}
+
+.cam-preview {
+  position: relative;
+  background: #0f2027;
+  border-radius: 10px;
+  overflow: hidden;
+  aspect-ratio: 16 / 9;
+  max-height: 360px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cam-preview video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  background: #0f2027;
+}
+
+.cam-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255,255,255,0.85);
+  font-size: 13px;
+  font-weight: 600;
+  background: rgba(15,32,39,0.55);
+  backdrop-filter: blur(2px);
+}
+
+.cam-overlay[hidden] { display: none !important; }
+
+.cam-controls {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin: 10px 0 10px;
+  font-size: 12.5px;
+}
+
+.cam-controls .check {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  color: var(--text-color, #0f2027);
+  cursor: pointer;
+}
+
+.cam-controls .check input { width: auto; }
+
+.cam-select-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  color: var(--text-muted, #6b7a8a);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.cam-select-label select {
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 13px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color, #dde3e8);
+  background: var(--bg-color, #fff);
+  color: var(--text-color, #0f2027);
+}
+
+.cam-log {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 260px;
+  overflow-y: auto;
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 10px;
+  padding: 10px;
+  background: #f8fafc;
+  min-height: 72px;
+}
+
+.cam-log:empty::before {
+  content: "Commentary will appear here once the camera is running.";
+  color: var(--text-muted, #98a2b3);
+  font-size: 12.5px;
+}
+
+.cam-entry {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 8px 10px;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--text-color, #0f2027);
+  animation: camIn 0.2s ease;
+}
+
+.cam-entry time {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #6b7a8a;
+  margin-bottom: 3px;
+}
+
+.cam-entry.cam-pending {
+  opacity: 0.7;
+  border-style: dashed;
+}
+
+.cam-entry.cam-error {
+  background: #fef2f2;
+  border-color: #fecaca;
+  color: #991b1b;
+}
+
+.cam-hint {
+  margin: 8px 0 0;
+  font-size: 11.5px;
+  color: var(--text-muted, #6b7a8a);
+  line-height: 1.5;
+}
+
+@keyframes camIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 @media (max-width: 600px) {
   .chat-settings { grid-template-columns: 1fr; }
   .msg { max-width: 92%; }

@@ -55,6 +55,50 @@ noindex: true
     </div>
   </div>
 
+  <div class="live-cam" id="live-cam">
+    <div class="live-cam-head">
+      <div class="live-cam-title"><i class="fa-solid fa-video"></i> Live Camera Commentary</div>
+      <span class="live-badge" id="cam-badge">Off</span>
+      <div class="live-cam-actions">
+        <button class="btn btn-ghost btn-sm" id="btn-cam-toggle" type="button"><i class="fa-solid fa-camera"></i> Open camera</button>
+        <button class="btn btn-ghost btn-sm" id="btn-cam-snap" type="button" hidden title="Send one frame now"><i class="fa-solid fa-bolt"></i> Snap</button>
+        <button class="btn btn-ghost btn-sm" id="btn-cam-stop" type="button" hidden><i class="fa-solid fa-stop"></i> Close</button>
+      </div>
+    </div>
+    <div class="live-cam-body" id="cam-body" hidden>
+      <div class="cam-preview">
+        <video id="cam-video" autoplay muted playsinline></video>
+        <canvas id="cam-canvas" hidden></canvas>
+        <div class="cam-overlay" id="cam-overlay">Camera off</div>
+      </div>
+      <div class="cam-controls">
+        <label class="check"><input type="checkbox" id="cam-live" checked> Live commentary</label>
+        <label class="cam-select-label">Every
+          <select id="cam-interval" aria-label="Frame interval">
+            <option value="1500">1.5 s</option>
+            <option value="2500">2.5 s</option>
+            <option value="3500" selected>3.5 s</option>
+            <option value="5000">5 s</option>
+            <option value="8000">8 s</option>
+          </select>
+        </label>
+        <label class="cam-select-label">Style
+          <select id="cam-style" aria-label="Commentary style">
+            <option value="casual">Casual</option>
+            <option value="concise">Concise</option>
+            <option value="detailed">Detailed</option>
+            <option value="playful">Playful</option>
+            <option value="assistive">Accessibility</option>
+          </select>
+        </label>
+        <label class="check"><input type="checkbox" id="cam-voice"> Speak</label>
+        <label class="check"><input type="checkbox" id="cam-to-chat"> Also post to chat</label>
+      </div>
+      <div class="cam-log" id="cam-log" aria-live="polite"></div>
+      <p class="cam-hint">Frames are captured in the browser and sent directly to your local Ollama vision model (<code>gemma3:4b</code>) at the endpoint above. Nothing leaves your machine.</p>
+    </div>
+  </div>
+
   <div class="chat-log" id="chat-log" aria-live="polite">
     <div class="chat-empty" id="chat-empty">
       <i class="fa-solid fa-comments"></i>

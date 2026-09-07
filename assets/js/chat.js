@@ -982,6 +982,280 @@
     setInterval(refreshWatches, WATCH_POLL_MS);
   }
 
+  // ---- Live Camera Commentary (vision model) ----
+  var camVideo = document.getElementById("cam-video");
+  var camCanvas = document.getElementById("cam-canvas");
+  var camBody = document.getElementById("cam-body");
+  var camBadge = document.getElementById("cam-badge");
+  var camOverlay = document.getElementById("cam-overlay");
+  var camLog = document.getElementById("cam-log");
+  var btnCamToggle = document.getElementById("btn-cam-toggle");
+  var btnCamStop = document.getElementById("btn-cam-stop");
+  var btnCamSnap = document.getElementById("btn-cam-snap");
+  var camLive = document.getElementById("cam-live");
+  var camInterval = document.getElementById("cam-interval");
+  var camStyle = document.getElementById("cam-style");
+  var camVoice = document.getElementById("cam-voice");
+  var camToChat = document.getElementById("cam-to-chat");
+
+  var camStream = null;
+  var camTimer = null;
+  var camBusy = false;
+  var camAborter = null;
+  var camFrameCount = 0;
+
+  function setCamBadge(state, text) {
+    if (!camBadge) return;
+    camBadge.textContent = text;
+    camBadge.className = "live-badge " + (state === "on" ? "on" : state === "busy" ? "busy" : state === "err" ? "err" : "");
+  }
+
+  function camPromptForStyle() {
+    var v = camStyle ? camStyle.value : "casual";
+    if (v === "concise") return "You are a concise live observer. In ONE short sentence (under 20 words) describe what you see right now. If nothing notable, say so briefly.";
+    if (v === "detailed") return "You are a detailed live observer. In 2-3 sentences, describe the scene, people, objects, actions and any notable context. Be specific but not repetitive.";
+    if (v === "playful") return "You are a playful live commentator. Give a fun, light-hearted one-or-two sentence commentary on what you see. Keep it family-friendly.";
+    if (v === "assistive") return "You are an accessibility helper. Clearly describe the scene for someone who cannot see it: layout, people, objects, text, and actions. Be factual and helpful.";
+    return "You are a friendly live commentator. In one natural sentence, describe what is happening in the image as if giving a live commentary. Keep it conversational and avoid repeating the same phrase.";
+  }
+
+  function speakText(t) {
+    if (!camVoice || !camVoice.checked) return;
+    if (!("speechSynthesis" in window)) return;
+    try {
+      window.speechSynthesis.cancel();
+      var u = new SpeechSynthesisUtterance(t);
+      u.rate = 1;
+      u.lang = navigator.language || "en-US";
+      window.speechSynthesis.speak(u);
+    } catch (e) {}
+  }
+
+  function addCamEntry(text, opts) {
+    if (!camLog) return null;
+    opts = opts || {};
+    var div = document.createElement("div");
+    div.className = "cam-entry" + (opts.pending ? " cam-pending" : "") + (opts.error ? " cam-error" : "");
+    var tm = document.createElement("time");
+    var now = new Date();
+    tm.textContent = now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" }) + (opts.pending ? " · analyzing…" : "");
+    tm.setAttribute("datetime", now.toISOString());
+    div.appendChild(tm);
+    var p = document.createElement("span");
+    p.textContent = text;
+    div.appendChild(p);
+    camLog.appendChild(div);
+    camLog.scrollTop = camLog.scrollHeight;
+    return div;
+  }
+
+  function captureFrameBase64() {
+    if (!camVideo || !camCanvas) return null;
+    if (!camVideo.videoWidth || !camVideo.videoHeight) return null;
+    var w = camVideo.videoWidth;
+    var h = camVideo.videoHeight;
+    var scale = Math.min(1, IMG_MAX_DIM / Math.max(w, h));
+    var cw = Math.max(1, Math.round(w * scale));
+    var ch = Math.max(1, Math.round(h * scale));
+    camCanvas.width = cw;
+    camCanvas.height = ch;
+    var ctx = camCanvas.getContext("2d");
+    if (!ctx) return null;
+    ctx.drawImage(camVideo, 0, 0, cw, ch);
+    var dataUrl = camCanvas.toDataURL("image/jpeg", 0.72);
+    return dataUrl.split(",", 2)[1];
+  }
+
+  function sendCamFrame(isSnap) {
+    if (camBusy) return;
+    if (!camStream) return;
+    if (document.hidden && !isSnap) return; // respect background tab
+    var b64 = captureFrameBase64();
+    if (!b64) return;
+    camBusy = true;
+    setCamBadge("busy", "Analyzing…");
+    if (camOverlay) camOverlay.hidden = true;
+    var pendingEl = addCamEntry(isSnap ? "Snapped — asking model…" : "Watching…", { pending: true });
+    camAborter = new AbortController();
+    camFrameCount++;
+    var sysPrompt = camPromptForStyle();
+    // For continuity, include a tiny hint about frame number so model can notice changes.
+    var userText = isSnap
+      ? "Describe this single camera frame. What do you see?"
+      : "This is frame #" + camFrameCount + " from a live camera feed. " + sysPrompt + " If the scene looks unchanged from a moment ago, just say so in a fresh way — do not hallucinate motion.";
+
+    fetch(endpoint() + "/api/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: VISION_MODEL,
+        stream: false,
+        messages: [
+          { role: "system", content: sysPrompt },
+          { role: "user", content: userText, images: [b64] }
+        ]
+      }),
+      signal: camAborter.signal
+    }).then(function (res) {
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      return res.json();
+    }).then(function (data) {
+      var text = (data && data.message && data.message.content || "").trim();
+      if (!text) text = "(no description returned)";
+      if (pendingEl) pendingEl.remove();
+      addCamEntry(text);
+      speakText(text);
+      if (camToChat && camToChat.checked) {
+        // Also publish to the main chat timeline as an assistant message (uses same markdown renderer).
+        var bodyEl = addMessage("assistant", text);
+        // Render as markdown for consistency.
+        bodyEl.innerHTML = renderMarkdown(text);
+        history.push({ role: "assistant", content: "[Camera] " + text });
+        saveHistory();
+        maybeSuggest(bodyEl, text);
+      }
+      setCamBadge("on", "Live");
+    }).catch(function (err) {
+      if (err && err.name === "AbortError") {
+        if (pendingEl) pendingEl.remove();
+        setCamBadge("on", "Live");
+      } else {
+        if (pendingEl) pendingEl.remove();
+        var msg = String((err && err.message) || err);
+        // Hint when vision model is missing.
+        if (msg.indexOf("404") !== -1 || msg.toLowerCase().indexOf("not found") !== -1) {
+          msg += " — is the vision model '" + VISION_MODEL + "' pulled? Try: ollama pull " + VISION_MODEL;
+        }
+        addCamEntry("Camera error: " + msg, { error: true });
+        setCamBadge("err", "Error");
+        // Briefly, then back to Live so timer keeps trying.
+        setTimeout(function () { if (camStream) setCamBadge("on", "Live"); }, 3000);
+      }
+    }).then(function () {
+      camBusy = false;
+      camAborter = null;
+      if (camStream && camOverlay) camOverlay.hidden = true;
+    });
+  }
+
+  function startCamTimer() {
+    stopCamTimer();
+    if (!camLive || !camLive.checked) return;
+    if (!camStream) return;
+    var ms = parseInt(camInterval ? camInterval.value : "3500", 10);
+    if (!(ms >= 800 && ms <= 20000)) ms = 3500;
+    camTimer = setInterval(function () { sendCamFrame(false); }, ms);
+    // Fire first frame shortly after starting.
+    setTimeout(function () { sendCamFrame(false); }, 450);
+  }
+
+  function stopCamTimer() {
+    if (camTimer) { clearInterval(camTimer); camTimer = null; }
+  }
+
+  function updateCamButtons() {
+    var on = !!camStream;
+    if (btnCamToggle) {
+      btnCamToggle.innerHTML = on ? '<i class="fa-solid fa-arrows-rotate"></i> Restart' : '<i class="fa-solid fa-camera"></i> Open camera';
+      btnCamToggle.title = on ? "Restart camera" : "Open camera";
+    }
+    if (btnCamStop) btnCamStop.hidden = !on;
+    if (btnCamSnap) btnCamSnap.hidden = !on;
+    if (camBody) camBody.hidden = !on;
+    if (camOverlay) {
+      camOverlay.hidden = !!on;
+      if (!on) camOverlay.textContent = "Camera off";
+    }
+  }
+
+  function stopCamera() {
+    stopCamTimer();
+    if (camAborter) { try { camAborter.abort(); } catch (e) {} camAborter = null; }
+    camBusy = false;
+    if (camStream) {
+      camStream.getTracks().forEach(function (t) { try { t.stop(); } catch (e) {} });
+      camStream = null;
+    }
+    if (camVideo) camVideo.srcObject = null;
+    if ("speechSynthesis" in window) { try { window.speechSynthesis.cancel(); } catch (e) {} }
+    setCamBadge("", "Off");
+    updateCamButtons();
+  }
+
+  function startCamera() {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      addCamEntry("This browser does not support camera access (getUserMedia missing). Try Chrome, Edge or Firefox on desktop.", { error: true });
+      setCamBadge("err", "Unsupported");
+      return;
+    }
+    // Ensure the camera panel is visible while we request permission.
+    if (camBody) camBody.hidden = false;
+    setCamBadge("busy", "Starting…");
+    if (camOverlay) { camOverlay.textContent = "Requesting camera…"; camOverlay.hidden = false; }
+    updateCamButtons();
+
+    // Stop any previous stream cleanly before requesting a new one.
+    if (camStream) stopCamera();
+    if (camBody) camBody.hidden = false;
+
+    navigator.mediaDevices.getUserMedia({
+      video: { facingMode: "user", width: { ideal: 640 }, height: { ideal: 480 } },
+      audio: false
+    }).then(function (stream) {
+      camStream = stream;
+      if (camVideo) {
+        camVideo.srcObject = stream;
+        // iOS needs explicit play()
+        var playP = camVideo.play();
+        if (playP && playP.catch) playP.catch(function () {});
+      }
+      setCamBadge("on", "Live");
+      if (camOverlay) camOverlay.hidden = true;
+      if (camLog && !camLog.hasChildNodes()) {
+        // keep empty pseudo-text until first entry; no extra DOM needed
+      }
+      updateCamButtons();
+      startCamTimer();
+    }).catch(function (err) {
+      var name = err && err.name || "";
+      var msg = String((err && err.message) || err);
+      if (name === "NotAllowedError" || name === "PermissionDeniedError") msg = "Camera permission denied — allow camera access in the browser and try again.";
+      else if (name === "NotFoundError" || name === "OverconstrainedError") msg = "No camera found on this device.";
+      else if (name === "NotReadableError") msg = "Camera is already in use by another app.";
+      addCamEntry(msg, { error: true });
+      setCamBadge("err", "Blocked");
+      if (camBody) camBody.hidden = false;
+      updateCamButtons();
+      if (camOverlay) { camOverlay.textContent = msg; camOverlay.hidden = false; }
+    });
+  }
+
+  function setupCamera() {
+    if (!btnCamToggle || !camVideo) return;
+    btnCamToggle.addEventListener("click", function () {
+      if (camStream) { stopCamera(); setTimeout(startCamera, 120); }
+      else startCamera();
+    });
+    if (btnCamStop) btnCamStop.addEventListener("click", stopCamera);
+    if (btnCamSnap) btnCamSnap.addEventListener("click", function () { sendCamFrame(true); });
+    if (camLive) camLive.addEventListener("change", function () {
+      if (camLive.checked) startCamTimer(); else stopCamTimer();
+    });
+    if (camInterval) camInterval.addEventListener("change", function () {
+      if (camStream && camLive && camLive.checked) startCamTimer();
+    });
+    document.addEventListener("visibilitychange", function () {
+      if (document.hidden) {
+        // Don't tear down; just let the send guard skip frames.
+      }
+    });
+    // Clean up if page navigates away.
+    window.addEventListener("pagehide", stopCamera);
+    window.addEventListener("beforeunload", stopCamera);
+    updateCamButtons();
+  }
+
+  setupCamera();
   setupWatches();
   btnReconnect.addEventListener("click", checkConnection);
   btnSend.addEventListener("click", send);
