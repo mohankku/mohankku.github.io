@@ -3,7 +3,7 @@ layout: default
 title: AR Physics Lab
 ---
 
-<link rel="stylesheet" href="{{ '/assets/css/physics.css' | relative_url }}">
+<link rel="stylesheet" href="{{ '/assets/css/physics.css?v=' | append: site.github.build_revision | relative_url }}">
 
 <div class="phys-lab" id="phys-lab">
 
@@ -106,7 +106,7 @@ title: AR Physics Lab
     </div>
     <div class="phys-btn-row">
       <button class="pub-btn" id="btn-sim-cam" type="button"><i class="fa-solid fa-video"></i> Open camera</button>
-      <button class="pub-btn" id="btn-sim-drop" type="button"><i class="fa-solid fa-play"></i> Drop</button>
+      <button class="pub-btn" id="btn-sim-drop" type="button" title="Drop (Space)"><i class="fa-solid fa-play"></i> Drop</button>
       <button class="pub-btn" id="btn-sim-reset" type="button"><i class="fa-solid fa-rotate-left"></i> Reset</button>
     </div>
     <div class="phys-readouts">
@@ -131,12 +131,13 @@ title: AR Physics Lab
     </div>
     <div class="phys-btn-row">
       <button class="pub-btn" id="btn-timer" type="button"><i class="fa-solid fa-play"></i> Start (release)</button>
+      <button class="pub-btn" id="btn-m-export" type="button"><i class="fa-solid fa-download"></i> Export CSV</button>
       <button class="pub-btn" id="btn-m-clear" type="button"><i class="fa-solid fa-trash"></i> Clear trials</button>
     </div>
     <p class="phys-status" id="m-status">Press Start when you release the ball.</p>
     <p id="m-stats" style="font-size:13px;">No trials yet.</p>
     <table class="phys-table" aria-label="Trials">
-      <thead><tr><th>#</th><th>h (m)</th><th>t (s)</th><th>g (m/s²)</th></tr></thead>
+      <thead><tr><th>#</th><th>h (m)</th><th>t (s)</th><th>g (m/s²)</th><th aria-label="Delete"></th></tr></thead>
       <tbody id="m-rows"></tbody>
     </table>
   </div>
@@ -146,7 +147,8 @@ title: AR Physics Lab
     <h3><i class="fa-solid fa-crosshairs"></i> Auto-track a falling ball</h3>
     <p class="desc">Point the camera at a plain background and drop a brightly colored ball
     through the frame. The page tracks its centroid each frame, converts pixels to meters,
-    and fits <code>y = ½·g·t²</code>. Tip: a red ball against a white wall works best.</p>
+    and fits <code>y = y0 + v0·t + ½·g·t²</code> (press Record just before you drop).
+    Tip: a red ball against a white wall works best.</p>
     <div class="stage" id="track-stage">
       <video id="track-video" autoplay muted playsinline></video>
       <canvas class="overlay" id="track-overlay"></canvas>
@@ -173,7 +175,7 @@ title: AR Physics Lab
     </div>
     <div class="phys-btn-row">
       <button class="pub-btn" id="btn-track-cam" type="button"><i class="fa-solid fa-video"></i> Open camera</button>
-      <button class="pub-btn" id="btn-track-rec" type="button"><i class="fa-solid fa-circle"></i> Record fall</button>
+      <button class="pub-btn" id="btn-track-rec" type="button" title="Record / stop (Space)"><i class="fa-solid fa-circle"></i> Record fall</button>
       <button class="pub-btn" id="btn-track-clear" type="button"><i class="fa-solid fa-trash"></i> Clear</button>
       <span class="phys-status" style="margin-left:auto;">points: <span id="track-count">0</span></span>
     </div>
@@ -271,7 +273,7 @@ title: AR Physics Lab
       <label class="phys-field">Ollama endpoint
         <input id="hold-ollama" type="url" value="http://localhost:11434" spellcheck="false" autocomplete="off" inputmode="url" style="width:190px;">
       </label>
-      <label class="phys-field">Vision model
+      <label class="phys-field">Model
         <input id="hold-model" type="text" value="gemma3:4b" spellcheck="false" autocomplete="off" style="width:130px;">
       </label>
     </div>
@@ -293,4 +295,4 @@ title: AR Physics Lab
     <a href="{{ '/other' | relative_url }}"><i class="fa-solid fa-arrow-left"></i> Back to experiments</a>
   </p>
 </div>
-<script src="{{ '/assets/js/physics.js?v=11' | relative_url }}"></script>
+<script src="{{ '/assets/js/physics.js?v=' | append: site.github.build_revision | relative_url }}"></script>

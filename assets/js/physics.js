@@ -50,11 +50,50 @@ function isSkinPixel(r, g, b) {
   return cr >= 133 && cr <= 173 && cb >= 77 && cb <= 127;
 }
 
+/* Least-squares fit of y = y0 + v0*t + (g/2)*t^2: tolerates pre-drop
+ * loitering frames and first detection mid-fall. Returns {g, v0, y0, rmse}. */
+function fitFreeFall(samples) {
+  var n = samples.length;
+  if (n < 4) return null;
+  var St = 0, St2 = 0, St3 = 0, St4 = 0, Sy = 0, Sty = 0, St2y = 0;
+  var i, t;
+  for (i = 0; i < n; i++) {
+    t = samples[i].t;
+    var t2 = t * t;
+    St += t; St2 += t2; St3 += t2 * t; St4 += t2 * t2;
+    Sy += samples[i].y; Sty += t * samples[i].y; St2y += t2 * samples[i].y;
+  }
+  function det3(m) {
+    return m[0][0] * (m[1][1] * m[2][2] - m[1][2] * m[2][1]) -
+           m[0][1] * (m[1][0] * m[2][2] - m[1][2] * m[2][0]) +
+           m[0][2] * (m[1][0] * m[2][1] - m[1][1] * m[2][0]);
+  }
+  var M = [[n, St, St2], [St, St2, St3], [St2, St3, St4]];
+  var D = det3(M);
+  if (!(Math.abs(D) > 1e-12)) return null;
+  var Vy = [Sy, Sty, St2y];
+  function col(m, j, v) {
+    return m.map(function(row, r) {
+      return row.map(function(x, c) { return c === j ? v[r] : x; });
+    });
+  }
+  var a = det3(col(M, 0, Vy)) / D;
+  var b = det3(col(M, 1, Vy)) / D;
+  var c = det3(col(M, 2, Vy)) / D;
+  var se = 0;
+  for (i = 0; i < n; i++) {
+    t = samples[i].t;
+    se += Math.pow(samples[i].y - (a + b * t + c * t * t), 2);
+  }
+  return { g: 2 * c, v0: b, y0: a, rmse: Math.sqrt(se / n) };
+}
+
 window.PhysLab = {
   fallTime: fallTime,
   gravityFromDrop: gravityFromDrop,
   mean: mean, std: std,
   fitGravity: fitGravity,
+  fitFreeFall: fitFreeFall,
   colorDistSq: colorDistSq
 };
 
@@ -81,6 +120,7 @@ function startCamera(video, statusEl) {
     setStatus(statusEl, "Camera API not available in this browser.", "err");
     return Promise.reject(new Error("no camera api"));
   }
+  stopOtherCameras(video);
   return navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }, audio: false })
     .then(function(stream) {
       activeStreams.push(stream);
@@ -101,6 +141,22 @@ function stopAllCameras() {
   activeStreams.forEach(function(s) { s.getTracks().forEach(function(t) { t.stop(); }); });
   activeStreams = [];
   document.querySelectorAll(".stage.cam-on").forEach(function(st) { st.classList.remove("cam-on"); });
+}
+/* One live camera lab-wide: opening a stage's camera releases the others,
+ * so phones never hold two streams (battery + device limits). */
+function stopOtherCameras(except) {
+  if (except && except.srcObject) except.srcObject = null; // detach first: old stream prunes below
+  activeStreams = activeStreams.filter(function(s) {
+    var live = false;
+    document.querySelectorAll(".stage video").forEach(function(v) {
+      if (v.srcObject === s) live = true;
+    });
+    if (!live) s.getTracks().forEach(function(t) { t.stop(); });
+    return live;
+  });
+  document.querySelectorAll(".stage").forEach(function(st) {
+    if (st.querySelector("video") !== except) st.classList.remove("cam-on");
+  });
 }
 
 /* ---------- mode tabs ---------- */
@@ -321,6 +377,15 @@ var Sim = {
     });
     $("btn-sim-drop").addEventListener("click", function() { self.drop(); });
     $("btn-sim-reset").addEventListener("click", function() { self.reset(); });
+    document.addEventListener("keydown", function(e) {
+      if (e.code === "Space" && !$("mode-simulate").hidden) {
+        var tag = (document.activeElement && document.activeElement.tagName) || "";
+        if (tag !== "INPUT" && tag !== "SELECT" && tag !== "TEXTAREA") {
+          e.preventDefault();
+          self.drop();
+        }
+      }
+    });
     $("btn-sim-cam").addEventListener("click", function() {
       startCamera($("sim-video"), $("sim-status")).then(function() { self.resize(); self.reset(); }, function() {});
     });
@@ -343,6 +408,10 @@ var Measure = {
     try { this.trials = JSON.parse(localStorage.getItem("physlab_trials") || "[]"); }
     catch (e) { this.trials = []; }
     if (!Array.isArray(this.trials)) this.trials = [];
+    // Drop corrupt entries so one bad write can't break rendering.
+    this.trials = this.trials.filter(function(tr) {
+      return tr && isFinite(tr.h) && isFinite(tr.t) && isFinite(tr.g);
+    });
   },
   save: function() {
     try { localStorage.setItem("physlab_trials", JSON.stringify(this.trials)); } catch (e) {}
@@ -377,13 +446,33 @@ var Measure = {
     this.save(); this.render();
     setStatus($("m-status"), "Trials cleared.", "");
   },
+  exportCSV: function() {
+    if (!this.trials.length) {
+      setStatus($("m-status"), "No trials to export yet.", "err");
+      return;
+    }
+    var lines = ["trial,height_m,time_s,g_ms2"];
+    this.trials.forEach(function(tr, i) {
+      lines.push([i + 1, tr.h.toFixed(3), tr.t.toFixed(4), tr.g.toFixed(3)].join(","));
+    });
+    var blob = new Blob([lines.join("\n") + "\n"], { type: "text/csv" });
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "gravity-trials.csv";
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function() { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+    setStatus($("m-status"), "Exported " + this.trials.length + " trial(s) to gravity-trials.csv.", "ok");
+  },
   render: function() {
     var tb = $("m-rows");
     tb.innerHTML = "";
     this.trials.forEach(function(tr, i) {
       var row = document.createElement("tr");
       row.innerHTML = "<td>" + (i + 1) + "</td><td>" + tr.h.toFixed(2) + "</td><td>" +
-        tr.t.toFixed(3) + "</td><td>" + tr.g.toFixed(2) + "</td>";
+        tr.t.toFixed(3) + "</td><td>" + tr.g.toFixed(2) + "</td>" +
+        '<td><button type="button" class="row-del" data-del="' + i +
+        '" aria-label="Delete trial ' + (i + 1) + '">✕</button></td>';
       tb.appendChild(row);
     });
     var box = $("m-stats");
@@ -404,6 +493,16 @@ var Measure = {
     this.load(); this.render();
     $("btn-timer").addEventListener("click", function() { self.toggle(); });
     $("btn-m-clear").addEventListener("click", function() { self.clear(); });
+    $("btn-m-export").addEventListener("click", function() { self.exportCSV(); });
+    $("m-rows").addEventListener("click", function(e) {
+      var btn = e.target.closest ? e.target.closest("[data-del]") : null;
+      if (!btn) return;
+      var i = parseInt(btn.getAttribute("data-del"), 10);
+      if (!(i >= 0 && i < self.trials.length)) return;
+      self.trials.splice(i, 1);
+      self.save(); self.render();
+      setStatus($("m-status"), "Trial deleted.", "");
+    });
     $("m-height").addEventListener("input", function() { /* height applies to next trial */ });
     document.addEventListener("keydown", function(e) {
       if (e.code === "Space" && !$("mode-measure").hidden) {
@@ -623,7 +722,21 @@ var Track = {
       LabLog.push("auto-track", "fall lasted only " + span.toFixed(2) + " s (need > 0.1 s)");
       return;
     }
-    var fit = fitGravity(mks);
+    var rise = mks[mks.length - 1].y - mks[0].y;
+    if (!(rise > 0.05)) {
+      setStatus($("track-status"), "Ball moved only " + (rise * 100).toFixed(1) +
+        " cm — drop it through the frame, don't just hold it.", "err");
+      LabLog.push("auto-track", "only " + (rise * 100).toFixed(1) + " cm of motion detected");
+      return;
+    }
+    // Trim pre-drop loitering: re-anchor where sustained fall begins.
+    var cut = 0;
+    while (cut < mks.length - 4 && mks[cut].y < 0.03 * rise) cut++;
+    if (cut > 0) {
+      var rt0 = mks[cut].t, ry0 = mks[cut].y;
+      mks = mks.slice(cut).map(function(s) { return { t: s.t - rt0, y: s.y - ry0 }; });
+    }
+    var fit = fitFreeFall(mks);
     if (!fit || !(fit.g > 0) || !(fit.g < 60)) {
       setStatus($("track-status"), "Fit failed — noisier data than expected. Retry with steadier light.", "err");
       LabLog.push("auto-track", "least-squares fit failed on " + mks.length + " points");
@@ -632,8 +745,8 @@ var Track = {
     LabLog.lastFit = { g: fit.g, rmse: fit.rmse, n: mks.length, span: span, h: h };
     var err = (fit.g - 9.81) / 9.81 * 100;
     setStatus($("track-status"), "g ≈ " + fit.g.toFixed(2) + " m/s² from " + mks.length +
-      " points (" + span.toFixed(2) + " s, RMSE " + (fit.rmse * 100).toFixed(1) +
-      " cm, " + (err >= 0 ? "+" : "") + err.toFixed(1) + "% vs 9.81).", "ok");
+      " points (" + span.toFixed(2) + " s, v0 ≈ " + fit.v0.toFixed(2) + " m/s, RMSE " +
+      (fit.rmse * 100).toFixed(1) + " cm, " + (err >= 0 ? "+" : "") + err.toFixed(1) + "% vs 9.81).", "ok");
     this.plot(mks, fit);
   },
   plot: function(mks, fit) {
@@ -657,7 +770,7 @@ var Track = {
     ctx.beginPath();
     for (var i = 0; i <= 40; i++) {
       var t = tMax * i / 40;
-      var y = fit.y0 + (fit.g / 2) * t * t;
+      var y = fit.y0 + (fit.v0 || 0) * t + (fit.g / 2) * t * t;
       if (i === 0) ctx.moveTo(X(t), Y(y)); else ctx.lineTo(X(t), Y(y));
     }
     ctx.stroke();
@@ -709,12 +822,21 @@ var Track = {
       $("btn-track-rec").innerHTML = '<i class="fa-solid fa-circle"></i> Record fall';
       setStatus($("track-status"), "Cleared.", "");
     });
+    document.addEventListener("keydown", function(e) {
+      if (e.code === "Space" && !$("mode-track").hidden) {
+        var tag = (document.activeElement && document.activeElement.tagName) || "";
+        if (tag !== "INPUT" && tag !== "SELECT" && tag !== "TEXTAREA") {
+          e.preventDefault();
+          if (self.recording) self.stop(); else self.start();
+        }
+      }
+    });
     window.addEventListener("beforeunload", stopAllCameras);
   }
 };
 
 /* ---------- MODE 4: hand-held ball ---------- */
-// Release line: drag the ball below this fraction of the frame to drop it.
+// Release line: lift the ball above this fraction of the frame to drop it.
 var HOLD_DROP_LINE = 0.2;
 var Hold = {
   target: { r: 229, g: 72, b: 77 },
@@ -722,7 +844,7 @@ var Hold = {
   sx: 0.5, sy: 0.3, fix: false,     // smoothed hand position (normalized)
   falling: false, landed: false, justResumed: false,
   t: 0, yM: 0, v: 0, h0: 0, prevYM: 0,
-  hvx: 0, hvy: 0, hotFrames: 0, calmUntil: 0, steady: false, lastSeen: 0,
+  hvx: 0, hvy: 0, calmUntil: 0, steady: false, lastSeen: 0,
   raf: 0, last: 0, live: false, ball: null,
   params: function() {
     var preset = $("hold-gravity");
@@ -765,28 +887,41 @@ var Hold = {
       var was = self.steady;
       var psx = self.sx, psy = self.sy;
       var c = Vision.centroid(video, self.target, p.tol);
+      if (!c && Vision.useMotion && was) {
+        // Still hand, not a gone hand: retry without the motion gate so a
+        // pause keeps the lock (new locks still require motion). Zero the
+        // velocity so a statue can't throw.
+        Vision.useMotion = false;
+        c = Vision.centroid(video, self.target, p.tol);
+        Vision.useMotion = true;
+        if (c) { self.hvx = 0; self.hvy = 0; }
+      }
       if (c) {
         self.lastSeen = now;
         // Exponential smoothing against frame-to-frame jitter.
         self.sx += 0.45 * (c.x - self.sx);
         self.sy += 0.45 * (c.y - self.sy);
         self.fix = true;
-        // Smoothed hand velocity (frame units/sec) drives the flick gesture.
+        // Smoothed hand velocity (frame units/sec) sets throw strength on release.
         self.hvx += 0.35 * ((self.sx - psx) / dtN - self.hvx);
         self.hvy += 0.35 * ((self.sy - psy) / dtN - self.hvy);
         if (!was) { // fresh lock: ignore the jump that acquired it
           self.calmUntil = now + 600;
-          self.hvx = 0; self.hvy = 0; self.hotFrames = 0;
+          self.hvx = 0; self.hvy = 0;
         }
         self.steady = true;
       } else if (self.steady && (now - self.lastSeen) < 150) {
-        // Coast through blur frames: fast flicks wash out color, so dead-reckon
+        // Coast through brief dropouts (motion blur, blink frames): dead-reckon
         // with the last velocity instead of declaring the hand gone.
         self.sx = Math.min(1, Math.max(0, self.sx + self.hvx * dtN));
         self.sy = Math.min(1, Math.max(0, self.sy + self.hvy * dtN));
       } else {
+        // Truly lost: disarm the ring and Release until the hand returns.
+        if (self.steady || self.fix) {
+          setStatus($("hold-status"), "Hand lost — move it back into view.", "");
+        }
         self.steady = false;
-        self.hotFrames = 0;
+        self.fix = false;
       }
       if (self.steady && $("hold-line").checked && !self.falling && !self.landed && now > self.calmUntil) {
         if (self.sy < HOLD_DROP_LINE) {
@@ -794,7 +929,7 @@ var Hold = {
           self.drop(Math.max(0, p.h * self.hvy), "drag");
         }
       }
-      if (!self.falling) { // a flick may have released mid-frame; then keep release state
+      if (!self.falling) { // the line may have released mid-frame; then keep release state
         self.yM = p.h * (1 - self.sy);
         self.t = 0; self.v = 0;
         if (self.justResumed || !self.fix) {
@@ -823,7 +958,7 @@ var Hold = {
       ctx.setLineDash([]);
       ctx.fillStyle = "rgba(255,255,255,0.8)";
       ctx.font = (11 * dims.dpr) + "px system-ui, sans-serif";
-      ctx.fillText("drop", 8 * dims.dpr, ly - 5 * dims.dpr);
+      ctx.fillText("lift to drop", 8 * dims.dpr, ly - 5 * dims.dpr);
     }
     if (self.fix) {
       ctx.strokeStyle = self.falling ? "#e5484d" : "#4ecd64";
@@ -867,6 +1002,8 @@ var Hold = {
     this.falling = false;
     this.landed = false;
     this.justResumed = true;
+    this.fix = false; // force a fresh lock so Hold again never trusts a stale spot
+    this.steady = false;
     this.t = 0; this.v = 0;
     setStatus($("hold-status"), this.fix ? "Holding — move your hand, then Release." : "Move your hand into view.", "");
   },
