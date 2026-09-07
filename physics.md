@@ -188,11 +188,6 @@ title: AR Physics Lab
     <strong>Skin</strong> and wave — no clicking needed. Lift the ball above the dashed
     <strong>drop line</strong> to release it from that height. Keep your hand below the line
     to keep holding. Release (or Space) also works from anywhere.</p>
-    <div class="stage" id="hold-stage">
-      <video id="hold-video" autoplay muted playsinline></video>
-      <canvas class="overlay" id="hold-overlay"></canvas>
-      <div class="stage-empty"><span><i class="fa-solid fa-video"></i> Camera off.</span><span>Open the camera, then click your hand in the video to sample its color.</span></div>
-    </div>
     <div class="phys-controls">
       <div class="phys-field">Hand color
         <div class="swatch-row">
@@ -253,6 +248,11 @@ title: AR Physics Lab
       <div class="phys-read">theory t<strong id="ro-h-theory">—</strong></div>
     </div>
     <p class="phys-status" id="hold-status">Open the camera to begin.</p>
+    <div class="stage" id="hold-stage">
+      <video id="hold-video" autoplay muted playsinline></video>
+      <canvas class="overlay" id="hold-overlay"></canvas>
+      <div class="stage-empty"><span><i class="fa-solid fa-video"></i> Camera off.</span><span>Open the camera, then click your hand in the video to sample its color.</span></div>
+    </div>
   </div>
 
   <div class="theory-box">
@@ -293,4 +293,4 @@ title: AR Physics Lab
     <a href="{{ '/other' | relative_url }}"><i class="fa-solid fa-arrow-left"></i> Back to experiments</a>
   </p>
 </div>
-<script src="{{ '/assets/js/physics.js?v=10' | relative_url }}"></script>
+<script src="{{ '/assets/js/physics.js?v=11' | relative_url }}"></script>
