@@ -35,6 +35,24 @@ Small side projects and experiments.
 <p><input class="search-input" id="filter-projects" placeholder="Filter projects..." aria-label="Filter projects" style="width:220px; font-size:13px; padding:8px 10px; border:1px solid var(--border-color, #dde3e8); border-radius:8px;"></p>
 
 <ul class="post-list">
+  <!-- AR Physics Lab -->
+  <li class="post-item" data-item>
+    <button class="post-toggle" aria-expanded="false">
+      <span class="post-title"><i class="fa-solid fa-flask"></i> AR Physics Lab</span>
+      <span class="post-hint"><span class="more">Click to expand &#9662;</span><span class="less">Click to collapse &#9652; (or press ESC)</span></span>
+    </button>
+    <p class="post-excerpt">Camera-based science experiments — augment a falling ball over live video, then measure gravity with a stopwatch or automatic color tracking.</p>
+    <div class="post-full" hidden>
+      <p>
+        A home for running lots of small physics experiments with the camera. Experiment 01 is live:
+        drop a virtual ball over AR video, hold it in your hand via camera tracking and release it,
+        time real drops to compute <code>g = 2h/t²</code>, or let the browser track a colored ball and
+        fit the fall curve. Projectile, pendulum, and air-friction experiments are next.
+      </p>
+      <p style="margin-top: 12px;"><a href="{{ '/physics' | relative_url }}" class="pub-btn"><i class="fa-solid fa-flask"></i> Open the lab &rarr;</a></p>
+    </div>
+  </li>
+
   <!-- Zenith Coding Agent -->
   <li class="post-item" data-item>
     <button class="post-toggle" aria-expanded="false">

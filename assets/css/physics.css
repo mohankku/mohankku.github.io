@@ -1,0 +1,48 @@
+/* AR Physics Lab — lab-specific styles (shared buttons/pills come from style.scss) */
+.phys-lab { max-width: 860px; }
+.phys-hero { border: 1px solid var(--border-color, #e8ecef); border-radius: 12px; padding: 18px 20px; background: var(--card-bg, #fff); margin-bottom: 18px; }
+.phys-hero h2 { margin: 0 0 6px; font-size: 22px; }
+.phys-hero p { margin: 6px 0; font-size: 14px; line-height: 1.55; color: var(--text-color, #1f2937); }
+.phys-hero .privacy { font-size: 12px; color: var(--text-muted, #6b7a8a); }
+.phys-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin: 14px 0 20px; }
+.phys-exp-card { border: 1px solid var(--border-color, #e8ecef); border-radius: 10px; padding: 14px; background: var(--card-bg, #fff); font-size: 13px; }
+.phys-exp-card h3 { margin: 0 0 4px; font-size: 15px; }
+.phys-exp-card p { margin: 6px 0 10px; color: var(--text-muted, #475569); line-height: 1.5; }
+.phys-exp-card.active { border-color: var(--link-color, #1a56db); box-shadow: 0 0 0 1px var(--link-color, #1a56db); }
+.phys-badge { display: inline-block; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 20px; margin-bottom: 6px; }
+.phys-badge.live { background: #e6f7f0; color: #0a7a4b; border: 1px solid #b6e8d5; }
+.phys-badge.soon { background: #f1f5f9; color: #64748b; border: 1px solid #e2e8f0; }
+.phys-mode-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0; }
+.phys-mode-btn { border: 1px solid var(--border-color, #dde3e8); background: #fff; border-radius: 8px; padding: 8px 14px; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; color: var(--text-color, #1f2937); }
+.phys-mode-btn.active { background: #0f2027; color: #fff; border-color: #0f2027; }
+.phys-mode-btn:focus-visible { outline: 2px solid var(--link-color, #3b82f6); outline-offset: 2px; }
+.phys-mode { border: 1px solid var(--border-color, #e8ecef); border-radius: 12px; padding: 16px; background: var(--card-bg, #fff); margin-bottom: 16px; }
+.phys-mode[hidden] { display: none; }
+.phys-mode h3 { margin-top: 0; font-size: 16px; }
+.phys-mode p.desc { font-size: 13px; color: var(--text-muted, #475569); line-height: 1.55; }
+.stage { position: relative; width: 100%; aspect-ratio: 4 / 3; background: #0b1220; border-radius: 10px; overflow: hidden; margin: 10px 0; }
+.stage video, .stage canvas.overlay { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: fill; }
+.phys-field input:disabled { opacity: .45; }
+.stage canvas.overlay { pointer-events: none; }
+.stage .stage-empty { position: absolute; inset: 0; display: flex; flex-direction: column; gap: 6px; align-items: center; justify-content: center; color: #cbd5e1; font-size: 13px; text-align: center; padding: 0 20px; }
+.stage.cam-on .stage-empty { display: none; }
+.phys-controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: end; margin: 10px 0; }
+.phys-field { display: flex; flex-direction: column; gap: 4px; font-size: 12px; font-weight: 600; color: var(--text-muted, #475569); }
+.phys-field input, .phys-field select { font: inherit; font-size: 13px; font-weight: 400; color: var(--text-color, #111); padding: 7px 9px; border: 1px solid var(--border-color, #dde3e8); border-radius: 8px; background: #fff; min-width: 0; }
+.phys-field input[type="range"] { padding: 0; border: none; }
+.phys-readouts { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px; margin: 10px 0; }
+.phys-read { background: var(--code-bg, #f1f5f9); border: 1px solid var(--border-color, #e2e8f0); border-radius: 8px; padding: 8px 10px; font-size: 12px; color: var(--text-muted, #475569); }
+.phys-read strong { display: block; font-size: 16px; color: var(--text-color, #0f2027); font-variant-numeric: tabular-nums; }
+.phys-btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin: 10px 0; }
+.phys-status { font-size: 12.5px; font-weight: 600; color: var(--text-muted, #6b7a8a); margin: 6px 0; }
+.phys-status.ok { color: #0a7a4b; }
+.phys-status.err { color: #b42318; }
+.phys-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 8px; font-variant-numeric: tabular-nums; }
+.phys-table th, .phys-table td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--border-color, #eef2f5); }
+.phys-table th { font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--text-muted, #6b7a8a); }
+.swatch-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.swatch { width: 28px; height: 28px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; padding: 0; }
+.swatch.selected { border-color: #0f2027; box-shadow: 0 0 0 2px #fff inset; }
+.theory-box { background: var(--code-bg, #f1f5f9); border: 1px solid var(--border-color, #e2e8f0); border-radius: 10px; padding: 12px 14px; font-size: 13px; line-height: 1.6; margin-top: 14px; }
+.theory-box code { font-size: 12.5px; }
+@media (max-width: 600px) { .phys-controls { flex-direction: column; align-items: stretch; } }
