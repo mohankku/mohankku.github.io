@@ -8,33 +8,33 @@ noindex: true
 
 <div class="chat-page" id="chat-page">
   <div class="chat-hero">
-    <h2><i class="fa-solid fa-robot"></i> Local Chat</h2>
-    <p>Talk to an Ollama model running on this laptop. The page calls your local Ollama server directly from the browser — no messages leave your machine.</p>
+    <h2><i class="fa-solid fa-robot" aria-hidden="true"></i> Local Chat</h2>
+    <p>Private, on-device chat with your local Ollama models. The browser connects directly to <code>localhost:11434</code> — no prompts or images leave this machine.</p>
     <div class="chat-meta">
-      <span class="meta-pill"><span class="status-dot dot-grey" id="ollama-dot"></span> <span id="ollama-status">Not connected</span></span>
-      <span class="meta-pill"><i class="fa-solid fa-microchip"></i> <span id="model-count">— models</span></span>
+      <span class="meta-pill" aria-live="polite"><span class="status-dot dot-grey" id="ollama-dot" aria-hidden="true"></span> <span id="ollama-status">Not connected</span></span>
+      <span class="meta-pill"><i class="fa-solid fa-microchip" aria-hidden="true"></i> <span id="model-count">— models</span></span>
       <div class="chat-actions">
-        <button class="btn btn-ghost" id="btn-reconnect" title="Reconnect to Ollama"><i class="fa-solid fa-plug"></i> Reconnect</button>
-        <button class="btn btn-ghost" id="btn-clear" title="Clear conversation"><i class="fa-solid fa-trash"></i> Clear</button>
+        <button class="btn btn-ghost" id="btn-reconnect" type="button"><i class="fa-solid fa-plug" aria-hidden="true"></i> Reconnect</button>
+        <button class="btn btn-ghost" id="btn-clear" type="button"><i class="fa-solid fa-trash" aria-hidden="true"></i> Clear</button>
       </div>
     </div>
   </div>
 
-  <div class="chat-settings">
+  <div class="chat-settings" role="group" aria-label="Chat settings">
     <div class="setting">
       <label for="endpoint">Ollama endpoint</label>
-      <input id="endpoint" type="url" value="http://localhost:11434" spellcheck="false" autocomplete="off">
+      <input id="endpoint" type="url" value="http://localhost:11434" spellcheck="false" autocomplete="off" inputmode="url">
     </div>
     <div class="setting">
       <label for="model">Model</label>
       <select id="model"><option>Loading…</option></select>
     </div>
     <div class="setting">
-      <label for="system">System prompt <span class="opt">(optional)</span></label>
-      <input id="system" type="text" placeholder="e.g. You are a concise coding assistant." autocomplete="off">
+      <label for="system">System prompt <span class="opt">— optional</span></label>
+      <input id="system" type="text" placeholder="You are a concise coding assistant." autocomplete="off">
     </div>
     <div class="setting setting-wide">
-      <label>Web search <span class="opt">(live prices &amp; products)</span></label>
+      <label>Web search <span class="opt">— live prices &amp; products</span></label>
       <div class="search-row">
         <label class="check"><input type="checkbox" id="search-enabled"> Enable</label>
         <select id="search-provider" aria-label="Search provider">
@@ -42,27 +42,27 @@ noindex: true
           <option value="tavily">Tavily (direct)</option>
           <option value="brave">Brave Search (direct)</option>
         </select>
-        <input id="search-key" type="password" placeholder="API key — only needed for direct mode" autocomplete="off" aria-label="Search API key">
+        <input id="search-key" type="password" placeholder="API key for direct mode" autocomplete="off" aria-label="Search API key">
       </div>
-      <p class="setting-hint">Local proxy (default) keeps your API key on this laptop — no key to paste. Direct modes need a free key from <a href="https://tavily.com" target="_blank" rel="noopener">Tavily</a> or <a href="https://brave.com/search/api/" target="_blank" rel="noopener">Brave Search</a>. Best with the Devstral model (native tool calling).</p>
+      <p class="setting-hint">Local proxy keeps your API key on this machine. Direct modes require a free key from <a href="https://tavily.com" target="_blank" rel="noopener">Tavily</a> or <a href="https://brave.com/search/api/" target="_blank" rel="noopener">Brave Search</a> and work best with a tool-calling model like Devstral.</p>
     </div>
     <div class="setting setting-wide">
       <label>Assistant extras</label>
       <div class="search-row">
-        <label class="check"><input type="checkbox" id="followups-enabled" checked> Suggest follow-up questions</label>
-        <label class="check"><input type="checkbox" id="market-enabled"> Include market snapshot (top movers)</label>
+        <label class="check"><input type="checkbox" id="followups-enabled" checked> Suggest follow-ups</label>
+        <label class="check"><input type="checkbox" id="market-enabled"> Market snapshot</label>
       </div>
     </div>
   </div>
 
   <div class="live-cam" id="live-cam">
     <div class="live-cam-head">
-      <div class="live-cam-title"><i class="fa-solid fa-video"></i> Live Camera Commentary</div>
+      <div class="live-cam-title"><i class="fa-solid fa-video" aria-hidden="true"></i> Live Camera Commentary</div>
       <span class="live-badge" id="cam-badge">Off</span>
       <div class="live-cam-actions">
-        <button class="btn btn-ghost btn-sm" id="btn-cam-toggle" type="button"><i class="fa-solid fa-camera"></i> Open camera</button>
-        <button class="btn btn-ghost btn-sm" id="btn-cam-snap" type="button" hidden title="Send one frame now"><i class="fa-solid fa-bolt"></i> Snap</button>
-        <button class="btn btn-ghost btn-sm" id="btn-cam-stop" type="button" hidden><i class="fa-solid fa-stop"></i> Close</button>
+        <button class="btn btn-ghost btn-sm" id="btn-cam-toggle" type="button"><i class="fa-solid fa-camera" aria-hidden="true"></i> Open camera</button>
+        <button class="btn btn-ghost btn-sm" id="btn-cam-snap" type="button" hidden><i class="fa-solid fa-bolt" aria-hidden="true"></i> Snap</button>
+        <button class="btn btn-ghost btn-sm" id="btn-cam-stop" type="button" hidden><i class="fa-solid fa-stop" aria-hidden="true"></i> Close</button>
       </div>
     </div>
     <div class="live-cam-body" id="cam-body" hidden>
@@ -94,27 +94,27 @@ noindex: true
         <label class="check"><input type="checkbox" id="cam-voice"> Speak</label>
         <label class="check"><input type="checkbox" id="cam-to-chat"> Also post to chat</label>
       </div>
-      <div class="cam-log" id="cam-log" aria-live="polite"></div>
-      <p class="cam-hint">Frames are captured in the browser and sent directly to your local Ollama vision model (<code>gemma3:4b</code>) at the endpoint above. Nothing leaves your machine.</p>
+      <div class="cam-log" id="cam-log" aria-live="polite" aria-label="Camera commentary log"></div>
+      <p class="cam-hint">Frames are processed locally by <code>gemma3:4b</code> at the endpoint above.</p>
     </div>
   </div>
 
-  <div class="chat-log" id="chat-log" aria-live="polite">
+  <div class="chat-log" id="chat-log" aria-live="polite" aria-label="Conversation">
     <div class="chat-empty" id="chat-empty">
-      <i class="fa-solid fa-comments"></i>
-      <p><strong>No messages yet.</strong><br>Pick a model above and say hello.</p>
+      <i class="fa-regular fa-comments" aria-hidden="true"></i>
+      <p><strong>No messages yet.</strong><br><span style="color:var(--text-muted)">Choose a model and start a conversation. Your history is stored locally in this browser.</span></p>
     </div>
   </div>
 
   <div class="img-strip" id="img-strip" hidden></div>
   <div class="chat-composer">
-    <textarea id="composer" rows="2" placeholder="Message your local model… (Enter to send, Shift+Enter for newline)" aria-label="Message"></textarea>
+    <textarea id="composer" rows="2" placeholder="Message your local model — Enter to send, Shift+Enter for newline" aria-label="Message"></textarea>
     <div class="composer-btns">
-      <button class="btn btn-ghost" id="btn-attach" aria-label="Attach image" title="Attach image (answered by the vision model)"><i class="fa-solid fa-paperclip"></i></button>
+      <button class="btn btn-ghost" id="btn-attach" type="button" aria-label="Attach image"><i class="fa-solid fa-paperclip" aria-hidden="true"></i></button>
       <input type="file" id="img-input" accept="image/*" multiple hidden>
-      <button class="btn btn-ghost" id="btn-mic" aria-label="Voice input" title="Voice input"><i class="fa-solid fa-microphone"></i></button>
-      <button class="btn btn-primary" id="btn-send" aria-label="Send message"><i class="fa-solid fa-paper-plane"></i> Send</button>
-      <button class="btn btn-ghost" id="btn-stop" aria-label="Stop generating" hidden><i class="fa-solid fa-stop"></i> Stop</button>
+      <button class="btn btn-ghost" id="btn-mic" type="button" aria-label="Voice input"><i class="fa-solid fa-microphone" aria-hidden="true"></i></button>
+      <button class="btn btn-primary" id="btn-send" type="button" aria-label="Send message"><i class="fa-solid fa-paper-plane" aria-hidden="true"></i> Send</button>
+      <button class="btn btn-ghost" id="btn-stop" type="button" aria-label="Stop generating" hidden><i class="fa-solid fa-stop" aria-hidden="true"></i> Stop</button>
     </div>
   </div>
 
