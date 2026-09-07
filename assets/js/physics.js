@@ -40,6 +40,11 @@ function colorDistSq(pxR, pxG, pxB, tR, tG, tB) {
   var dr = pxR - tR, dg = pxG - tG, db = pxB - tB;
   return dr * dr + dg * dg + db * db;
 }
+/* Blue-screen backdrop test: strongly blue-dominant pixels belong to a hung
+ * blue sheet, never to the hand — excluded when the backdrop option is on. */
+function isBlueBackdrop(r, g, b) {
+  return b > 90 && (b - r) > 25 && (b - g) > 15;
+}
 /* Classic YCrCb skin rule — no calibration click needed, works across
  * lighting better than one sampled RGB point. */
 function isSkinPixel(r, g, b) {
@@ -567,6 +572,7 @@ var Vision = {
   },
   skinOnly: false,  // YCrCb skin rule instead of sampled RGB
   useMotion: false, // require pixels to also be moving (rejects static clutter)
+  ignoreBlue: false, // chroma-key out a blue bedsheet backdrop
   mask: null, gray: null, prev: null, seen: null, stack: null, stamp: 0,
   // Downsample frame, build match mask, return centroid of the LARGEST
   // 4-connected blob (or null). Largest-blob wins over a global average so
@@ -588,7 +594,7 @@ var Vision = {
       this.stack = new Int32Array(N);
     }
     var tolSq = tol * tol;
-    var skin = this.skinOnly, motion = this.useMotion;
+    var skin = this.skinOnly, motion = this.useMotion, blue = this.ignoreBlue;
     var mask = this.mask, gray = this.gray, prev = this.prev;
     var n = 0, i, p, r, g, b;
     for (i = 0, p = 0; i < d.length; i += 4, p++) {
@@ -596,6 +602,7 @@ var Vision = {
       var y = (0.299 * r + 0.587 * g + 0.114 * b) | 0;
       var ok = skin ? isSkinPixel(r, g, b)
                     : colorDistSq(r, g, b, target.r, target.g, target.b) <= tolSq;
+      if (ok && blue && isBlueBackdrop(r, g, b)) ok = false;
       if (ok && motion && Math.abs(y - prev[p]) < 14) ok = false;
       mask[p] = ok ? 1 : 0;
       if (ok) n++;
@@ -656,6 +663,7 @@ var Track = {
     if (!self.recording) return;
     Vision.skinOnly = false;
     Vision.useMotion = false;
+    Vision.ignoreBlue = false;
     var video = $("track-video");
     var tol = parseFloat($("track-tol").value) || 80;
     var c = self.centroid(video, tol);
@@ -868,6 +876,7 @@ var Hold = {
     var p = self.params();
     Vision.skinOnly = self.useSkin;
     Vision.useMotion = $("hold-motion").checked;
+    Vision.ignoreBlue = $("hold-blue").checked;
     var video = $("hold-video");
     var cv = $("hold-overlay");
     var dims = fitCanvas(cv);

@@ -189,7 +189,8 @@ title: AR Physics Lab
     <p class="desc">The virtual ball sticks to your hand as you move it. Easiest: pick
     <strong>Skin</strong> and wave — no clicking needed. Lift the ball above the dashed
     <strong>drop line</strong> to release it from that height. Keep your hand below the line
-    to keep holding. Release (or Space) also works from anywhere.</p>
+    to keep holding. Hanging a blue sheet behind you? Tick <strong>Blue backdrop</strong> and
+    the tracker will ignore it. Release (or Space) also works from anywhere.</p>
     <div class="phys-controls">
       <div class="phys-field">Hand color
         <div class="swatch-row">
@@ -205,6 +206,9 @@ title: AR Physics Lab
       </label>
       <label class="phys-field" style="flex-direction:row; align-items:center; gap:6px;">
         <input id="hold-line" type="checkbox" checked> Drop line
+      </label>
+      <label class="phys-field" style="flex-direction:row; align-items:center; gap:6px;">
+        <input id="hold-blue" type="checkbox"> Blue backdrop
       </label>
       <label class="phys-field">Tolerance
         <input id="hold-tol" type="range" min="30" max="150" value="80" step="5" disabled>
