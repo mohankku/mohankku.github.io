@@ -20,7 +20,7 @@
 .phys-mode[hidden] { display: none; }
 .phys-mode h3 { margin-top: 0; font-size: 16px; }
 .phys-mode p.desc { font-size: 13px; color: var(--text-muted, #475569); line-height: 1.55; }
-.stage { position: relative; width: 100%; aspect-ratio: 4 / 3; background: #0b1220; border-radius: 10px; overflow: hidden; margin: 10px 0; }
+.stage { position: relative; width: 100%; aspect-ratio: 4 / 3; min-height: 240px; background: #0b1220; border-radius: 10px; overflow: hidden; margin: 10px 0; }
 .stage video, .stage canvas.overlay { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: fill; }
 .phys-field input:disabled { opacity: .45; }
 .ask-row { display: flex; gap: 8px; margin: 10px 0; }
@@ -49,6 +49,7 @@
 .swatch-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 .swatch { width: 28px; height: 28px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; padding: 0; }
 .swatch.selected { border-color: #0f2027; box-shadow: 0 0 0 2px #fff inset; }
+.swatch:focus-visible { outline: 2px solid var(--link-color, #3b82f6); outline-offset: 2px; }
 .theory-box { background: var(--code-bg, #f1f5f9); border: 1px solid var(--border-color, #e2e8f0); border-radius: 10px; padding: 12px 14px; font-size: 13px; line-height: 1.6; margin-top: 14px; }
 .theory-box code { font-size: 12.5px; }
 @media (max-width: 600px) { .phys-controls { flex-direction: column; align-items: stretch; } }

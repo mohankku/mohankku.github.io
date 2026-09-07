@@ -125,9 +125,10 @@ function startCamera(video, statusEl) {
     setStatus(statusEl, "Camera API not available in this browser.", "err");
     return Promise.reject(new Error("no camera api"));
   }
-  stopOtherCameras(video);
   return navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }, audio: false })
     .then(function(stream) {
+      // Prune only after success: a denied request no longer kills working cameras.
+      stopOtherCameras(video);
       activeStreams.push(stream);
       video.srcObject = stream;
       return video.play().then(function() {
@@ -200,6 +201,17 @@ function currentBallStyle(sel) {
 }
 function rememberBallStyle(s) {
   try { localStorage.setItem("physlab_ball", s); } catch (e) {}
+}
+/* Persist experiment settings across visits (gravity, heights). */
+function rememberSetting(key, value) {
+  try { localStorage.setItem("physlab_" + key, value); } catch (e) {}
+}
+function restoreSettings(ids) {
+  ids.forEach(function(pair) {
+    var v = null;
+    try { v = localStorage.getItem("physlab_" + pair[1]); } catch (e) {}
+    if (v !== null && v !== "" && $(pair[0])) $(pair[0]).value = v;
+  });
 }
 /* Soft ground shadow: tighter + darker as the ball nears the ground. */
 function drawShadow(ctx, x, groundY, r, prox) {
@@ -279,6 +291,7 @@ var Sim = {
     var preset = $("sim-gravity");
     var g = parseFloat(preset.value);
     if (preset.value === "custom") g = parseFloat($("sim-g-custom").value) || 9.81;
+    if (!(g > 0)) g = 9.81;
     return {
       g: g,
       h: Math.min(50, Math.max(0.2, parseFloat($("sim-height").value) || 2)),
@@ -385,7 +398,7 @@ var Sim = {
     document.addEventListener("keydown", function(e) {
       if (e.code === "Space" && !$("mode-simulate").hidden) {
         var tag = (document.activeElement && document.activeElement.tagName) || "";
-        if (tag !== "INPUT" && tag !== "SELECT" && tag !== "TEXTAREA") {
+        if (tag !== "INPUT" && tag !== "SELECT" && tag !== "TEXTAREA" && tag !== "BUTTON") {
           e.preventDefault();
           self.drop();
         }
@@ -394,9 +407,14 @@ var Sim = {
     $("btn-sim-cam").addEventListener("click", function() {
       startCamera($("sim-video"), $("sim-status")).then(function() { self.resize(); self.reset(); }, function() {});
     });
+    restoreSettings([["sim-gravity", "sim-g"], ["sim-g-custom", "sim-gc"], ["sim-height", "sim-h"]]);
+    $("sim-g-custom").disabled = ($("sim-gravity").value !== "custom");
     ["sim-gravity", "sim-g-custom", "sim-height", "sim-slow", "sim-trail"].forEach(function(id) {
       $(id).addEventListener("input", function() {
         $("sim-g-custom").disabled = ($("sim-gravity").value !== "custom");
+        rememberSetting("sim-g", $("sim-gravity").value);
+        rememberSetting("sim-gc", $("sim-g-custom").value);
+        rememberSetting("sim-h", $("sim-height").value);
         if (!self.running) self.reset();
       });
     });
@@ -487,9 +505,13 @@ var Measure = {
     }
     var gs = this.trials.map(function(tr) { return tr.g; });
     var m = mean(gs), s = std(gs);
+    var sorted = gs.slice().sort(function(a, b) { return a - b; });
+    var med = sorted.length % 2 ? sorted[(sorted.length - 1) / 2]
+                                : (sorted[sorted.length / 2 - 1] + sorted[sorted.length / 2]) / 2;
     var err = (m - 9.81) / 9.81 * 100;
     box.innerHTML = "Mean g = <strong>" + m.toFixed(2) + " m/s²</strong>" +
       (gs.length > 1 ? " ± " + s.toFixed(2) : "") +
+      " &nbsp;·&nbsp; median " + med.toFixed(2) +
       " &nbsp;·&nbsp; error vs 9.81: <strong>" + (err >= 0 ? "+" : "") + err.toFixed(1) + "%</strong>" +
       " &nbsp;·&nbsp; n = " + gs.length;
   },
@@ -512,7 +534,7 @@ var Measure = {
     document.addEventListener("keydown", function(e) {
       if (e.code === "Space" && !$("mode-measure").hidden) {
         var tag = (document.activeElement && document.activeElement.tagName) || "";
-        if (tag !== "INPUT" && tag !== "SELECT" && tag !== "TEXTAREA") {
+        if (tag !== "INPUT" && tag !== "SELECT" && tag !== "TEXTAREA" && tag !== "BUTTON") {
           e.preventDefault();
           self.toggle();
         }
@@ -573,6 +595,8 @@ var Vision = {
   skinOnly: false,  // YCrCb skin rule instead of sampled RGB
   useMotion: false, // require pixels to also be moving (rejects static clutter)
   ignoreBlue: false, // chroma-key out a blue bedsheet backdrop
+  pref: null,        // sticky lock: {x, y} to prefer when choosing among blobs
+  stickR: 0.3,       // ...within this normalized distance of the last position
   mask: null, gray: null, prev: null, seen: null, stack: null, stamp: 0,
   // Downsample frame, build match mask, return centroid of the LARGEST
   // 4-connected blob (or null). Largest-blob wins over a global average so
@@ -610,10 +634,14 @@ var Vision = {
     }
     prev.set(gray);
     if (n < 12) return null;
-    // Largest 4-connected component via flood fill.
+    // Largest 4-connected component via flood fill — but a lock already held
+    // near the previous position wins over a bigger blob elsewhere (your face
+    // is usually the largest skin blob in frame; this keeps the hand).
     var seen = this.seen, stack = this.stack;
     var stamp = (this.stamp = (this.stamp + 1) | 0);
+    var pref = this.pref, stickR = this.stickR;
     var best = 0, bestX = 0, bestY = 0;
+    var near = 0, nearX = 0, nearY = 0;
     for (p = 0; p < N; p++) {
       if (!mask[p] || seen[p] === stamp) continue;
       var top = 0;
@@ -629,7 +657,14 @@ var Vision = {
         if (qy < H - 1) { var dd = q + W; if (mask[dd] && seen[dd] !== stamp) { seen[dd] = stamp; stack[top++] = dd; } }
       }
       if (cn > best) { best = cn; bestX = cx / cn; bestY = cy / cn; }
+      if (pref && cn >= 12) {
+        var gx = cx / cn / W - pref.x, gy = cy / cn / H - pref.y;
+        if (gx * gx + gy * gy < stickR * stickR && cn > near) {
+          near = cn; nearX = cx / cn; nearY = cy / cn;
+        }
+      }
     }
+    if (near >= 12) return { x: nearX / W, y: nearY / H, n: near };
     if (best < 12) return null;
     return { x: bestX / W, y: bestY / H, n: best };
   },
@@ -664,6 +699,7 @@ var Track = {
     Vision.skinOnly = false;
     Vision.useMotion = false;
     Vision.ignoreBlue = false;
+    Vision.pref = null;
     var video = $("track-video");
     var tol = parseFloat($("track-tol").value) || 80;
     var c = self.centroid(video, tol);
@@ -778,6 +814,10 @@ var Track = {
     ctx.lineWidth = dims.dpr;
     ctx.beginPath(); ctx.moveTo(30 * dims.dpr, 4); ctx.lineTo(30 * dims.dpr, dims.h - 14 * dims.dpr);
     ctx.lineTo(dims.w - 6, dims.h - 14 * dims.dpr); ctx.stroke();
+    ctx.fillStyle = "rgba(0,0,0,0.55)";
+    ctx.font = (10 * dims.dpr) + "px system-ui, sans-serif";
+    ctx.fillText("t (s)", dims.w - 34 * dims.dpr, dims.h - 3 * dims.dpr);
+    ctx.fillText("y (m)", 4 * dims.dpr, 10 * dims.dpr);
     // fitted curve
     ctx.strokeStyle = "#1a56db";
     ctx.lineWidth = 2 * dims.dpr;
@@ -804,6 +844,10 @@ var Track = {
         self.target = { r: c[0], g: c[1], b: c[2] };
         setStatus($("track-status"), "Tracking " + sw.getAttribute("data-color") + " — or click the video to sample.", "");
       });
+    });
+    restoreSettings([["track-height", "track-h"]]);
+    $("track-height").addEventListener("input", function() {
+      rememberSetting("track-h", $("track-height").value);
     });
     $("btn-track-cam").addEventListener("click", function() {
       startCamera($("track-video"), $("track-status")).then(function() {
@@ -839,7 +883,7 @@ var Track = {
     document.addEventListener("keydown", function(e) {
       if (e.code === "Space" && !$("mode-track").hidden) {
         var tag = (document.activeElement && document.activeElement.tagName) || "";
-        if (tag !== "INPUT" && tag !== "SELECT" && tag !== "TEXTAREA") {
+        if (tag !== "INPUT" && tag !== "SELECT" && tag !== "TEXTAREA" && tag !== "BUTTON") {
           e.preventDefault();
           if (self.recording) self.stop(); else self.start();
         }
@@ -850,8 +894,12 @@ var Track = {
 };
 
 /* ---------- MODE 4: hand-held ball ---------- */
-// Release line: lift the ball above this fraction of the frame to drop it.
-var HOLD_DROP_LINE = 0.2;
+// Release line position (fraction of frame height): lift the ball above it to drop.
+function dropLinePos() {
+  var v = parseFloat($("hold-linepos").value);
+  if (!(v > 0)) v = 20;
+  return Math.min(0.9, Math.max(0.05, v / 100));
+}
 var Hold = {
   target: { r: 229, g: 72, b: 77 },
   useSkin: true, // matches the pre-selected Skin swatch in the markup
@@ -864,6 +912,7 @@ var Hold = {
     var preset = $("hold-gravity");
     var g = parseFloat(preset.value);
     if (preset.value === "custom") g = parseFloat($("hold-g-custom").value) || 9.81;
+    if (!(g > 0)) g = 9.81;
     return {
       g: g,
       h: Math.min(50, Math.max(0.2, parseFloat($("hold-height").value) || 2)),
@@ -873,10 +922,19 @@ var Hold = {
   loop: function(now) {
     var self = this;
     if (!self.live) return;
+    if ($("mode-hold").hidden) {
+      // Tab not visible: idle the loop and stay calm, so a position jump
+      // while hidden can neither burn CPU nor false-trigger the drop line.
+      self.calmUntil = now + 600;
+      self.hvx = 0; self.hvy = 0;
+      self.raf = requestAnimationFrame(function(n) { self.loop(n); });
+      return;
+    }
     var p = self.params();
     Vision.skinOnly = self.useSkin;
     Vision.useMotion = $("hold-motion").checked;
     Vision.ignoreBlue = $("hold-blue").checked;
+    Vision.pref = self.fix ? { x: self.sx, y: self.sy } : null;
     var video = $("hold-video");
     var cv = $("hold-overlay");
     var dims = fitCanvas(cv);
@@ -939,7 +997,7 @@ var Hold = {
         self.fix = false;
       }
       if (self.steady && $("hold-line").checked && !self.falling && !self.landed && now > self.calmUntil) {
-        if (self.sy < HOLD_DROP_LINE) {
+        if (self.sy < dropLinePos()) {
           // Crossing speed becomes throw velocity; a slow crossing drops from rest.
           self.drop(Math.max(0, p.h * self.hvy), "drag");
         }
@@ -963,9 +1021,21 @@ var Hold = {
     var bx = self.sx * dims.w;
     var by = Math.min(dims.h - 8 * dims.dpr, Math.max(8 * dims.dpr, ynorm * dims.h));
     var ballR = Math.max(8 * dims.dpr, dims.w * 0.03);
+    // Tracker view: paint what the matcher sees, so users can diagnose steals.
+    if ($("hold-mask").checked && Vision.mask) {
+      var MW = Vision.work.width, MH = Vision.work.height;
+      ctx.fillStyle = "rgba(0,255,102,0.45)";
+      for (var my = 0; my < MH; my += 2) {
+        for (var mx = 0; mx < MW; mx += 2) {
+          if (Vision.mask[my * MW + mx]) {
+            ctx.fillRect(mx / MW * dims.w, my / MH * dims.h, 2 * dims.dpr, 2 * dims.dpr);
+          }
+        }
+      }
+    }
     // Drop line: drag the ball below it to release.
     if ($("hold-line").checked && !self.falling && !self.landed) {
-      var ly = HOLD_DROP_LINE * dims.h;
+      var ly = dropLinePos() * dims.h;
       ctx.strokeStyle = "rgba(255,255,255,0.65)";
       ctx.lineWidth = Math.max(1, dims.dpr);
       ctx.setLineDash([6 * dims.dpr, 5 * dims.dpr]);
@@ -1014,13 +1084,14 @@ var Hold = {
     }
   },
   reset: function() {
+    var had = this.fix;
     this.falling = false;
     this.landed = false;
     this.justResumed = true;
     this.fix = false; // force a fresh lock so Hold again never trusts a stale spot
     this.steady = false;
     this.t = 0; this.v = 0;
-    setStatus($("hold-status"), this.fix ? "Holding — move your hand, then Release." : "Move your hand into view.", "");
+    setStatus($("hold-status"), had ? "Holding — move your hand, then Release." : "Move your hand into view.", "");
   },
   init: function() {
     var self = this;
@@ -1077,15 +1148,21 @@ var Hold = {
     });
     $("btn-hold-drop").addEventListener("click", function() { self.drop(0); });
     $("btn-hold-reset").addEventListener("click", function() { self.reset(); });
-    ["hold-gravity", "hold-g-custom", "hold-height"].forEach(function(id) {
+    restoreSettings([["hold-gravity", "hold-g"], ["hold-g-custom", "hold-gc"], ["hold-height", "hold-h"], ["hold-linepos", "hold-linepos"]]);
+    $("hold-g-custom").disabled = ($("hold-gravity").value !== "custom");
+    ["hold-gravity", "hold-g-custom", "hold-height", "hold-linepos"].forEach(function(id) {
       $(id).addEventListener("input", function() {
         $("hold-g-custom").disabled = ($("hold-gravity").value !== "custom");
+        rememberSetting("hold-g", $("hold-gravity").value);
+        rememberSetting("hold-gc", $("hold-g-custom").value);
+        rememberSetting("hold-h", $("hold-height").value);
+        rememberSetting("hold-linepos", $("hold-linepos").value);
       });
     });
     document.addEventListener("keydown", function(e) {
       if (e.code === "Space" && !$("mode-hold").hidden) {
         var tag = (document.activeElement && document.activeElement.tagName) || "";
-        if (tag !== "INPUT" && tag !== "SELECT" && tag !== "TEXTAREA") {
+        if (tag !== "INPUT" && tag !== "SELECT" && tag !== "TEXTAREA" && tag !== "BUTTON") {
           e.preventDefault();
           self.drop(0);
         }
@@ -1145,9 +1222,17 @@ var Assistant = {
     box.textContent = text;
     setStatus($("ask-status"), cls === "err" ? "Assistant error." : "Assistant replied.", cls);
   },
+  hasData: function() {
+    return (Measure.trials || []).length > 0 || !!LabLog.lastFit || LabLog.failures.length > 0;
+  },
   run: function(kind, userText, b64) {
     var self = this;
     if (self.busy) return;
+    if ((kind === "diagnose" || kind === "results") && !self.hasData()) {
+      self.say("Nothing to " + (kind === "diagnose" ? "diagnose" : "explain") +
+        " yet — run a stopwatch trial or an auto-tracked fall first.", "err");
+      return;
+    }
     var prompt;
     var ctx = self.contextText();
     if (kind === "setup") {

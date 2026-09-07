@@ -190,7 +190,10 @@ title: AR Physics Lab
     <strong>Skin</strong> and wave — no clicking needed. Lift the ball above the dashed
     <strong>drop line</strong> to release it from that height. Keep your hand below the line
     to keep holding. Hanging a blue sheet behind you? Tick <strong>Blue backdrop</strong> and
-    the tracker will ignore it. Release (or Space) also works from anywhere.</p>
+    the tracker will ignore it. If the ball sticks to the wrong thing, tick <strong>Tracker
+    view</strong> to see the match dots — green where the tracker looks. Keep faces and bare
+    arms out of frame: the lock prefers your hand but a face is a bigger target. Release
+    (or Space) also works from anywhere.</p>
     <div class="phys-controls">
       <div class="phys-field">Hand color
         <div class="swatch-row">
@@ -207,8 +210,14 @@ title: AR Physics Lab
       <label class="phys-field" style="flex-direction:row; align-items:center; gap:6px;">
         <input id="hold-line" type="checkbox" checked> Drop line
       </label>
+      <label class="phys-field">Line at
+        <input id="hold-linepos" type="range" min="5" max="50" value="20" step="1">
+      </label>
       <label class="phys-field" style="flex-direction:row; align-items:center; gap:6px;">
         <input id="hold-blue" type="checkbox"> Blue backdrop
+      </label>
+      <label class="phys-field" style="flex-direction:row; align-items:center; gap:6px;">
+        <input id="hold-mask" type="checkbox"> Tracker view
       </label>
       <label class="phys-field">Tolerance
         <input id="hold-tol" type="range" min="30" max="150" value="80" step="5" disabled>
