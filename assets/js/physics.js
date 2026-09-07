@@ -662,6 +662,12 @@ var Track = {
     var now = (performance.now() - self.t0) / 1000;
     var cv = $("track-overlay");
     var dims = fitCanvas(cv);
+    if (dims.w <= 2) {
+      // Pane hidden mid-recording (tab switch): skip sampling rather than
+      // recording garbage against a collapsed canvas. Timing gap is harmless.
+      self.raf = requestAnimationFrame(function() { self.loop(); });
+      return;
+    }
     var ctx = cv.getContext("2d");
     ctx.clearRect(0, 0, dims.w, dims.h);
     if (c) {
