@@ -417,6 +417,37 @@ var Measure = {
   }
 };
 
+/* ---------- shared Ollama chat helper (local only) ---------- */
+function ollamaChat(endpoint, model, messages) {
+  return fetch(endpoint + "/api/chat", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ model: model, stream: false, messages: messages })
+  }).then(function(res) {
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    return res.json();
+  }).then(function(data) {
+    return ((data && data.message && data.message.content) || "").trim();
+  }).catch(function(err) {
+    var msg = String((err && err.message) || err);
+    if (msg.indexOf("Failed to fetch") !== -1 || msg.indexOf("NetworkError") !== -1) {
+      msg = "Ollama not reachable — run `ollama serve` on this machine.";
+    } else if (msg.indexOf("404") !== -1) {
+      msg += " — pull the model first: `ollama pull " + model + "`";
+    }
+    throw new Error(msg);
+  });
+}
+/* ---------- lab event log (feeds the assistant, never leaves device) ---------- */
+var LabLog = {
+  failures: [],
+  lastFit: null,
+  push: function(kind, detail) {
+    this.failures.push({ kind: kind, detail: detail, at: new Date().toLocaleTimeString() });
+    if (this.failures.length > 5) this.failures.shift();
+  }
+};
+
 /* ---------- shared on-device color tracker ---------- */
 var Vision = {
   work: null, wctx: null,
@@ -581,6 +612,7 @@ var Track = {
     if (pts.length < 8) {
       setStatus($("track-status"),
         "Only " + pts.length + " tracked points — need 8+. Try a brighter ball, closer camera, or higher tolerance.", "err");
+      LabLog.push("auto-track", "only " + pts.length + " tracked points (need 8+)");
       return;
     }
     var t0 = pts[0].t, y0px = pts[0].yPx;
@@ -588,13 +620,16 @@ var Track = {
     var span = mks[mks.length - 1].t;
     if (!(span > 0.1)) {
       setStatus($("track-status"), "Fall lasted " + span.toFixed(2) + " s — too short to fit.", "err");
+      LabLog.push("auto-track", "fall lasted only " + span.toFixed(2) + " s (need > 0.1 s)");
       return;
     }
     var fit = fitGravity(mks);
     if (!fit || !(fit.g > 0) || !(fit.g < 60)) {
       setStatus($("track-status"), "Fit failed — noisier data than expected. Retry with steadier light.", "err");
+      LabLog.push("auto-track", "least-squares fit failed on " + mks.length + " points");
       return;
     }
+    LabLog.lastFit = { g: fit.g, rmse: fit.rmse, n: mks.length, span: span, h: h };
     var err = (fit.g - 9.81) / 9.81 * 100;
     setStatus($("track-status"), "g ≈ " + fit.g.toFixed(2) + " m/s² from " + mks.length +
       " points (" + span.toFixed(2) + " s, RMSE " + (fit.rmse * 100).toFixed(1) +
@@ -679,12 +714,15 @@ var Track = {
 };
 
 /* ---------- MODE 4: hand-held ball ---------- */
+// Release line: drag the ball below this fraction of the frame to drop it.
+var HOLD_DROP_LINE = 0.2;
 var Hold = {
   target: { r: 229, g: 72, b: 77 },
   useSkin: true, // matches the pre-selected Skin swatch in the markup
   sx: 0.5, sy: 0.3, fix: false,     // smoothed hand position (normalized)
   falling: false, landed: false, justResumed: false,
   t: 0, yM: 0, v: 0, h0: 0, prevYM: 0,
+  hvx: 0, hvy: 0, hotFrames: 0, calmUntil: 0, steady: false, lastSeen: 0,
   raf: 0, last: 0, live: false, ball: null,
   params: function() {
     var preset = $("hold-gravity");
@@ -713,6 +751,7 @@ var Hold = {
       self.v += p.g * dt;
       self.yM -= self.v * dt;
       self.t += dt;
+      if (self.yM > p.h) { self.yM = p.h; self.v = 0; } // tossed above frame: stall at ceiling, then fall
       if (self.ball) self.ball.angle += (self.v * dt) / p.h * 6;
       if (self.yM <= 0) {
         self.yM = 0; self.falling = false; self.landed = true;
@@ -721,21 +760,51 @@ var Hold = {
           " s from " + self.h0.toFixed(2) + " m (theory " + theory.toFixed(3) + " s). Press Hold again to pick it up.", "ok");
       }
     } else if (!self.landed) {
+      var dtN = Math.min(0.1, Math.max(0.005, (now - self.last) / 1000));
       self.last = now;
+      var was = self.steady;
+      var psx = self.sx, psy = self.sy;
       var c = Vision.centroid(video, self.target, p.tol);
       if (c) {
+        self.lastSeen = now;
         // Exponential smoothing against frame-to-frame jitter.
         self.sx += 0.45 * (c.x - self.sx);
         self.sy += 0.45 * (c.y - self.sy);
         self.fix = true;
+        // Smoothed hand velocity (frame units/sec) drives the flick gesture.
+        self.hvx += 0.35 * ((self.sx - psx) / dtN - self.hvx);
+        self.hvy += 0.35 * ((self.sy - psy) / dtN - self.hvy);
+        if (!was) { // fresh lock: ignore the jump that acquired it
+          self.calmUntil = now + 600;
+          self.hvx = 0; self.hvy = 0; self.hotFrames = 0;
+        }
+        self.steady = true;
+      } else if (self.steady && (now - self.lastSeen) < 150) {
+        // Coast through blur frames: fast flicks wash out color, so dead-reckon
+        // with the last velocity instead of declaring the hand gone.
+        self.sx = Math.min(1, Math.max(0, self.sx + self.hvx * dtN));
+        self.sy = Math.min(1, Math.max(0, self.sy + self.hvy * dtN));
+      } else {
+        self.steady = false;
+        self.hotFrames = 0;
       }
-      self.yM = p.h * (1 - self.sy);
-      self.t = 0; self.v = 0;
-      if (self.justResumed || !self.fix) {
-        self.prevYM = self.yM; // re-pickup: sync, don't spin-burst
-        self.justResumed = false;
-      } else if (self.ball) {
-        self.ball.angle += Math.abs(self.yM - self.prevYM) / p.h * 6;
+      if (self.steady && $("hold-line").checked && !self.falling && !self.landed && now > self.calmUntil) {
+        if (self.sy < HOLD_DROP_LINE) {
+          // Crossing speed becomes throw velocity; a slow crossing drops from rest.
+          self.drop(Math.max(0, p.h * self.hvy), "drag");
+        }
+      }
+      if (!self.falling) { // a flick may have released mid-frame; then keep release state
+        self.yM = p.h * (1 - self.sy);
+        self.t = 0; self.v = 0;
+        if (self.justResumed || !self.fix) {
+          self.prevYM = self.yM; // re-pickup: sync, don't spin-burst
+          self.justResumed = false;
+        } else if (self.ball) {
+          self.ball.angle += Math.abs(self.yM - self.prevYM) / p.h * 6;
+          self.prevYM = self.yM;
+        }
+      } else {
         self.prevYM = self.yM;
       }
     }
@@ -744,6 +813,18 @@ var Hold = {
     var bx = self.sx * dims.w;
     var by = Math.min(dims.h - 8 * dims.dpr, Math.max(8 * dims.dpr, ynorm * dims.h));
     var ballR = Math.max(8 * dims.dpr, dims.w * 0.03);
+    // Drop line: drag the ball below it to release.
+    if ($("hold-line").checked && !self.falling && !self.landed) {
+      var ly = HOLD_DROP_LINE * dims.h;
+      ctx.strokeStyle = "rgba(255,255,255,0.65)";
+      ctx.lineWidth = Math.max(1, dims.dpr);
+      ctx.setLineDash([6 * dims.dpr, 5 * dims.dpr]);
+      ctx.beginPath(); ctx.moveTo(0, ly); ctx.lineTo(dims.w, ly); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = "rgba(255,255,255,0.8)";
+      ctx.font = (11 * dims.dpr) + "px system-ui, sans-serif";
+      ctx.fillText("drop", 8 * dims.dpr, ly - 5 * dims.dpr);
+    }
     if (self.fix) {
       ctx.strokeStyle = self.falling ? "#e5484d" : "#4ecd64";
       ctx.lineWidth = 2 * dims.dpr;
@@ -754,27 +835,33 @@ var Hold = {
     if (!self.ball) self.ball = makeBall(currentBallStyle($("hold-ball")));
     drawBall(self.ball, ctx, bx, by, ballR);
     $("ro-h-y").textContent = self.fix ? self.yM.toFixed(2) + " m" : "—";
+    $("ro-h-v").textContent = self.fix ?
+      Math.sqrt(self.hvx * self.hvx + self.hvy * self.hvy).toFixed(1) + " f/s" : "—";
     $("ro-h-t").textContent = self.t.toFixed(3) + " s";
     $("ro-h-theory").textContent = self.fix ? fallTime(Math.max(0.01, (self.falling || self.landed) ? self.h0 : self.yM), p.g).toFixed(3) + " s" : "—";
     self.raf = requestAnimationFrame(function(n) { self.loop(n); });
   },
-  drop: function() {
+  drop: function(v0, how) {
     if (this.falling) return;
     if (this.landed) {
       setStatus($("hold-status"), "Ball is on the ground — press Hold again to pick it up.", "err");
       return;
     }
     if (!this.fix) {
-      setStatus($("hold-status"), "No hand found — click your hand in the video first.", "err");
+      setStatus($("hold-status"), "No hand found — wave your hand into view first.", "err");
       return;
     }
-    var p = this.params();
     this.h0 = Math.max(0.05, this.yM);
     this.yM = this.h0;
-    this.t = 0; this.v = 0;
+    this.t = 0; this.v = v0 || 0;
     this.falling = true;
     this.last = performance.now();
-    setStatus($("hold-status"), "Released from " + this.h0.toFixed(2) + " m!", "");
+    if (how === "drag" && (v0 || 0) > 0.5) {
+      setStatus($("hold-status"), "Thrown downward at " + v0.toFixed(1) + " m/s from " +
+        this.h0.toFixed(2) + " m!", "");
+    } else {
+      setStatus($("hold-status"), "Released from " + this.h0.toFixed(2) + " m!", "");
+    }
   },
   reset: function() {
     this.falling = false;
@@ -836,7 +923,7 @@ var Hold = {
         setStatus($("hold-status"), "Could not sample that pixel.", "err");
       }
     });
-    $("btn-hold-drop").addEventListener("click", function() { self.drop(); });
+    $("btn-hold-drop").addEventListener("click", function() { self.drop(0); });
     $("btn-hold-reset").addEventListener("click", function() { self.reset(); });
     ["hold-gravity", "hold-g-custom", "hold-height"].forEach(function(id) {
       $(id).addEventListener("input", function() {
@@ -848,168 +935,116 @@ var Hold = {
         var tag = (document.activeElement && document.activeElement.tagName) || "";
         if (tag !== "INPUT" && tag !== "SELECT" && tag !== "TEXTAREA") {
           e.preventDefault();
-          self.drop();
+          self.drop(0);
         }
       }
     });
   }
 };
 
-/* ---------- MODE 4 helper: LLM supervisor (local Ollama vision) ---------- */
-var HoldLLM = {
-  busy: false, timer: 0, lostStreak: 0,
+/* ---------- lab assistant: local LLM interprets, never measures ---------- */
+var Assistant = {
+  busy: false,
   endpoint: function() {
-    var v = ($("hold-ollama").value || "http://localhost:11434").trim().replace(/\/+$/, "");
-    try { localStorage.setItem("physlab_ollama", v); } catch (e) {}
-    return v;
+    return (($("hold-ollama") && $("hold-ollama").value) || "http://localhost:11434").trim().replace(/\/+$/, "");
   },
   model: function() {
-    return ($("hold-model").value || "gemma3:4b").trim();
+    return (($("hold-model") && $("hold-model").value) || "gemma3:4b").trim();
   },
-  // Close-up crop centered on the tracked point — the model judges the
-  // region it actually governs, not a tiny ring on a full frame.
-  crop: function() {
-    var video = $("hold-video");
-    if (!video.srcObject || !video.videoWidth || !Hold.fix) return null;
-    var vw = video.videoWidth, vh = video.videoHeight;
-    var side = Math.max(80, Math.min(vw, vh) * 0.45);
-    var sx = Math.min(Math.max(0, Hold.sx * vw - side / 2), Math.max(0, vw - side));
-    var sy = Math.min(Math.max(0, Hold.sy * vh - side / 2), Math.max(0, vh - side));
-    var c = document.createElement("canvas");
-    c.width = 384; c.height = 384;
-    var ctx = c.getContext("2d");
-    if (!ctx) return null;
-    ctx.drawImage(video, sx, sy, side, side, 0, 0, 384, 384);
-    return c.toDataURL("image/jpeg", 0.75).split(",", 2)[1];
-  },
-  // JPEG snapshot of the hold camera; optionally ring the tracked point for the model.
-  capture: function(mark) {
-    var video = $("hold-video");
-    if (!video.srcObject || !video.videoWidth) return null;
-    var maxDim = 512;
-    var scale = Math.min(1, maxDim / Math.max(video.videoWidth, video.videoHeight));
-    var c = document.createElement("canvas");
-    c.width = Math.max(1, Math.round(video.videoWidth * scale));
-    c.height = Math.max(1, Math.round(video.videoHeight * scale));
-    var ctx = c.getContext("2d");
-    if (!ctx) return null;
-    ctx.drawImage(video, 0, 0, c.width, c.height);
-    if (mark && Hold.fix) {
-      ctx.strokeStyle = "#00ff66";
-      ctx.lineWidth = Math.max(2, c.width / 160);
-      ctx.beginPath();
-      ctx.arc(Hold.sx * c.width, Hold.sy * c.height, c.width / 22, 0, 2 * Math.PI);
-      ctx.stroke();
+  // Text summary the model reasons over: trials, last fit, recent failures.
+  contextText: function() {
+    var lines = [];
+    var tr = Measure.trials || [];
+    if (tr.length) {
+      var gs = tr.map(function(t) { return t.g; });
+      lines.push("Stopwatch trials: n=" + tr.length +
+        ", heights(m)=" + tr.map(function(t) { return t.h.toFixed(2); }).join(",") +
+        ", times(s)=" + tr.map(function(t) { return t.t.toFixed(3); }).join(",") +
+        ", g values=" + gs.map(function(g) { return g.toFixed(2); }).join(",") +
+        ", mean g=" + mean(gs).toFixed(2) + " m/s^2.");
+    } else {
+      lines.push("Stopwatch trials: none yet.");
     }
-    return c.toDataURL("image/jpeg", 0.72).split(",", 2)[1];
-  },
-  ask: function(prompt, b64) {
-    var self = this;
-    self.busy = true;
-    setStatus($("hold-llm-status"), "LLM thinking…", "");
-    return fetch(self.endpoint() + "/api/chat", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: self.model(),
-        stream: false,
-        messages: [{ role: "user", content: prompt, images: [b64] }]
-      })
-    }).then(function(res) {
-      if (!res.ok) throw new Error("HTTP " + res.status);
-      return res.json();
-    }).then(function(data) {
-      return ((data && data.message && data.message.content) || "").trim();
-    }).catch(function(err) {
-      var msg = String((err && err.message) || err);
-      if (msg.indexOf("Failed to fetch") !== -1 || msg.indexOf("NetworkError") !== -1) {
-        msg = "Ollama not reachable — run `ollama serve` on this machine.";
-      } else if (msg.indexOf("404") !== -1) {
-        msg += " — pull the vision model: `ollama pull " + self.model() + "`";
-      }
-      throw new Error(msg);
-    }).then(function(text) {
-      self.busy = false;
-      return text;
-    }, function(err) {
-      self.busy = false;
-      throw err;
-    });
-  },
-  // Periodic slow-loop check: is the tracked point still on a hand?
-  verifyOnce: function() {
-    var self = this;
-    if (self.busy || document.hidden) return;
-    if (!$("hold-verify").checked) return;
-    var video = $("hold-video");
-    if (!video.srcObject) return;
-    if (!Hold.fix) {
-      setStatus($("hold-llm-status"), "LLM idle — no color lock to check.", "");
-      return;
+    if (LabLog.lastFit) {
+      var f = LabLog.lastFit;
+      lines.push("Auto-track last fit: g=" + f.g.toFixed(2) + " m/s^2, RMSE=" +
+        (f.rmse * 100).toFixed(1) + "cm, points=" + f.n + ", span=" +
+        f.span.toFixed(2) + "s, drop height=" + f.h.toFixed(2) + "m.");
+    } else {
+      lines.push("Auto-track: no successful fit yet.");
     }
-    var b64 = self.crop();
-    if (!b64) return;
-    self.ask("This is a close-up crop centered on a tracked point from a webcam. " +
-      "Is a human hand (or a ball/toy held in a human hand) visible near the center of this crop? " +
-      "Reply with exactly one word: LOCK or LOST.", b64).then(function(text) {
-      var verdict = text.toUpperCase().split(/[^A-Z]+/)[0];
-      if (verdict === "LOCK") {
-        self.lostStreak = 0;
-        setStatus($("hold-llm-status"), "LLM: LOCK — still on the hand.", "ok");
-      } else if (verdict === "LOST") {
-        self.lostStreak++;
-        if (self.lostStreak >= 2) {
-          Hold.fix = false; // drop the false lock; ball ring hides until re-acquired
-          setStatus($("hold-llm-status"), "LLM: LOST twice — lock released. Click your hand to re-sample.", "err");
-          setStatus($("hold-status"), "Supervisor lost the hand — click your hand in the video to re-sample.", "err");
-        } else {
-          setStatus($("hold-llm-status"), "LLM: LOST once (" + text.slice(0, 80) + ") — watching.", "err");
-        }
-      } else {
-        setStatus($("hold-llm-status"), "LLM unclear: " + text.slice(0, 100), "");
-      }
-    }).catch(function(err) {
-      setStatus($("hold-llm-status"), "LLM error: " + err.message, "err");
-    });
+    if (LabLog.failures.length) {
+      lines.push("Recent problems: " + LabLog.failures.map(function(x) {
+        return x.kind + ": " + x.detail;
+      }).join(" | "));
+    }
+    lines.push("Reference: true g is 9.81 m/s^2.");
+    return lines.join("\n");
   },
-  // One-shot: ask the model where the hand is, auto-sample color there.
-  findHand: function() {
+  refreshContext: function() {
+    var n = (Measure.trials || []).length;
+    var f = LabLog.lastFit;
+    $("lab-ctx").textContent = "Context: " + n + " stopwatch trial(s)" +
+      (f ? ", last auto-track g=" + f.g.toFixed(2) + " m/s²" : ", no auto-track fit yet") +
+      (LabLog.failures.length ? ", " + LabLog.failures.length + " recent problem(s)" : "") + ".";
+  },
+  say: function(text, cls) {
+    var box = $("ask-answer");
+    box.textContent = text;
+    setStatus($("ask-status"), cls === "err" ? "Assistant error." : "Assistant replied.", cls);
+  },
+  run: function(kind, userText, b64) {
     var self = this;
     if (self.busy) return;
-    var video = $("hold-video");
-    if (!video.srcObject) {
-      setStatus($("hold-llm-status"), "Open the camera first.", "err");
-      return;
+    var prompt;
+    var ctx = self.contextText();
+    if (kind === "setup") {
+      prompt = "You are a physics-lab assistant looking at a webcam frame of a free-fall " +
+        "experiment setup (camera pointed at a room/wall where a ball will be dropped or held). " +
+        "Rate the setup 1-5 and give at most 3 concrete fixes (lighting, background clutter, " +
+        "camera framing, ball visibility). Under 120 words.";
+    } else if (kind === "diagnose") {
+      prompt = "You are a physics-lab assistant. Diagnose why the student's recent gravity " +
+        "measurement(s) failed or look off, using ONLY this log — do not recompute anything, " +
+        "interpret the given numbers. End with the single most useful next step. Under 150 words.\n" + ctx;
+    } else if (kind === "results") {
+      prompt = "You are a physics-lab assistant. Given these free-fall measurements, explain " +
+        "the error versus 9.81 m/s^2, name the most likely error sources in order (human reaction " +
+        "time ~0.15s, height mismeasurement, air drag, tracking noise), and suggest one concrete " +
+        "next trial. Do not recompute — interpret the given numbers. Under 150 words.\n" + ctx;
+    } else {
+      prompt = "You are a physics-lab assistant helping with a ball-drop gravity experiment. " +
+        "Current results:\n" + ctx + "\nStudent question: " + userText;
     }
-    var b64 = self.capture(false);
-    if (!b64) return;
-    self.ask("Locate the most prominent human hand in this webcam image. " +
-      "Reply with exactly two integers COLUMN ROW on a 3x3 grid (each 1-3, 1=top, 1=left), " +
-      "e.g. 2 1 for top-center. If no hand is visible, reply NONE.", b64).then(function(text) {
-      var m = text.match(/([1-3])\s+([1-3])/);
-      if (!m) {
-        setStatus($("hold-llm-status"), "LLM found no hand (" + text.slice(0, 80) + ").", "err");
-        return;
-      }
-      var fx = (parseInt(m[1], 10) - 0.5) / 3;
-      var fy = (parseInt(m[2], 10) - 0.5) / 3;
-      try {
-        var c = Vision.sampleAt(video, fx, fy);
-        Hold.target = c;
-        Hold.useSkin = false;
-        $("hold-tol").disabled = false;
-        Hold.fix = false; // re-acquire with the new color
-        var pane = $("mode-hold");
-        pane.querySelectorAll(".swatch").forEach(function(o) { o.classList.remove("selected"); });
-        setStatus($("hold-llm-status"),
-          "LLM pointed at cell " + m[1] + " " + m[2] + " — sampled rgb(" +
-          c.r + "," + c.g + "," + c.b + "). Move your hand.", "ok");
-      } catch (err) {
-        setStatus($("hold-llm-status"), "Could not sample that pixel.", "err");
-      }
+    self.busy = true;
+    setStatus($("ask-status"), "Assistant thinking…", "");
+    var msg = { role: "user", content: prompt };
+    if (b64) msg.images = [b64];
+    ollamaChat(self.endpoint(), self.model(), [msg]).then(function(text) {
+      self.busy = false;
+      self.say(text || "(empty reply)");
     }).catch(function(err) {
-      setStatus($("hold-llm-status"), "LLM error: " + err.message, "err");
+      self.busy = false;
+      self.say("Error: " + err.message, "err");
     });
+  },
+  snapshot: function() {
+    // First live camera among the lab's three stages.
+    var ids = ["hold-video", "track-video", "sim-video"];
+    for (var k = 0; k < ids.length; k++) {
+      var v = $(ids[k]);
+      if (v && v.srcObject && v.videoWidth) {
+        var scale = Math.min(1, 512 / Math.max(v.videoWidth, v.videoHeight));
+        var c = document.createElement("canvas");
+        c.width = Math.max(1, Math.round(v.videoWidth * scale));
+        c.height = Math.max(1, Math.round(v.videoHeight * scale));
+        var ctx = c.getContext("2d");
+        if (!ctx) return null;
+        ctx.drawImage(v, 0, 0, c.width, c.height);
+        return c.toDataURL("image/jpeg", 0.72).split(",", 2)[1];
+      }
+    }
+    return null;
   },
   init: function() {
     var self = this;
@@ -1017,18 +1052,27 @@ var HoldLLM = {
       var saved = localStorage.getItem("physlab_ollama");
       if (saved) $("hold-ollama").value = saved;
     } catch (e) {}
-    $("hold-ollama").addEventListener("change", function() { self.endpoint(); });
-    $("btn-hold-find").addEventListener("click", function() { self.findHand(); });
-    $("hold-verify").addEventListener("change", function() {
-      if ($("hold-verify").checked) {
-        setStatus($("hold-llm-status"), "Supervisor on — checking every ~6 s.", "");
-        self.verifyOnce();
-      } else {
-        self.lostStreak = 0;
-        setStatus($("hold-llm-status"), "LLM idle.", "");
-      }
+    $("hold-ollama").addEventListener("change", function() {
+      try { localStorage.setItem("physlab_ollama", self.endpoint()); } catch (e) {}
     });
-    self.timer = setInterval(function() { self.verifyOnce(); }, 6000);
+    self.refreshContext();
+    setInterval(function() { self.refreshContext(); }, 3000);
+    $("btn-ask-setup").addEventListener("click", function() {
+      var b64 = self.snapshot();
+      if (!b64) { self.say("Error: open any lab camera first (Simulate, Auto-track, or Hand-hold).", "err"); return; }
+      self.run("setup", null, b64);
+    });
+    $("btn-ask-diagnose").addEventListener("click", function() { self.run("diagnose"); });
+    $("btn-ask-results").addEventListener("click", function() { self.run("results"); });
+    function send() {
+      var q = $("ask-input").value.trim();
+      if (!q || self.busy) return;
+      self.run("ask", q);
+    }
+    $("btn-ask-send").addEventListener("click", send);
+    $("ask-input").addEventListener("keydown", function(e) {
+      if (e.key === "Enter") send();
+    });
   }
 };
 
@@ -1040,7 +1084,7 @@ document.addEventListener("DOMContentLoaded", function() {
   Measure.init();
   Track.init();
   Hold.init();
-  HoldLLM.init();
+  Assistant.init();
 });
 
 })();

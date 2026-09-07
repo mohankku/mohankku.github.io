@@ -185,9 +185,9 @@ title: AR Physics Lab
   <div class="phys-mode" id="mode-hold" hidden>
     <h3><i class="fa-solid fa-hand"></i> Hold the ball in your hand</h3>
     <p class="desc">The virtual ball sticks to your hand as you move it. Easiest: pick
-    <strong>Skin</strong> and wave — no clicking needed. Or sample a bright glove/ball color.
-    <strong>Moving only</strong> ignores static background clutter. Raise your hand, then press
-    Release (or Space) to drop from that height.</p>
+    <strong>Skin</strong> and wave — no clicking needed. Lift the ball above the dashed
+    <strong>drop line</strong> to release it from that height. Keep your hand below the line
+    to keep holding. Release (or Space) also works from anywhere.</p>
     <div class="stage" id="hold-stage">
       <video id="hold-video" autoplay muted playsinline></video>
       <canvas class="overlay" id="hold-overlay"></canvas>
@@ -205,6 +205,9 @@ title: AR Physics Lab
       </div>
       <label class="phys-field" style="flex-direction:row; align-items:center; gap:6px;">
         <input id="hold-motion" type="checkbox" checked> Moving only
+      </label>
+      <label class="phys-field" style="flex-direction:row; align-items:center; gap:6px;">
+        <input id="hold-line" type="checkbox" checked> Drop line
       </label>
       <label class="phys-field">Tolerance
         <input id="hold-tol" type="range" min="30" max="150" value="80" step="5" disabled>
@@ -245,29 +248,11 @@ title: AR Physics Lab
     </div>
     <div class="phys-readouts">
       <div class="phys-read">hand height<strong id="ro-h-y">—</strong></div>
+      <div class="phys-read">hand speed<strong id="ro-h-v">—</strong></div>
       <div class="phys-read">fall time<strong id="ro-h-t">0.000 s</strong></div>
       <div class="phys-read">theory t<strong id="ro-h-theory">—</strong></div>
     </div>
     <p class="phys-status" id="hold-status">Open the camera to begin.</p>
-    <div class="theory-box">
-      <strong><i class="fa-solid fa-robot"></i> LLM supervisor</strong> <span style="color:var(--text-muted,#6b7a8a);">— your local Ollama vision model double-checks the color tracker every few seconds. Only works in a browser on the machine running Ollama.</span>
-      <div class="phys-controls">
-        <label class="phys-field">Ollama endpoint
-          <input id="hold-ollama" type="url" value="http://localhost:11434" spellcheck="false" autocomplete="off" inputmode="url" style="width:190px;">
-        </label>
-        <label class="phys-field">Vision model
-          <input id="hold-model" type="text" value="gemma3:4b" spellcheck="false" autocomplete="off" style="width:130px;">
-        </label>
-        <label class="phys-field" style="flex-direction:row; align-items:center; gap:6px;">
-          <input id="hold-verify" type="checkbox"> Verify lock every ~6 s
-        </label>
-      </div>
-      <div class="phys-btn-row">
-        <button class="pub-btn" id="btn-hold-find" type="button"><i class="fa-solid fa-magnifying-glass"></i> Find my hand</button>
-        <span class="phys-status" style="margin-left:auto;" id="hold-llm-status">LLM idle.</span>
-      </div>
-      <p class="privacy" style="font-size:12px; color:var(--text-muted,#6b7a8a); margin:6px 0 0;">Frames go to <code>localhost</code> only. Deployed site needs the <code>OLLAMA_ORIGINS</code> exception — see the <a href="{{ '/chat' | relative_url }}">chat page</a> setup notes.</p>
-    </div>
   </div>
 
   <div class="theory-box">
@@ -277,8 +262,35 @@ title: AR Physics Lab
     without air resistance, the mass of the ball doesn't matter.
   </div>
 
+  <h2 id="assistant"><i class="fa-solid fa-robot"></i> Lab assistant</h2>
+  <div class="phys-mode" id="lab-assistant">
+    <p class="desc">Your local Ollama model answers questions <em>about</em> your experiment — it
+    sees your trial table, last auto-track fit, and recent failures, but it never measures anything
+    itself. Laptop only.</p>
+    <div class="phys-controls">
+      <label class="phys-field">Ollama endpoint
+        <input id="hold-ollama" type="url" value="http://localhost:11434" spellcheck="false" autocomplete="off" inputmode="url" style="width:190px;">
+      </label>
+      <label class="phys-field">Vision model
+        <input id="hold-model" type="text" value="gemma3:4b" spellcheck="false" autocomplete="off" style="width:130px;">
+      </label>
+    </div>
+    <p class="phys-status" id="lab-ctx">Context: —</p>
+    <div class="phys-btn-row">
+      <button class="pub-btn" id="btn-ask-setup" type="button"><i class="fa-solid fa-camera"></i> Check my setup</button>
+      <button class="pub-btn" id="btn-ask-diagnose" type="button"><i class="fa-solid fa-stethoscope"></i> Diagnose last failure</button>
+      <button class="pub-btn" id="btn-ask-results" type="button"><i class="fa-solid fa-chart-line"></i> Explain my results</button>
+    </div>
+    <div class="ask-row">
+      <input id="ask-input" type="text" placeholder="Ask about your experiment — e.g. why is my g too high?" aria-label="Ask the lab assistant">
+      <button class="pub-btn" id="btn-ask-send" type="button"><i class="fa-solid fa-paper-plane"></i> Ask</button>
+    </div>
+    <p class="phys-status" id="ask-status">Assistant idle.</p>
+    <div id="ask-answer" aria-live="polite">—</div>
+  </div>
+
   <p style="text-align:center; margin-top:16px; font-size:12px; color:#6b7a8a;">
     <a href="{{ '/other' | relative_url }}"><i class="fa-solid fa-arrow-left"></i> Back to experiments</a>
   </p>
 </div>
-<script src="{{ '/assets/js/physics.js' | relative_url }}"></script>
+<script src="{{ '/assets/js/physics.js?v=10' | relative_url }}"></script>
