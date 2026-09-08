@@ -38,6 +38,10 @@ title: Blogs
   {% endfor %}
 </ul>
 
+<p style="text-align:center; margin-top:16px; font-size:12px; color:#6b7a8a;">
+  <a href="{{ '/' | relative_url }}"><i class="fa-solid fa-arrow-left"></i> Back to Home</a>
+</p>
+
 <script>
 (function(){
   function collapse(item){
