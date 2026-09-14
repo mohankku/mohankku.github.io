@@ -123,6 +123,38 @@
     downscale(file, setSource);
   }
 
+  var statsTimer = null;
+
+  function fmtStats(s) {
+    if (!s) return null;
+    var parts = [];
+    if (typeof s.cpu_percent === "number") parts.push("CPU " + s.cpu_percent + "%");
+    if (typeof s.mem_used_gb === "number" && typeof s.mem_total_gb === "number")
+      parts.push("Mem " + s.mem_used_gb + "/" + s.mem_total_gb + " GB");
+    if (typeof s.worker_rss_gb === "number") parts.push("Model " + s.worker_rss_gb + " GB");
+    return parts.length ? parts.join(" · ") : null;
+  }
+
+  function pollStats() {
+    fetch(MFLUX_URL + "/api/stats", { cache: "no-store" })
+      .then(function (res) { return res.ok ? res.json() : null; })
+      .then(function (s) {
+        var line = fmtStats(s);
+        if (line && busy) note.textContent = "Editing… " + line;
+      })
+      .catch(function () { /* keep last readout */ });
+  }
+
+  function startStats() {
+    stopStats();
+    pollStats();
+    statsTimer = setInterval(pollStats, 2000);
+  }
+
+  function stopStats() {
+    if (statsTimer) { clearInterval(statsTimer); statsTimer = null; }
+  }
+
   function runEdit() {
     if (busy) return;
     clearError();
@@ -138,7 +170,8 @@
     }
     var steps = parseInt(stepsSelect.value, 10) || 20;
     setBusy(true);
-    note.textContent = "Editing… the first run loads the model and takes minutes.";
+    note.textContent = "Editing… warming up live stats.";
+    startStats();
     fetch(MFLUX_URL + "/api/edit", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -165,7 +198,7 @@
       showError("<strong>Image edit failed:</strong> " + escapeHtml(detail));
       setServerStatus("err", "Edit server unreachable");
       note.textContent = "";
-    }).then(function () { setBusy(false); });
+    }).then(function () { stopStats(); setBusy(false); });
   }
 
   dropzone.addEventListener("click", function () {

@@ -9,6 +9,7 @@ import importlib.util
 import json
 import os
 import threading
+import time
 import unittest
 import urllib.error
 import urllib.request
@@ -45,6 +46,11 @@ class EditServerTest(unittest.TestCase):
         self.assertEqual(status, 200)
         self.assertTrue(obj.get("ok"))
 
+    def test_health_reports_worker_status(self):
+        _, obj = call("GET", "/api/health")
+        self.assertIn(obj.get("status"), ("cold", "loading", "ready", "busy"))
+        self.assertTrue(obj.get("model"))
+
     def test_unknown_path(self):
         self.assertEqual(call("GET", "/nope")[0], 404)
         self.assertEqual(call("POST", "/nope", {})[0], 404)
@@ -63,6 +69,53 @@ class EditServerTest(unittest.TestCase):
         status, _ = call("POST", "/api/edit",
                          {"image": "not-a-data-url", "prompt": "x"})
         self.assertEqual(status, 400)
+
+    def test_readline_timeout(self):
+        # Exercises the worker reply reader (no model needed).
+        r, w = os.pipe()
+        try:
+            os.write(w, b'{"ready": true}\n')
+            with os.fdopen(r, "rb") as pipe:
+                r = None  # fd owned by pipe now
+                self.assertEqual(
+                    srv._readline_timeout(pipe, 5.0),
+                    '{"ready": true}')
+        finally:
+            os.close(w)
+            if r is not None:
+                os.close(r)
+
+    def test_readline_times_out(self):
+        r, w = os.pipe()
+        try:
+            t0 = time.monotonic()
+            with self.assertRaises(TimeoutError):
+                with os.fdopen(r, "rb") as pipe:
+                    r = None
+                    srv._readline_timeout(pipe, 0.5)
+            self.assertLess(time.monotonic() - t0, 10)
+        finally:
+            os.close(w)
+            if r is not None:
+                os.close(r)
+
+    def test_stats_shape(self):
+        status, obj = call("GET", "/api/stats")
+        self.assertEqual(status, 200)
+        for key in ("cpu_percent", "mem_used_gb", "mem_total_gb",
+                    "worker_rss_gb"):
+            self.assertIn(key, obj)
+        total = obj["mem_total_gb"]
+        used = obj["mem_used_gb"]
+        self.assertIsNotNone(total)
+        self.assertGreater(total, 0)
+        if used is not None:
+            self.assertGreaterEqual(used, 0)
+            self.assertLessEqual(used, total)
+        if obj["cpu_percent"] is not None:
+            self.assertGreaterEqual(obj["cpu_percent"], 0)
+        if obj["worker_rss_gb"] is not None:
+            self.assertGreaterEqual(obj["worker_rss_gb"], 0)
 
     def test_busy_returns_409(self):
         self.assertTrue(srv._edit_lock.acquire(blocking=False))

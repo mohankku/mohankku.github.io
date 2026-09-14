@@ -63,7 +63,7 @@ noindex: true
       <p>This page needs the local edit server (it shells out to <code>mflux</code> in the project <code>.venv</code>). From the repo root:</p>
       <div class="code-box"><code>python3 script/mflux-server.py</code></div>
       <ul>
-        <li>The <strong>first edit is slow</strong> — the 20B weights load and quantize to 4-bit in memory before the steps run. Later edits reuse the cached weights on disk but still reload per run.</li>
+        <li>The <strong>first edit is slow</strong> — the 20B weights load and quantize to 4-bit in memory before the steps run. The model stays loaded: <strong>later edits reuse it</strong> and only pay for the steps.</li>
         <li>Runs in low-RAM mode at 4-bit, sized for 24GB unified memory. One edit at a time; a second request gets a clear busy message.</li>
       </ul>
     </div>
