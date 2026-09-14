@@ -127,6 +127,21 @@ Small side projects and experiments.
       <p style="margin-top: 12px;"><a href="{{ '/chat' | relative_url }}" class="pub-btn"><i class="fa-solid fa-comments"></i> Open chat &rarr;</a></p>
     </div>
   </li>
+
+  <!-- AI Image Edit -->
+  <li class="post-item" data-item>
+    <button class="post-toggle" aria-expanded="false">
+      <span class="post-title"><i class="fa-solid fa-wand-magic-sparkles"></i> AI Image Edit</span>
+      <span class="post-hint"><span class="more">Click to expand &#9662;</span><span class="less">Click to collapse &#9652; (or press ESC)</span></span>
+    </button>
+    <p class="post-excerpt">Edit photos with plain-language instructions using Qwen-Image-Edit running locally via mflux — fully on-device, nothing uploaded.</p>
+    <div class="post-full" hidden>
+      <p>
+        Needs the local edit server (<code>python3 script/mflux-server.py</code>) alongside the page. The first edit loads the 20B weights, so it takes minutes; later edits are faster.
+      </p>
+      <p style="margin-top: 12px;"><a href="{{ '/image-edit' | relative_url }}" class="pub-btn"><i class="fa-solid fa-image"></i> Open image edit &rarr;</a></p>
+    </div>
+  </li>
 </ul>
 
 <p style="text-align:center; margin-top:16px; font-size:12px; color:#6b7a8a;">
