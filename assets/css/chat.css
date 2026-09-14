@@ -731,9 +731,25 @@
   background: #fff;
 }
 
-.img-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.img-thumb { width: 84px; height: 84px; }
+.img-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; cursor: pointer; }
+.img-thumb img:focus-visible { outline: 2px solid var(--link-color, #3b82f6); outline-offset: -2px; }
 
-.img-thumb button {
+.img-pos {
+  position: absolute;
+  top: 4px; left: 4px;
+  min-width: 18px; height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.78);
+  color: #fff;
+  font-size: 10.5px;
+  font-weight: 650;
+  line-height: 18px;
+  text-align: center;
+}
+
+.img-thumb .img-remove {
   position: absolute;
   top: 4px; right: 4px;
   width: 20px; height: 20px;
@@ -748,7 +764,63 @@
   place-items: center;
 }
 
-.img-thumb button:hover { background: rgba(15,23,42,0.92); }
+.img-thumb .img-remove:hover { background: rgba(15,23,42,0.92); }
+
+.img-tools {
+  position: absolute;
+  left: 4px; right: 4px; bottom: 4px;
+  display: flex;
+  gap: 4px;
+  justify-content: center;
+}
+
+.img-tools button {
+  flex: 1;
+  height: 20px;
+  border-radius: 6px;
+  border: 1px solid rgba(255,255,255,0.75);
+  background: rgba(15, 23, 42, 0.78);
+  color: #fff;
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  padding: 0;
+}
+
+.img-tools button:hover:not(:disabled) { background: rgba(15,23,42,0.92); }
+.img-tools button:disabled { opacity: 0.35; cursor: default; }
+.img-tools button:focus-visible,
+.img-thumb .img-remove:focus-visible,
+.img-clear-all:focus-visible { outline: 2px solid var(--link-color, #3b82f6); outline-offset: 2px; }
+
+.img-clear-all {
+  align-self: center;
+  appearance: none;
+  background: none;
+  border: 1px solid var(--chat-border);
+  border-radius: 8px;
+  color: var(--chat-muted);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+
+.img-clear-all:hover { color: #dc2626; border-color: #fecaca; background: #fef2f2; }
+
+/* Off-screen replace picker: in the document so the chooser opens, never visible */
+.img-replace-picker {
+  position: fixed;
+  left: -10000px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
 
 .msg .attached-img {
   max-width: 260px;

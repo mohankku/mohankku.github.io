@@ -760,28 +760,126 @@
 
   // ---- Image input (vision model) ----
 
+  function movePendingImage(i, dir) {
+    var j = i + dir;
+    if (i < 0 || j < 0 || i >= pendingImages.length || j >= pendingImages.length) return;
+    var tmp = pendingImages[i];
+    pendingImages[i] = pendingImages[j];
+    pendingImages[j] = tmp;
+    renderStrip();
+    // Keep keyboard focus on the moved control.
+    var act = dir < 0 ? "move-left" : "move-right";
+    var el = imgStrip && imgStrip.querySelector('[data-idx="' + j + '"][data-act="' + act + '"]');
+    if (el) el.focus();
+  }
+
+  function replacePendingImage(i) {
+    var picker = document.createElement("input");
+    picker.type = "file";
+    picker.accept = "image/*";
+    // Keep in the document (off-screen, not display:none) so the
+    // chooser opens reliably and assistive tech can see the control.
+    picker.className = "img-replace-picker";
+    picker.setAttribute("aria-hidden", "true");
+    picker.tabIndex = -1;
+    function cleanup() {
+      if (picker.parentNode) picker.parentNode.removeChild(picker);
+    }
+    picker.addEventListener("change", function () {
+      if (!picker.files || !picker.files.length) { cleanup(); return; }
+      var f = picker.files[0];
+      if (!f.type || f.type.indexOf("image/") !== 0) {
+        addError("That file is not an image.");
+        cleanup();
+        return;
+      }
+      downscale(f, function (url) {
+        pendingImages[i] = url;
+        renderStrip();
+      });
+      cleanup();
+    });
+    picker.addEventListener("cancel", cleanup);
+    document.body.appendChild(picker);
+    picker.click();
+  }
+
   function renderStrip() {
     if (!imgStrip) return;
     imgStrip.innerHTML = "";
     imgStrip.hidden = pendingImages.length === 0;
+    if (!pendingImages.length) return;
+    imgStrip.setAttribute("role", "group");
+    imgStrip.setAttribute("aria-label", "Attached images: reorder, replace, or remove before sending");
     pendingImages.forEach(function (src, i) {
       var wrap = document.createElement("div");
       wrap.className = "img-thumb";
       var im = document.createElement("img");
       im.src = src;
-      im.alt = "attached image " + (i + 1);
+      im.alt = "attached image " + (i + 1) + " of " + pendingImages.length;
+      im.title = "Click to replace this image";
+      im.tabIndex = 0;
+      im.setAttribute("role", "button");
+      im.setAttribute("aria-label", "Replace image " + (i + 1));
+      im.addEventListener("click", function () { replacePendingImage(i); });
+      im.addEventListener("keydown", function (e) {
+        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); replacePendingImage(i); }
+      });
       wrap.appendChild(im);
+      var pos = document.createElement("span");
+      pos.className = "img-pos";
+      pos.textContent = String(i + 1);
+      pos.setAttribute("aria-hidden", "true");
+      wrap.appendChild(pos);
       var x = document.createElement("button");
       x.type = "button";
+      x.className = "img-remove";
       x.textContent = "×";
-      x.setAttribute("aria-label", "Remove image");
+      x.setAttribute("aria-label", "Remove image " + (i + 1));
       x.addEventListener("click", function () {
         pendingImages.splice(i, 1);
         renderStrip();
       });
       wrap.appendChild(x);
+      var tools = document.createElement("div");
+      tools.className = "img-tools";
+      var left = document.createElement("button");
+      left.type = "button";
+      left.textContent = "‹";
+      left.setAttribute("aria-label", "Move image " + (i + 1) + " earlier");
+      left.setAttribute("data-idx", String(i));
+      left.setAttribute("data-act", "move-left");
+      left.disabled = (i === 0);
+      left.addEventListener("click", function () { movePendingImage(i, -1); });
+      var rep = document.createElement("button");
+      rep.type = "button";
+      rep.textContent = "↻";
+      rep.title = "Replace";
+      rep.setAttribute("aria-label", "Replace image " + (i + 1));
+      rep.addEventListener("click", function () { replacePendingImage(i); });
+      var right = document.createElement("button");
+      right.type = "button";
+      right.textContent = "›";
+      right.setAttribute("aria-label", "Move image " + (i + 1) + " later");
+      right.setAttribute("data-idx", String(i));
+      right.setAttribute("data-act", "move-right");
+      right.disabled = (i === pendingImages.length - 1);
+      right.addEventListener("click", function () { movePendingImage(i, 1); });
+      tools.appendChild(left);
+      tools.appendChild(rep);
+      tools.appendChild(right);
+      wrap.appendChild(tools);
       imgStrip.appendChild(wrap);
     });
+    if (pendingImages.length > 1) {
+      var clear = document.createElement("button");
+      clear.type = "button";
+      clear.className = "img-clear-all";
+      clear.textContent = "Clear all";
+      clear.setAttribute("aria-label", "Remove all attached images");
+      clear.addEventListener("click", function () { clearPendingImages(); });
+      imgStrip.appendChild(clear);
+    }
   }
 
   function clearPendingImages() {
