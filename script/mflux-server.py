@@ -12,6 +12,8 @@ Endpoints:
   POST /api/edit    {"image": "data:image/...;base64,...", "prompt": str,
                      "steps": int?}
                     -> {"image": "data:image/png;base64,..."}
+  POST /api/upscale {"image": "data:image/...;base64,..."}
+                    -> {"image": "data:image/png;base64,..."} (4x, Real-ESRGAN)
 
 Run:  python3 script/mflux-server.py   (from the repo root)
 Requires the project .venv with mflux installed (./.venv/bin/...).
@@ -50,6 +52,8 @@ WORKER_START_TIMEOUT = 7200.0  # first load + quantize is slow; happens once
 _edit_lock = threading.Lock()
 _worker = None           # subprocess.Popen while alive
 _worker_state = "cold"   # cold | loading | ready (guarded by _edit_lock)
+_upscale_mod = None      # lazily imported script/upscale.py (torch stays out
+                         # of server startup; model loads on first upscale)
 
 
 def _mac_sysctl(name):
@@ -298,6 +302,26 @@ def run_edit(image_b64, mime, prompt, steps, seed):
             return base64.b64encode(f.read()).decode("ascii")
 
 
+def run_upscale(image_b64):
+    """4x Real-ESRGAN upscale; model loads once and stays resident."""
+    global _upscale_mod
+    if _upscale_mod is None:
+        import importlib.util
+        spec = importlib.util.spec_from_file_location(
+            "upscale", os.path.join(HERE, "upscale.py"))
+        _upscale_mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(_upscale_mod)
+    try:
+        raw = base64.b64decode(image_b64, validate=True)
+    except (binascii.Error, ValueError):
+        raise
+    try:
+        out_png = _upscale_mod.upscale_png_bytes(raw)
+    except Exception as e:  # noqa: BLE001 - report back like run_edit does
+        raise RuntimeError("upscale failed: " + str(e)[:500])
+    return base64.b64encode(out_png).decode("ascii")
+
+
 class Handler(BaseHTTPRequestHandler):
     server_version = "mflux-edit/1"
 
@@ -340,7 +364,8 @@ class Handler(BaseHTTPRequestHandler):
     def do_POST(self):
         if not self._guard():
             return
-        if self.path != "/api/edit":
+        is_upscale = (self.path == "/api/upscale")
+        if self.path != "/api/edit" and not is_upscale:
             send_json(self, 404, {"error": "not found"})
             return
         try:
@@ -369,26 +394,33 @@ class Handler(BaseHTTPRequestHandler):
         if mime not in ("image/png", "image/jpeg"):
             send_json(self, 400, {"error": "only PNG/JPEG supported"})
             return
-        if not isinstance(prompt, str) or not prompt.strip():
-            send_json(self, 400, {"error": "prompt is required"})
-            return
-        prompt = prompt.strip()[:MAX_PROMPT]
-        try:
-            steps = int(steps)
-        except (TypeError, ValueError):
-            steps = DEFAULT_STEPS
-        steps = max(MIN_STEPS, min(MAX_STEPS, steps))
-        if not (os.path.exists(VENV_PY) and os.path.exists(WORKER_SCRIPT)):
-            send_json(self, 500, {"error": "mflux worker not installed in .venv"})
-            return
+        if is_upscale:
+            job = "an upscale"
+        else:
+            if not isinstance(prompt, str) or not prompt.strip():
+                send_json(self, 400, {"error": "prompt is required"})
+                return
+            prompt = prompt.strip()[:MAX_PROMPT]
+            try:
+                steps = int(steps)
+            except (TypeError, ValueError):
+                steps = DEFAULT_STEPS
+            steps = max(MIN_STEPS, min(MAX_STEPS, steps))
+            if not (os.path.exists(VENV_PY) and os.path.exists(WORKER_SCRIPT)):
+                send_json(self, 500, {"error": "mflux worker not installed in .venv"})
+                return
+            job = "an edit"
         if not _edit_lock.acquire(blocking=False):
-            send_json(self, 409, {"error": "an edit is already running"})
+            send_json(self, 409, {"error": job + " is already running"})
             return
         try:
             try:
-                ensure_worker()  # slow once per server lifetime, then reused
-                out_b64 = run_edit(image_b64, mime, prompt, steps,
-                                   random.randint(0, 2**31 - 1))
+                if is_upscale:
+                    out_b64 = run_upscale(image_b64)  # loads once, then reused
+                else:
+                    ensure_worker()  # slow once per server lifetime, then reused
+                    out_b64 = run_edit(image_b64, mime, prompt, steps,
+                                       random.randint(0, 2**31 - 1))
             except (binascii.Error, ValueError):
                 send_json(self, 400, {"error": "invalid image data"})
                 return

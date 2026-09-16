@@ -20,6 +20,7 @@
   var resultImg = document.getElementById("result");
   var resultHint = document.getElementById("result-hint");
   var btnDownload = document.getElementById("btn-download");
+  var btnUpscale = document.getElementById("btn-upscale");
 
   if (!dropzone || !btnRun) return; // not on the edit page
 
@@ -52,6 +53,9 @@
     busy = b;
     btnRun.disabled = b;
     fileInput.disabled = b;
+    if (btnUpscale) btnUpscale.disabled = b;
+    if (typeof btnUpscaleSource !== "undefined" && btnUpscaleSource)
+      btnUpscaleSource.disabled = b;
     btnRun.innerHTML = b
       ? '<i class="fa-solid fa-circle-notch fa-spin" aria-hidden="true"></i> Editing…'
       : '<i class="fa-solid fa-wand-magic-sparkles" aria-hidden="true"></i> Edit image';
@@ -89,6 +93,7 @@
     resultImg.hidden = true;
     resultHint.hidden = false;
     btnDownload.hidden = true;
+    if (btnUpscale) btnUpscale.hidden = true;
     promptInput.value = "";
     note.textContent = "";
     clearError();
@@ -187,8 +192,10 @@
       resultImg.hidden = false;
       resultHint.hidden = true;
       btnDownload.href = data.image;
+      btnDownload.download = "edited.png";
       btnDownload.hidden = false;
-      note.textContent = "Done — review the result, or download it.";
+      if (btnUpscale) btnUpscale.hidden = false;
+      note.textContent = "Done — review the result, download it, or upscale 4×.";
       setServerStatus("ok", "Edit server ready");
     }).catch(function (err) {
       var detail = String((err && err.message) || err);
@@ -231,7 +238,61 @@
       }
     }
   });
+  function postUpscale(dataUrl) {
+    clearError();
+    setBusy(true);
+    note.textContent = "Upscaling 4×… about half a minute for a 1024px image.";
+    startStats();
+    fetch(MFLUX_URL + "/api/upscale", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ image: dataUrl })
+    }).then(function (res) {
+      return res.json().then(function (data) {
+        if (!res.ok) throw new Error((data && data.error) || ("HTTP " + res.status));
+        return data;
+      });
+    }).then(function (data) {
+      if (!data || !data.image) throw new Error("empty result from upscale server");
+      resultImg.src = data.image;
+      resultImg.hidden = false;
+      resultHint.hidden = true;
+      btnDownload.href = data.image;
+      btnDownload.hidden = false;
+      btnDownload.download = "upscaled.png";
+      if (btnUpscale) btnUpscale.hidden = true; // one 4x pass; avoid 16x reruns
+      note.textContent = "Upscaled 4× — review the result, or download it.";
+      setServerStatus("ok", "Edit server ready");
+    }).catch(function (err) {
+      var detail = String((err && err.message) || err);
+      if (err && err.name === "TypeError") {
+        detail = "Edit server unreachable — start it with: python3 script/mflux-server.py";
+      }
+      showError("<strong>Upscale failed:</strong> " + escapeHtml(detail));
+      setServerStatus("err", "Edit server unreachable");
+      note.textContent = "";
+    }).then(function () { stopStats(); setBusy(false); });
+  }
+
+  function runUpscale() {
+    if (busy || !resultImg.src || resultImg.hidden) return;
+    postUpscale(resultImg.src);
+  }
+
+  function runUpscaleSource() {
+    if (busy) return;
+    if (!sourceImage) {
+      showError("Choose an image first — click, drop, or paste one above.");
+      return;
+    }
+    postUpscale(sourceImage);
+  }
+
+  var btnUpscaleSource = document.getElementById("btn-upscale-source");
+
   btnRun.addEventListener("click", runEdit);
+  if (btnUpscale) btnUpscale.addEventListener("click", runUpscale);
+  if (btnUpscaleSource) btnUpscaleSource.addEventListener("click", runUpscaleSource);
   btnClear.addEventListener("click", function () { if (!busy) clearAll(); });
   btnCheck.addEventListener("click", checkServer);
 

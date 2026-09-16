@@ -127,6 +127,31 @@ class EditServerTest(unittest.TestCase):
         self.assertEqual(status, 409)
         self.assertIn("already running", obj["error"])
 
+    def test_upscale_missing_image(self):
+        status, obj = call("POST", "/api/upscale", {})
+        self.assertEqual(status, 400)
+        self.assertIn("image", obj["error"])
+
+    def test_upscale_bad_image(self):
+        status, _ = call("POST", "/api/upscale",
+                         {"image": "not-a-data-url"})
+        self.assertEqual(status, 400)
+
+    def test_upscale_forbidden_origin(self):
+        status, _ = call("POST", "/api/upscale", {"image": TINY_PNG},
+                         origin="https://evil.example")
+        self.assertEqual(status, 403)
+
+    def test_upscale_busy_returns_409(self):
+        self.assertTrue(srv._edit_lock.acquire(blocking=False))
+        try:
+            status, obj = call("POST", "/api/upscale",
+                               {"image": TINY_PNG})
+        finally:
+            srv._edit_lock.release()
+        self.assertEqual(status, 409)
+        self.assertIn("already running", obj["error"])
+
 
 if __name__ == "__main__":
     server = ThreadingHTTPServer(("127.0.0.1", 0), srv.Handler)

@@ -37,6 +37,7 @@ noindex: true
         </select>
         <div class="edit-row-btns">
           <button class="ebtn ebtn-ghost" id="btn-edit-clear" type="button">Clear</button>
+          <button class="ebtn ebtn-ghost" id="btn-upscale-source" type="button"><i class="fa-solid fa-expand" aria-hidden="true"></i> Upscale 4×</button>
           <button class="ebtn ebtn-primary" id="btn-edit-run" type="button"><i class="fa-solid fa-wand-magic-sparkles" aria-hidden="true"></i> Edit image</button>
         </div>
       </div>
@@ -51,6 +52,7 @@ noindex: true
       </div>
       <div class="edit-row-btns" style="margin-top:10px;">
         <a class="ebtn ebtn-ghost" id="btn-download" href="#" download="edited.png" hidden><i class="fa-solid fa-download" aria-hidden="true"></i> Download</a>
+        <button class="ebtn ebtn-ghost" id="btn-upscale" type="button" hidden><i class="fa-solid fa-expand" aria-hidden="true"></i> Upscale 4×</button>
       </div>
     </div>
   </div>
