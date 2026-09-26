@@ -34,6 +34,8 @@ noindex: true
           <option value="10">10 — draft</option>
           <option value="20" selected>20 — balanced</option>
           <option value="30">30 — refined</option>
+          <option value="40">40 — detailed</option>
+          <option value="50">50 — max detail</option>
         </select>
         <div class="edit-row-btns">
           <button class="ebtn ebtn-ghost" id="btn-edit-clear" type="button">Clear</button>

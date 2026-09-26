@@ -2,11 +2,12 @@ name: Stocks Live Fetch
 
 on:
   schedule:
-    # Hourly during NYSE trading hours 9:30-16 ET = 13:30-20 UTC, Mon-Fri.
-    # :23 chosen over :05 to dodge scheduler contention (schedules are best-effort).
-    - cron: '23 13-20 * * 1-5'
+    # Twice per trading day instead of hourly: midday snapshot + post-close
+    # snapshot. 16:30 UTC ~= 12:30 ET, 20:30 UTC ~= 16:30 ET, Mon-Fri.
+    # (Schedules are best-effort; repository_dispatch below fills gaps.)
+    - cron: '30 16,20 * * 1-5'
   # External cron (e.g. cron-job.org) POSTs {"event_type":"stocks-refresh"} here
-  # for reliable hourly runs — dispatch events are never skipped like schedules.
+  # for reliable runs — dispatch events are never skipped like schedules.
   repository_dispatch:
     types: [stocks-refresh]
   workflow_dispatch:
@@ -14,183 +15,72 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: stocks-live
+  cancel-in-progress: true
+
 jobs:
   fetch:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Fetch Tech Live (TwelveData preferred, Yahoo fallback, Alpha last resort)
+      - name: Fetch sector stocks (TwelveData -> Yahoo -> Alpha)
         env:
           ALPHAVANTAGE_API_KEY: ${{ secrets.ALPHAVANTAGE_API_KEY }}
           TWELVEDATA_API_KEY: ${{ secrets.TWELVEDATA_API_KEY }}
         run: |
-          mkdir -p assets
           # Skip NYSE holidays (schedule covers Mon-Fri only; holidays would burn fetches)
           ET_D=$(TZ='America/New_York' date +%F)
           case "$ET_D" in
             2026-09-07|2026-11-26|2026-12-25|2027-01-01|2027-01-18|2027-02-15|2027-04-02|2027-05-31|2027-06-18|2027-07-05|2027-09-06|2027-11-25|2027-12-24)
               echo "NYSE holiday ($ET_D), skipping fetch"; exit 0;;
           esac
-          TECH_SYMS="AAPL,MSFT,GOOGL,META,AMZN,NFLX,ADBE,CSCO,IBM,NOW,NVDA,AMD,AVGO,TSM,MU,INTC,ARM,SMCI,DELL,ON,ASML,LRCX,KLAC,AMAT,ENTG,TER,SNPS,CDNS,COHR,MKSI,QCOM,TXN,NXPI,MRVL,ANET,CIEN,CRDO,LITE,FFIV,EXTR,ORCL,CRM,PLTR,CRWD,TSLA,SNOW,DDOG,PANW,ZS,TEAM,MRNA,REGN,VRTX,AMGN,GILD,BIIB,LLY,NVO,PFE,MRK"
-          fetched=false
-
-          # 1) TwelveData (per-symbol quote, requires TWELVEDATA_API_KEY)
-          if [ -n "$TWELVEDATA_API_KEY" ]; then
-            echo "Fetching Tech via TwelveData (60 symbols, 1/hour)..."
-            rm -f /tmp/tech.json; echo "[]" > /tmp/tech.json
-            IFS=',' read -ra SYMS <<< "$TECH_SYMS"
-            for sym in "${SYMS[@]}"; do
-              curl -s "https://api.twelvedata.com/quote?symbol=$sym&interval=1day&apikey=$TWELVEDATA_API_KEY" -o /tmp/q.json
-              if grep -q '"symbol"' /tmp/q.json; then
-                price=$(jq -r '.close' /tmp/q.json)
-                chg=$(jq -r '.change' /tmp/q.json)
-                pct=$(jq -r '.percent_change' /tmp/q.json)
-                vol=$(jq -r '.volume' /tmp/q.json)
-                mc=$(jq -r '.market_cap // 0' /tmp/q.json)
-                jq --arg t "$sym" --arg p "$price" --arg c "$chg" --arg pc "$pct" --arg v "$vol" --argjson mc "$mc" '. + [{ticker:$t, price:$p, change_amount:$c, change_percentage:($pc+"%"), volume:$v, market_cap:$mc}]' /tmp/tech.json > /tmp/tech2.json && mv /tmp/tech2.json /tmp/tech.json
-                echo "Fetched $sym $price $pc%"
-              else
-                echo "Failed $sym: $(cat /tmp/q.json | head -c 200)"
-              fi
-              sleep 2
-            done
-            if [ "$(jq 'length' /tmp/tech.json)" -ge 5 ]; then
-              cat /tmp/tech.json | jq -c 'sort_by(.change_percentage|tonumber) | reverse' > /tmp/sorted.json
-              jq -n --slurpfile tech /tmp/sorted.json --arg ts "$(date -u +%Y-%m-%dT%H:%M:%SZ)" --arg lu "$(TZ='America/New_York' date '+%Y-%m-%d %H:%M:%S US/Eastern')" '{metadata:"Sector stocks — 6 sectors x 10", last_updated:$lu, fetched_at:$ts, top_gainers: ($tech[0][:12] | sort_by(.change_percentage|tonumber) | reverse | .[:12]), top_losers: ($tech[0] | sort_by(.change_percentage|tonumber) | .[:12]), tech_all: $tech[0] }' > assets/stocks-live.json
-              jq '.top_gainers |= map(select(.change_percentage|tonumber > 0)) | .top_losers |= map(select(.change_percentage|tonumber < 0))' assets/stocks-live.json > /tmp/f.json && mv /tmp/f.json assets/stocks-live.json
-              echo "TwelveData Tech fetched $(jq '.top_gainers|length' assets/stocks-live.json) gainers, $(jq '.top_losers|length' assets/stocks-live.json) losers"
-              fetched=true
-            else
-              echo "TwelveData yielded too few symbols, falling through"
-            fi
-          fi
-
-          # 2) Yahoo Finance fallback (no key, free) — fetch each tech symbol
-          if [ "$fetched" = false ]; then
-            echo "Trying Yahoo Finance for 60 symbols (no key needed)..."
-            python3 << 'PY'
-          import json, urllib.request, time, os, sys
-          syms = "AAPL,MSFT,GOOGL,META,AMZN,NFLX,ADBE,CSCO,IBM,NOW,NVDA,AMD,AVGO,TSM,MU,INTC,ARM,SMCI,DELL,ON,ASML,LRCX,KLAC,AMAT,ENTG,TER,SNPS,CDNS,COHR,MKSI,QCOM,TXN,NXPI,MRVL,ANET,CIEN,CRDO,LITE,FFIV,EXTR,ORCL,CRM,PLTR,CRWD,TSLA,SNOW,DDOG,PANW,ZS,TEAM,MRNA,REGN,VRTX,AMGN,GILD,BIIB,LLY,NVO,PFE,MRK".split(",")
-          results=[]; dropped=[]
-          for sym in syms:
-              url = f'https://query1.finance.yahoo.com/v8/finance/chart/{sym}?interval=1d&range=1d'
-              try:
-                  req = urllib.request.Request(url, headers={"User-Agent":"Mozilla/5.0"})
-                  with urllib.request.urlopen(req, timeout=10) as r:
-                      data=json.load(r)
-                      meta=data['chart']['result'][0]['meta']
-                      price=float(meta['regularMarketPrice'])
-                      prev=float(meta['chartPreviousClose'])
-                      if price<=0 or prev<=0:
-                          raise ValueError(f"non-positive price {price}/{prev}")
-                      chg=price-prev
-                      pct=(chg/prev*100)
-                      if abs(pct) > 50:
-                          # Almost certainly a bad quote (bad tick, split, corrupt meta) — drop the symbol, keep the batch
-                          dropped.append(sym)
-                          print(f"Yahoo outlier {sym} {price} {pct:.2f}% — dropped")
-                          continue
-                      vol=str(meta.get('regularMarketVolume',0))
-                      try:
-                          mcap=int(meta.get('marketCap') or 0)
-                      except (TypeError, ValueError):
-                          mcap=0
-                      results.append({"ticker":sym,"price":f"{price:.2f}","change_amount":f"{chg:.2f}","change_percentage":f"{pct:.4f}%","volume":vol,"market_cap":mcap})
-                      print(f"Yahoo {sym} {price} {pct:.2f}% mcap={mcap}")
-              except Exception as e:
-                  print(f"Yahoo failed {sym}: {e}")
-              time.sleep(0.3)
-          MIN_OK=45
-          if len(results) >= MIN_OK:
-              pos = sorted([r for r in results if float(r['change_percentage'].replace('%',''))>0], key=lambda x: float(x['change_percentage'].replace('%','')), reverse=True)
-              neg = sorted([r for r in results if float(r['change_percentage'].replace('%',''))<0], key=lambda x: float(x['change_percentage'].replace('%','')))
-              all_sorted = sorted(results, key=lambda x: float(x['change_percentage'].replace('%','')), reverse=True)
-              import datetime, zoneinfo
-              now_utc = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-              tz = zoneinfo.ZoneInfo("America/New_York")
-              now_et = datetime.datetime.now(tz).strftime("%Y-%m-%d %H:%M:%S US/Eastern")
-              out={"metadata":"Sector stocks — 6 sectors x 10","last_updated":now_et,"fetched_at":now_utc,"top_gainers":pos[:12],"top_losers":neg[:12],"tech_all":all_sorted}
-              open("assets/stocks-live.json","w").write(json.dumps(out, indent=2))
-              print(f"Yahoo wrote {len(pos)} gainers {len(neg)} losers all {len(all_sorted)} (dropped outliers: {dropped or 'none'})")
-              # Rolling price history for sparklines (bounded: last 40 points per ticker ≈ 5 trading days)
-              hist_path="assets/stocks-history.json"
-              hist={}
-              if os.path.exists(hist_path):
-                  try:
-                      hist=json.load(open(hist_path))
-                      if not isinstance(hist.get("points"), dict):
-                          hist={}
-                  except Exception as e:
-                      print(f"History unreadable, starting fresh: {e}")
-                      hist={}
-              pts=hist.get("points",{})
-              for r in all_sorted:
-                  try:
-                      px=float(r["price"])
-                  except (TypeError, ValueError):
-                      continue
-                  seq=pts.get(r["ticker"],[])
-                  if not seq or seq[-1]!=px:
-                      seq.append(px)
-                  pts[r["ticker"]]=seq[-40:]
-              hist={"updated":now_utc,"points":pts}
-              open(hist_path,"w").write(json.dumps(hist))
-              print(f"History updated: {len(pts)} tickers")
-          else:
-              print(f"Yahoo insufficient {len(results)} results (< {MIN_OK}), keeping existing file")
-              sys.exit(1)
-          PY
-            if [ $? -eq 0 ] && [ -f assets/stocks-live.json ] && [ "$(jq '(.top_gainers|length) + (.top_losers|length)' assets/stocks-live.json)" -ge 5 ]; then
-              echo "Yahoo succeeded: $(jq '.top_gainers|length' assets/stocks-live.json) gainers, $(jq '.top_losers|length' assets/stocks-live.json) losers"
-              fetched=true
-            else
-              echo "Yahoo fallback failed, trying Alpha"
-            fi
-          fi
-
-          # 3) Alpha Vantage TOP_GAINERS_LOSERS last resort — only if tech-filtered
-          if [ "$fetched" = false ]; then
-            if [ -z "$ALPHAVANTAGE_API_KEY" ]; then
-              echo "No API keys and Yahoo failed, keeping existing assets/stocks-live.json"
-              exit 0
-            fi
-            echo "Fetching Alpha TOP_GAINERS_LOSERS as last resort..."
-            curl -s "https://www.alphavantage.co/query?function=TOP_GAINERS_LOSERS&apikey=$ALPHAVANTAGE_API_KEY" -o /tmp/alpha.json
-            if grep -q '"Information"' /tmp/alpha.json; then
-              echo "Alpha rate-limited or error: $(cat /tmp/alpha.json | head -c 300)"
-              echo "Keeping existing file"
-              exit 0
-            fi
-            TECH_LIST="AAPL,MSFT,GOOGL,META,AMZN,NFLX,ADBE,CSCO,IBM,NOW,NVDA,AMD,AVGO,TSM,MU,INTC,ARM,SMCI,DELL,ON,ASML,LRCX,KLAC,AMAT,ENTG,TER,SNPS,CDNS,COHR,MKSI,QCOM,TXN,NXPI,MRVL,ANET,CIEN,CRDO,LITE,FFIV,EXTR,ORCL,CRM,PLTR,CRWD,TSLA,SNOW,DDOG,PANW,ZS,TEAM,MRNA,REGN,VRTX,AMGN,GILD,BIIB,LLY,NVO,PFE,MRK"
-            jq --arg tech "$TECH_LIST" --arg ts "$(date -u +%Y-%m-%dT%H:%M:%SZ)" '
-              .fetched_at = $ts |
-              .metadata = "Sector stocks — 6 sectors x 10 (Alpha filtered)" |
-              (.top_gainers | map(select(.ticker as $t | ($tech | split(",")) | index($t)))) as $g |
-              (.top_losers | map(select(.ticker as $t | ($tech | split(",")) | index($t)))) as $l |
-              .top_gainers = $g |
-              .top_losers = $l
-            ' /tmp/alpha.json > /tmp/alpha_filtered.json
-            gcount=$(jq '.top_gainers|length' /tmp/alpha_filtered.json)
-            lcount=$(jq '.top_losers|length' /tmp/alpha_filtered.json)
-            if [ "$gcount" -ge 3 ] && [ "$lcount" -ge 3 ]; then
-              mv /tmp/alpha_filtered.json assets/stocks-live.json
-              echo "Alpha filtered kept: $gcount gainers $lcount losers"
-              fetched=true
-            else
-              echo "Alpha filtered has insufficient tech ($gcount/$lcount), keeping existing file"
-              exit 0
-            fi
-          fi
-
-          cat assets/stocks-live.json | head -c 800
-          echo ""
-      - name: Commit if changed
+          python3 script/fetch_stocks.py \
+            --live assets/stocks-live.json \
+            --history assets/stocks-history.json \
+          || echo "All sources failed, keeping existing files"
+          head -c 800 assets/stocks-live.json; echo ""
+      - name: Commit if data meaningfully changed
         run: |
-          if [ -f assets/stocks-live.json ]; then
-            git config user.name "github-actions[bot]"
-            git config user.email "github-actions[bot]@users.noreply.github.com"
-            git add assets/stocks-live.json
-            [ -f assets/stocks-history.json ] && git add assets/stocks-history.json
-            git diff --staged --quiet || git commit -m "chore: update stocks live data [skip ci]"
-            git push || echo "nothing to push or push failed"
-          fi
+          # Timestamps (fetched_at/last_updated/updated) change on every run,
+          # so compare payloads with those keys stripped — no commit when
+          # prices didn't actually move (weekends, holidays, flat market).
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          python3 - <<'PY'
+          import json, subprocess
+          VOLATILE = {"fetched_at", "last_updated", "updated"}
+          FILES = ["assets/stocks-live.json", "assets/stocks-history.json"]
+          def head_version(path):
+              try:
+                  out = subprocess.run(
+                      ["git", "show", f"HEAD:{path}"],
+                      capture_output=True, text=True, check=True,
+                  )
+                  return json.loads(out.stdout)
+              except Exception:
+                  return None
+          def normalize(payload):
+              if isinstance(payload, dict):
+                  return {k: payload[k] for k in sorted(payload) if k not in VOLATILE}
+              return payload
+          changed = []
+          for path in FILES:
+              try:
+                  with open(path) as f:
+                      current = normalize(json.load(f))
+              except FileNotFoundError:
+                  continue
+              if normalize(head_version(path)) != current:
+                  changed.append(path)
+          if changed:
+              subprocess.run(["git", "add", *changed], check=True)
+              subprocess.run(
+                  ["git", "commit", "-m", "chore: update stocks live data [skip ci]"],
+                  check=True,
+              )
+              print(f"Committed: {changed}")
+          else:
+              print("No meaningful change, skipping commit")
+          PY
+          git push || echo "nothing to push or push failed"

@@ -3,3 +3,7 @@ _site/
 .jekyll-metadata
 .DS_Store
 .venv/
+.tmp/
+__pycache__/
+*.pyc
+*.pyo
