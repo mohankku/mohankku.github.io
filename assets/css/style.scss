@@ -4,6 +4,7 @@
 @import "jekyll-theme-minimal";
 
 :root {
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   --bg-color: #f8fafc;
   --text-color: #1e293b;
   --text-muted: #64748b;
@@ -19,6 +20,9 @@
   --tag-bg: rgba(59, 130, 246, 0.08);
   --tag-border: rgba(59, 130, 246, 0.2);
   --tag-text: #1d4ed8;
+  --scholar-color: #2563eb;
+  --scholar-bg: rgba(37, 99, 235, 0.08);
+  --scholar-border: rgba(37, 99, 235, 0.22);
   --award-bg: rgba(245, 158, 11, 0.12);
   --award-border: rgba(245, 158, 11, 0.35);
   --award-text: #b45309;
@@ -42,6 +46,9 @@
     --tag-bg: rgba(96, 165, 250, 0.12);
     --tag-border: rgba(96, 165, 250, 0.3);
     --tag-text: #93c5fd;
+    --scholar-color: #60a5fa;
+    --scholar-bg: rgba(96, 165, 250, 0.14);
+    --scholar-border: rgba(96, 165, 250, 0.32);
     --award-bg: rgba(245, 158, 11, 0.18);
     --award-border: rgba(245, 158, 11, 0.45);
     --award-text: #fcd34d;
@@ -193,11 +200,16 @@ section p, section ul, section ol, section li, strong, b, em, i, span {
   text-align: center;
   box-sizing: border-box;
 
-  &:hover {
+  &:hover,
+  &.active {
     background: var(--link-color);
-    color: white;
+    color: white !important;
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px var(--card-shadow);
+    box-shadow: 0 4px 12px var(--card-shadow), 0 0 10px var(--glow-color);
+
+    strong, i {
+      color: white !important;
+    }
   }
 
   strong {
@@ -810,7 +822,7 @@ footer {
 .terminal-title {
   color: #ccc;
   font-size: 13px;
-  font-family: monospace;
+  font-family: var(--font-mono);
   position: absolute;
   width: 100%;
   text-align: center;
@@ -820,11 +832,11 @@ footer {
 
 .terminal-body {
   padding: 20px;
-  font-family: 'Courier New', Courier, monospace;
+  font-family: var(--font-mono);
   color: #27c93f;
   height: 350px;
   overflow-y: auto;
-  font-size: 14px;
+  font-size: 13.5px;
 }
 
 .terminal-body div {
@@ -834,6 +846,7 @@ footer {
 .prompt {
   color: #27c93f;
   margin-right: 10px;
+  font-family: var(--font-mono);
 }
 
 .command-highlight {
@@ -851,8 +864,8 @@ footer {
   background: transparent;
   border: none;
   color: #fff;
-  font-family: 'Courier New', Courier, monospace;
-  font-size: 14px;
+  font-family: var(--font-mono);
+  font-size: 13.5px;
   flex: 1;
   outline: none;
 }
@@ -902,7 +915,7 @@ footer {
 /* Stat Grid */
 .stat-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   gap: 12px;
   margin: 20px 0 16px;
 }
@@ -911,14 +924,19 @@ footer {
   background: rgba(255, 255, 255, 0.4);
   border: 1px solid var(--border-color);
   border-radius: 10px;
-  padding: 12px 10px;
+  padding: 12px 8px;
   text-align: center;
-  transition: transform 0.2s ease, border-color 0.2s ease;
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  text-decoration: none !important;
 
   &:hover {
     transform: translateY(-2px);
     border-color: var(--link-color);
   }
+}
+
+.stat-item.stat-item-link:hover {
+  box-shadow: 0 4px 12px var(--card-shadow);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -929,7 +947,7 @@ footer {
 
 .stat-val {
   display: block;
-  font-size: 18px;
+  font-size: 17px;
   font-weight: 700;
   color: var(--text-color);
   line-height: 1.2;
@@ -943,16 +961,26 @@ footer {
   color: var(--award-text);
 }
 
+.stat-val.scholar {
+  color: var(--scholar-color);
+}
+
 .stat-lbl {
   display: block;
-  font-size: 11px;
+  font-size: 10.5px;
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   margin-top: 4px;
 }
 
-@media (max-width: 720px) {
+@media (max-width: 900px) {
+  .stat-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 580px) {
   .stat-grid {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -1262,7 +1290,7 @@ footer {
   padding: 0;
   font-size: 11.5px;
   line-height: 1.45;
-  font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-family: var(--font-mono) !important;
   color: var(--text-color);
   overflow-x: auto;
   white-space: pre;
@@ -1429,6 +1457,357 @@ footer {
   margin: 0;
 }
 
+/* Global Monospace Rules */
+code, kbd, samp, pre {
+  font-family: var(--font-mono) !important;
+}
+
+code {
+  font-size: 0.9em;
+  padding: 2px 5px;
+  border-radius: 4px;
+  background: var(--code-bg);
+  border: 1px solid var(--border-color);
+}
+
+pre {
+  background: var(--code-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+}
+
+/* ==========================================================================
+   Publications Header & Scholar Badge
+   ========================================================================== */
+.pub-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 36px;
+  margin-bottom: 8px;
+
+  h2 {
+    margin: 0 !important;
+  }
+}
+
+.scholar-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  background: var(--scholar-bg);
+  border: 1px solid var(--scholar-border);
+  color: var(--scholar-color);
+  font-size: 12.5px;
+  font-weight: 600;
+  text-decoration: none !important;
+  transition: all 0.25s ease;
+
+  i {
+    color: var(--scholar-color);
+  }
+
+  .scholar-count {
+    font-weight: 700;
+  }
+
+  .scholar-sep {
+    opacity: 0.5;
+  }
+
+  .scholar-sub {
+    font-weight: 500;
+  }
+
+  .scholar-ext {
+    font-size: 10px;
+    opacity: 0.7;
+    transition: transform 0.2s ease;
+  }
+
+  &:hover {
+    background: var(--link-color);
+    border-color: var(--link-color);
+    color: #ffffff !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 14px var(--glow-color);
+
+    i, .scholar-sub, .scholar-sep, .scholar-ext {
+      color: #ffffff !important;
+    }
+
+    .scholar-ext {
+      transform: translate(1px, -1px);
+    }
+  }
+}
+
+/* ==========================================================================
+   Site Breadcrumb Navigation
+   ========================================================================== */
+.site-breadcrumb {
+  margin-bottom: 24px;
+  animation: fadeIn 0.4s ease-out;
+}
+
+.breadcrumb-inner {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.breadcrumb-link {
+  color: var(--link-color);
+  text-decoration: none !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 500;
+  transition: color 0.2s ease, transform 0.2s ease;
+
+  i {
+    font-size: 11px;
+    color: var(--link-color);
+  }
+
+  &:hover {
+    color: var(--link-hover);
+    transform: translateX(-1px);
+  }
+}
+
+.breadcrumb-separator {
+  display: inline-flex;
+  align-items: center;
+  color: var(--text-muted);
+  opacity: 0.5;
+  font-size: 10px;
+}
+
+.breadcrumb-current {
+  color: var(--text-color);
+  font-weight: 600;
+  max-width: 320px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 600px) {
+  .breadcrumb-inner {
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .breadcrumb-current {
+    max-width: 180px;
+  }
+}
+
+/* ==========================================================================
+   Featured Systems & Projects Grid
+   ========================================================================== */
+.section-title-wrap {
+  margin-top: 36px;
+  margin-bottom: 16px;
+
+  h2 {
+    margin: 0 0 4px !important;
+  }
+}
+
+.section-subtitle {
+  font-size: 13.5px;
+  color: var(--text-muted);
+  display: block;
+}
+
+.featured-projects-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+@media (max-width: 760px) {
+  .featured-projects-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.project-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 16px var(--card-shadow);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+
+  /* Initial state for scroll animation */
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.5s ease-out, transform 0.5s ease-out, border-color 0.25s ease, box-shadow 0.25s ease;
+
+  &.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  &:hover {
+    transform: translateY(-4px);
+    border-color: var(--link-color);
+    box-shadow: 0 10px 28px var(--card-shadow), 0 0 16px var(--glow-color);
+  }
+}
+
+.project-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.project-card-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: var(--tag-bg);
+  border: 1px solid var(--tag-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--link-color);
+  font-size: 18px;
+}
+
+.project-card-badges {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.project-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.project-badge.badge-accent {
+  background: var(--tag-bg);
+  border: 1px solid var(--tag-border);
+  color: var(--tag-text);
+}
+
+.project-badge.badge-subtle {
+  background: rgba(100, 116, 139, 0.08);
+  border: 1px solid rgba(100, 116, 139, 0.2);
+  color: var(--text-muted);
+}
+
+.project-card-title {
+  font-size: 16.5px;
+  font-weight: 700;
+  color: var(--text-color);
+  margin: 0 0 8px;
+  line-height: 1.35;
+}
+
+.project-card-desc {
+  font-size: 13.5px;
+  color: var(--text-muted);
+  line-height: 1.55;
+  margin: 0 0 14px;
+  flex-grow: 1;
+}
+
+.project-card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 16px;
+
+  span {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11.5px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: rgba(148, 163, 184, 0.08);
+    border: 1px solid var(--border-color);
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+
+    i {
+      font-size: 10.5px;
+      color: var(--link-color);
+    }
+  }
+}
+
+.project-card-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: auto;
+  flex-wrap: wrap;
+
+  .pub-btn {
+    font-size: 12px;
+    padding: 6px 12px;
+  }
+}
+
+.projects-cta-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 12px 18px;
+  border-radius: 10px;
+  background: var(--tag-bg);
+  border: 1px solid var(--tag-border);
+  font-size: 13px;
+  color: var(--text-color);
+  margin-bottom: 28px;
+}
+
+.projects-cta-link {
+  font-weight: 600;
+  color: var(--link-color);
+  text-decoration: none !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: transform 0.2s ease, color 0.2s ease;
+
+  &:hover {
+    color: var(--link-hover);
+    transform: translateX(2px);
+  }
+}
+
 /* === Fix: progressive enhancement for scroll animations === */
 /* Only hide elements when JS is enabled; without JS they stay visible */
 html:not(.js) section > ul > li,
@@ -1439,7 +1818,8 @@ html:not(.js) .hero-banner,
 html:not(.js) .research-card,
 html:not(.js) .pub-card,
 html:not(.js) .timeline-card,
-html:not(.js) .service-card {
+html:not(.js) .service-card,
+html:not(.js) .project-card {
   opacity: 1 !important;
   transform: none !important;
 }
@@ -1455,7 +1835,8 @@ html:not(.js) .service-card {
   .research-card,
   .pub-card,
   .timeline-card,
-  .service-card {
+  .service-card,
+  .project-card {
     transition: none !important;
     animation: none !important;
     opacity: 1 !important;
@@ -1468,7 +1849,8 @@ html:not(.js) .service-card {
   .research-card:hover,
   .pub-card:hover,
   .timeline-card:hover,
-  .service-card:hover {
+  .service-card:hover,
+  .project-card:hover {
     transform: none !important;
   }
 }

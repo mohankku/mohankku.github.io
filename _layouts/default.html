@@ -21,14 +21,14 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     
     <link rel="stylesheet" href="{{ '/assets/css/style.css?v=' | append: site.github.build_revision | relative_url }}">
     <meta name="viewport" content="width=device-width">
     <script>document.documentElement.classList.add('js');</script>
     <noscript>
       <style>
-        section > ul > li, section > h2, section > p, .experience-list li { opacity: 1 !important; transform: none !important; }
+        section > ul > li, section > h2, section > p, .experience-list li, .project-card { opacity: 1 !important; transform: none !important; }
       </style>
     </noscript>
     <!--[if lt IE 9]>
@@ -47,13 +47,14 @@
           
           <nav class="header-nav">
             <ul>
+              <li><a href="{{ '/' | relative_url }}" class="{% if page.url == '/' or page.url == '/index.html' %}active{% endif %}"><i class="fa-solid fa-house"></i> <strong>Home</strong></a></li>
               <li><a href="{{ '/data/cv.pdf' | relative_url }}"><i class="fa-solid fa-file-pdf"></i> <strong>CV</strong></a></li>
-              <li><a href="https://scholar.google.com/citations?user=NVCULdIAAAAJ&hl=en"><i class="fa-solid fa-graduation-cap"></i> <strong>Google Scholar</strong></a></li>
-              <li><a href="https://github.com/mohankku"><i class="fa-brands fa-github"></i> <strong>GitHub</strong></a></li>
-              <li><a href="https://www.linkedin.com/in/mohankkumar/"><i class="fa-brands fa-linkedin"></i> <strong>LinkedIn</strong></a></li>
+              <li><a href="https://scholar.google.com/citations?user=NVCULdIAAAAJ&hl=en" target="_blank" rel="noopener"><i class="fa-solid fa-graduation-cap"></i> <strong>Scholar</strong></a></li>
+              <li><a href="https://github.com/mohankku" target="_blank" rel="noopener"><i class="fa-brands fa-github"></i> <strong>GitHub</strong></a></li>
+              <li><a href="https://www.linkedin.com/in/mohankkumar/" target="_blank" rel="noopener"><i class="fa-brands fa-linkedin"></i> <strong>LinkedIn</strong></a></li>
               <li><a href="#" id="open-terminal"><i class="fa-solid fa-terminal"></i> <strong>Terminal</strong></a></li>
-              <li><a href="{{ '/blogs' | relative_url }}"><i class="fa-solid fa-blog"></i> <strong>Blogs</strong></a></li>
-              <li><a href="{{ '/other' | relative_url }}"><i class="fa-solid fa-ellipsis"></i> <strong>Other</strong></a></li>
+              <li><a href="{{ '/blogs' | relative_url }}" class="{% if page.url contains '/blogs' or page.collection == 'posts' %}active{% endif %}"><i class="fa-solid fa-blog"></i> <strong>Blogs</strong></a></li>
+              <li><a href="{{ '/other' | relative_url }}" class="{% if page.url contains '/other' or page.url contains '/stocks' or page.url contains '/physics' or page.url contains '/chat' or page.url contains '/image-edit' %}active{% endif %}"><i class="fa-solid fa-ellipsis"></i> <strong>Other</strong></a></li>
             </ul>
           </nav>
 
@@ -72,6 +73,24 @@
       </header>
       <div class="main-content">
         <section>
+          {% unless page.url == '/' or page.url == '/index.html' %}
+          <nav class="site-breadcrumb" aria-label="Breadcrumb navigation">
+            <div class="breadcrumb-inner">
+              <a href="{{ '/' | relative_url }}" class="breadcrumb-link breadcrumb-home" title="Back to Homepage">
+                <i class="fa-solid fa-arrow-left"></i> <span>Home</span>
+              </a>
+              <span class="breadcrumb-separator"><i class="fa-solid fa-chevron-right"></i></span>
+              {% if page.collection == 'posts' %}
+                <a href="{{ '/blogs' | relative_url }}" class="breadcrumb-link">Blogs</a>
+                <span class="breadcrumb-separator"><i class="fa-solid fa-chevron-right"></i></span>
+              {% elsif page.url contains '/stocks' or page.url contains '/physics' or page.url contains '/chat' or page.url contains '/image-edit' %}
+                <a href="{{ '/other' | relative_url }}" class="breadcrumb-link">Other</a>
+                <span class="breadcrumb-separator"><i class="fa-solid fa-chevron-right"></i></span>
+              {% endif %}
+              <span class="breadcrumb-current" aria-current="page">{{ page.title }}</span>
+            </div>
+          </nav>
+          {% endunless %}
           {{ content }}
         </section>
         <footer>
@@ -126,7 +145,7 @@
         });
 
         // Target all section paragraphs, headers, and cards
-        const elementsToAnimate = document.querySelectorAll('section > p, section > h2, section > ul > li, .experience-list li, .hero-banner, .research-card, .pub-card, .timeline-card, .service-card');
+        const elementsToAnimate = document.querySelectorAll('section > p, section > h2, section > ul > li, .experience-list li, .hero-banner, .research-card, .pub-card, .timeline-card, .service-card, .project-card');
         elementsToAnimate.forEach(el => observer.observe(el));
         
         // Back to top button functionality
@@ -274,9 +293,12 @@
           }
 
           const commands = {
-            'help': 'Available commands: <br> - <span class="command-highlight">whoami</span>: Display basic info<br> - <span class="command-highlight">skills</span>: List technical skills<br> - <span class="command-highlight">publications</span>: Link to publications<br> - <span class="command-highlight">clear</span>: Clear terminal output<br> - <span class="command-highlight">exit</span>: Close terminal',
+            'help': 'Available commands: <br> - <span class="command-highlight">whoami</span>: Display basic info<br> - <span class="command-highlight">skills</span>: List technical skills<br> - <span class="command-highlight">projects</span>: Featured systems & tools<br> - <span class="command-highlight">scholar</span>: Citation & publication metrics<br> - <span class="command-highlight">publications</span>: Link to publications<br> - <span class="command-highlight">blogs</span>: Recent blog posts<br> - <span class="command-highlight">clear</span>: Clear terminal output<br> - <span class="command-highlight">exit</span>: Close terminal',
             'whoami': 'Mohan Kumar<br>Research Scientist at Meta Reality Labs<br>Ph.D. in Computer Science from Georgia Tech',
             'skills': 'Languages: C/C++, Python, Rust<br>Frameworks: PyTorch<br>Expertise: Machine Learning Acceleration, SIMD vectorization, Distributed Systems, Operating Systems',
+            'projects': '• <span class="command-highlight">Zenith</span>: Autonomous local coding agent (Ollama / Qwen)<br>• <span class="command-highlight">AR Physics Lab</span>: In-browser camera physics experiments<br>• <span class="command-highlight">Stock Dashboard</span>: Real-time tech tickers tracking<br>• <span class="command-highlight">AI Image Edit</span>: On-device MLX image editing',
+            'scholar': '574+ citations on Google Scholar across ASPLOS, EuroSys, and ACM TACO.<br>h-index: 5 · i10-index: 5',
+            'blogs': '• <a href="/blogs" style="color:var(--link-color);">Zenith: Local-First Autonomous Coding Agent</a><br>• <a href="/blogs" style="color:var(--link-color);">AR Physics Lab: Free-Fall Gravity with Computer Vision</a>',
             'publications': 'Check out the "Publications" section on the main page, or search my Google Scholar profile!',
             'sudo': 'mohan is not in the sudoers file. This incident will be reported.',
           };

@@ -17,6 +17,10 @@ title: Home
       <span class="stat-val highlight">Georgia Tech</span>
       <span class="stat-lbl">Ph.D. in Computer Science</span>
     </div>
+    <a href="https://scholar.google.com/citations?user=NVCULdIAAAAJ&hl=en" target="_blank" rel="noopener" class="stat-item stat-item-link" title="View Google Scholar Profile (574+ citations)">
+      <span class="stat-val scholar"><i class="fa-solid fa-graduation-cap"></i> 570+</span>
+      <span class="stat-lbl">Scholar Citations</span>
+    </a>
     <div class="stat-item">
       <span class="stat-val award">2 Awards 🏆</span>
       <span class="stat-lbl">Best Paper & Student Paper</span>
@@ -74,6 +78,129 @@ title: Home
   </div>
 </div>
 
+<div class="section-title-wrap">
+  <h2 id="featured-projects">Featured Systems & Projects</h2>
+  <span class="section-subtitle">Selected open-source autonomous agents, edge AI tools, and browser science sandboxes</span>
+</div>
+
+<div class="featured-projects-grid">
+  <!-- Card 1: Zenith -->
+  <div class="project-card">
+    <div class="project-card-header">
+      <div class="project-card-icon"><i class="fa-solid fa-robot"></i></div>
+      <div class="project-card-badges">
+        <span class="project-badge badge-accent">Edge AI</span>
+        <span class="project-badge badge-subtle">Open Source</span>
+      </div>
+    </div>
+    <h3 class="project-card-title">Zenith: Local-First Autonomous Coding Agent</h3>
+    <p class="project-card-desc">
+      Modular autonomous coding assistant running on-device on Apple Silicon or cloud models. Features 2-tier persistent memory, AST symbol indexing, and a resilient 5-tier fuzzy edit engine with pre-mutation <code>/undo</code> checkpoints.
+    </p>
+    <div class="project-card-tags">
+      <span><i class="fa-solid fa-microchip"></i> Local Qwen</span>
+      <span><i class="fa-solid fa-wand-magic-sparkles"></i> 5-Tier Edit Engine</span>
+      <span><i class="fa-solid fa-rotate-left"></i> Checkpoint Rollbacks</span>
+    </div>
+    <div class="project-card-actions">
+      <a href="https://github.com/mohankku/zenith" target="_blank" rel="noopener" class="pub-btn">
+        <i class="fa-brands fa-github"></i> GitHub
+      </a>
+      <a href="{{ '/blogs' | relative_url }}" class="pub-btn">
+        <i class="fa-solid fa-newspaper"></i> Blog Post
+      </a>
+    </div>
+  </div>
+
+  <!-- Card 2: AR Physics Lab -->
+  <div class="project-card">
+    <div class="project-card-header">
+      <div class="project-card-icon"><i class="fa-solid fa-flask"></i></div>
+      <div class="project-card-badges">
+        <span class="project-badge badge-accent">WebAR</span>
+        <span class="project-badge badge-subtle">Interactive CV</span>
+      </div>
+    </div>
+    <h3 class="project-card-title">AR Physics Lab</h3>
+    <p class="project-card-desc">
+      In-browser experimental physics powered by real-time computer vision. Augment a falling ball over live camera feeds, measure gravitational acceleration (<code>g = 2h/t²</code>), track colored spheres, and export experiment trials.
+    </p>
+    <div class="project-card-tags">
+      <span><i class="fa-solid fa-video"></i> Live Camera CV</span>
+      <span><i class="fa-solid fa-hand"></i> Hand-Release Tracking</span>
+      <span><i class="fa-solid fa-chart-line"></i> Kinematics Fitting</span>
+    </div>
+    <div class="project-card-actions">
+      <a href="{{ '/physics' | relative_url }}" class="pub-btn">
+        <i class="fa-solid fa-flask"></i> Launch Lab
+      </a>
+      <a href="{{ '/other' | relative_url }}" class="pub-btn">
+        <i class="fa-solid fa-circle-info"></i> Details
+      </a>
+    </div>
+  </div>
+
+  <!-- Card 3: Stock Monitoring Dashboard -->
+  <div class="project-card">
+    <div class="project-card-header">
+      <div class="project-card-icon"><i class="fa-solid fa-chart-line"></i></div>
+      <div class="project-card-badges">
+        <span class="project-badge badge-accent">Live Systems</span>
+        <span class="project-badge badge-subtle">Automated Ingestion</span>
+      </div>
+    </div>
+    <h3 class="project-card-title">Stock Monitoring Dashboard</h3>
+    <p class="project-card-desc">
+      High-density tech market dashboard monitoring 60 tickers across 6 sectors (Big Tech, AI hardware, Cloud, Security). Ingests and caches live Yahoo Finance data hourly via automated GitHub Actions pipelines.
+    </p>
+    <div class="project-card-tags">
+      <span><i class="fa-solid fa-server"></i> GitHub Actions Cron</span>
+      <span><i class="fa-solid fa-layer-group"></i> 6 Sector Grids</span>
+      <span><i class="fa-solid fa-magnifying-glass"></i> Instant Search</span>
+    </div>
+    <div class="project-card-actions">
+      <a href="{{ '/stocks' | relative_url }}" class="pub-btn">
+        <i class="fa-solid fa-chart-simple"></i> Open Dashboard
+      </a>
+    </div>
+  </div>
+
+  <!-- Card 4: AI Image Edit -->
+  <div class="project-card">
+    <div class="project-card-header">
+      <div class="project-card-icon"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+      <div class="project-card-badges">
+        <span class="project-badge badge-accent">Apple MLX</span>
+        <span class="project-badge badge-subtle">Private / Local</span>
+      </div>
+    </div>
+    <h3 class="project-card-title">On-Device AI Image Editor</h3>
+    <p class="project-card-desc">
+      Zero-cloud photo editing using natural language prompts powered by Qwen-Image-Edit running locally via Apple Silicon MLX/mflux, featuring 4x Real-ESRGAN upscaling and persistent worker architecture.
+    </p>
+    <div class="project-card-tags">
+      <span><i class="fa-brands fa-apple"></i> Apple Silicon MLX</span>
+      <span><i class="fa-solid fa-lock"></i> 100% On-Device</span>
+      <span><i class="fa-solid fa-image"></i> 4x Super-Resolution</span>
+    </div>
+    <div class="project-card-actions">
+      <a href="{{ '/image-edit' | relative_url }}" class="pub-btn">
+        <i class="fa-solid fa-wand-magic-sparkles"></i> Open Editor
+      </a>
+      <a href="{{ '/chat' | relative_url }}" class="pub-btn">
+        <i class="fa-solid fa-comments"></i> Local Chat
+      </a>
+    </div>
+  </div>
+</div>
+
+<div class="projects-cta-row">
+  <span>Looking for more? Explore all interactive tools, demos, and experiments.</span>
+  <a href="{{ '/other' | relative_url }}" class="projects-cta-link">
+    View all projects &amp; experiments <i class="fa-solid fa-arrow-right"></i>
+  </a>
+</div>
+
 <h2 id="experience">Experience & Education</h2>
 
 <div class="timeline-list">
@@ -120,7 +247,16 @@ title: Home
   </div>
 </div>
 
-<h2 id="publications">Publications</h2>
+<div class="pub-section-header">
+  <h2 id="publications">Publications</h2>
+  <a href="https://scholar.google.com/citations?user=NVCULdIAAAAJ&hl=en" target="_blank" rel="noopener" class="scholar-badge" title="View citation metrics on Google Scholar">
+    <i class="fa-solid fa-graduation-cap"></i>
+    <span class="scholar-count">570+ Citations</span>
+    <span class="scholar-sep">&middot;</span>
+    <span class="scholar-sub">Google Scholar</span>
+    <i class="fa-solid fa-arrow-up-right-from-square scholar-ext"></i>
+  </a>
+</div>
 
 <div class="pub-filter-bar">
   <button type="button" class="pub-filter-btn active" data-filter="all">All Papers</button>
