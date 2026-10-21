@@ -6,7 +6,7 @@
       "price": "35.57",
       "change_amount": "3.10",
       "change_percentage": "9.5473%",
-      "volume": "81762260",
+      "volume": "81909879",
       "market_cap": 0
     },
     {
@@ -14,7 +14,7 @@
       "price": "231.33",
       "change_amount": "16.82",
       "change_percentage": "7.8411%",
-      "volume": "2755750",
+      "volume": "2762432",
       "market_cap": 0
     },
     {
@@ -22,7 +22,7 @@
       "price": "273.09",
       "change_amount": "16.66",
       "change_percentage": "6.4969%",
-      "volume": "2876426",
+      "volume": "2877680",
       "market_cap": 0
     },
     {
@@ -30,7 +30,7 @@
       "price": "182.28",
       "change_amount": "10.77",
       "change_percentage": "6.2795%",
-      "volume": "7160027",
+      "volume": "7245733",
       "market_cap": 0
     },
     {
@@ -38,15 +38,15 @@
       "price": "361.34",
       "change_amount": "19.39",
       "change_percentage": "5.6704%",
-      "volume": "2972339",
+      "volume": "3003968",
       "market_cap": 0
     },
     {
       "ticker": "DELL",
-      "price": "486.01",
-      "change_amount": "24.45",
-      "change_percentage": "5.2973%",
-      "volume": "6783524",
+      "price": "485.88",
+      "change_amount": "24.32",
+      "change_percentage": "5.2691%",
+      "volume": "6821140",
       "market_cap": 0
     },
     {
@@ -54,7 +54,7 @@
       "price": "239.34",
       "change_amount": "11.97",
       "change_percentage": "5.2645%",
-      "volume": "9184494",
+      "volume": "9332356",
       "market_cap": 0
     },
     {
@@ -62,7 +62,7 @@
       "price": "201.72",
       "change_amount": "9.12",
       "change_percentage": "4.7352%",
-      "volume": "21150939",
+      "volume": "21192659",
       "market_cap": 0
     },
     {
@@ -70,7 +70,7 @@
       "price": "251.46",
       "change_amount": "9.54",
       "change_percentage": "3.9435%",
-      "volume": "8143910",
+      "volume": "9067912",
       "market_cap": 0
     },
     {
@@ -78,7 +78,7 @@
       "price": "850.70",
       "change_amount": "28.19",
       "change_percentage": "3.4273%",
-      "volume": "3700565",
+      "volume": "3709977",
       "market_cap": 0
     },
     {
@@ -86,7 +86,7 @@
       "price": "386.47",
       "change_amount": "12.76",
       "change_percentage": "3.4144%",
-      "volume": "42923520",
+      "volume": "44779790",
       "market_cap": 0
     },
     {
@@ -94,7 +94,7 @@
       "price": "552.72",
       "change_amount": "17.98",
       "change_percentage": "3.3624%",
-      "volume": "17657435",
+      "volume": "17756841",
       "market_cap": 0
     }
   ],
@@ -104,7 +104,7 @@
       "price": "65.04",
       "change_amount": "-3.65",
       "change_percentage": "-5.3137%",
-      "volume": "100741000",
+      "volume": "100931063",
       "market_cap": 0
     },
     {
@@ -112,7 +112,7 @@
       "price": "153.57",
       "change_amount": "-2.94",
       "change_percentage": "-1.8785%",
-      "volume": "6186447",
+      "volume": "6188210",
       "market_cap": 0
     },
     {
@@ -120,15 +120,15 @@
       "price": "334.76",
       "change_amount": "-5.51",
       "change_percentage": "-1.6207%",
-      "volume": "28247615",
+      "volume": "28525256",
       "market_cap": 0
     },
     {
       "ticker": "ORCL",
-      "price": "129.10",
-      "change_amount": "-2.04",
-      "change_percentage": "-1.5556%",
-      "volume": "25994349",
+      "price": "129.13",
+      "change_amount": "-2.01",
+      "change_percentage": "-1.5327%",
+      "volume": "26126507",
       "market_cap": 0
     },
     {
@@ -136,7 +136,7 @@
       "price": "1270.75",
       "change_amount": "-12.91",
       "change_percentage": "-1.0057%",
-      "volume": "1862712",
+      "volume": "1874070",
       "market_cap": 0
     },
     {
@@ -144,7 +144,7 @@
       "price": "260.81",
       "change_amount": "-2.64",
       "change_percentage": "-1.0021%",
-      "volume": "14271119",
+      "volume": "15261196",
       "market_cap": 0
     },
     {
@@ -152,15 +152,15 @@
       "price": "240.98",
       "change_amount": "-2.12",
       "change_percentage": "-0.8721%",
-      "volume": "812841",
+      "volume": "812875",
       "market_cap": 0
     },
     {
       "ticker": "PFE",
-      "price": "29.86",
-      "change_amount": "-0.25",
-      "change_percentage": "-0.8303%",
-      "volume": "22140334",
+      "price": "29.85",
+      "change_amount": "-0.26",
+      "change_percentage": "-0.8635%",
+      "volume": "22196975",
       "market_cap": 0
     },
     {
@@ -168,7 +168,7 @@
       "price": "39.06",
       "change_amount": "-0.29",
       "change_percentage": "-0.7370%",
-      "volume": "6710692",
+      "volume": "6721708",
       "market_cap": 0
     },
     {
@@ -176,7 +176,7 @@
       "price": "255.06",
       "change_amount": "-1.67",
       "change_percentage": "-0.6505%",
-      "volume": "3076844",
+      "volume": "3078619",
       "market_cap": 0
     },
     {
@@ -184,7 +184,7 @@
       "price": "241.78",
       "change_amount": "-0.65",
       "change_percentage": "-0.2681%",
-      "volume": "5414556",
+      "volume": "5425611",
       "market_cap": 0
     },
     {
@@ -192,7 +192,7 @@
       "price": "805.67",
       "change_amount": "-1.81",
       "change_percentage": "-0.2242%",
-      "volume": "577987",
+      "volume": "578415",
       "market_cap": 0
     }
   ],
@@ -202,7 +202,7 @@
       "price": "35.57",
       "change_amount": "3.10",
       "change_percentage": "9.5473%",
-      "volume": "81762260",
+      "volume": "81909879",
       "market_cap": 0
     },
     {
@@ -210,7 +210,7 @@
       "price": "231.33",
       "change_amount": "16.82",
       "change_percentage": "7.8411%",
-      "volume": "2755750",
+      "volume": "2762432",
       "market_cap": 0
     },
     {
@@ -218,7 +218,7 @@
       "price": "273.09",
       "change_amount": "16.66",
       "change_percentage": "6.4969%",
-      "volume": "2876426",
+      "volume": "2877680",
       "market_cap": 0
     },
     {
@@ -226,7 +226,7 @@
       "price": "182.28",
       "change_amount": "10.77",
       "change_percentage": "6.2795%",
-      "volume": "7160027",
+      "volume": "7245733",
       "market_cap": 0
     },
     {
@@ -234,15 +234,15 @@
       "price": "361.34",
       "change_amount": "19.39",
       "change_percentage": "5.6704%",
-      "volume": "2972339",
+      "volume": "3003968",
       "market_cap": 0
     },
     {
       "ticker": "DELL",
-      "price": "486.01",
-      "change_amount": "24.45",
-      "change_percentage": "5.2973%",
-      "volume": "6783524",
+      "price": "485.88",
+      "change_amount": "24.32",
+      "change_percentage": "5.2691%",
+      "volume": "6821140",
       "market_cap": 0
     },
     {
@@ -250,7 +250,7 @@
       "price": "239.34",
       "change_amount": "11.97",
       "change_percentage": "5.2645%",
-      "volume": "9184494",
+      "volume": "9332356",
       "market_cap": 0
     },
     {
@@ -258,7 +258,7 @@
       "price": "201.72",
       "change_amount": "9.12",
       "change_percentage": "4.7352%",
-      "volume": "21150939",
+      "volume": "21192659",
       "market_cap": 0
     },
     {
@@ -266,7 +266,7 @@
       "price": "251.46",
       "change_amount": "9.54",
       "change_percentage": "3.9435%",
-      "volume": "8143910",
+      "volume": "9067912",
       "market_cap": 0
     },
     {
@@ -274,7 +274,7 @@
       "price": "850.70",
       "change_amount": "28.19",
       "change_percentage": "3.4273%",
-      "volume": "3700565",
+      "volume": "3709977",
       "market_cap": 0
     },
     {
@@ -282,7 +282,7 @@
       "price": "386.47",
       "change_amount": "12.76",
       "change_percentage": "3.4144%",
-      "volume": "42923520",
+      "volume": "44779790",
       "market_cap": 0
     },
     {
@@ -290,7 +290,7 @@
       "price": "552.72",
       "change_amount": "17.98",
       "change_percentage": "3.3624%",
-      "volume": "17657435",
+      "volume": "17756841",
       "market_cap": 0
     },
     {
@@ -298,7 +298,7 @@
       "price": "147.69",
       "change_amount": "4.79",
       "change_percentage": "3.3520%",
-      "volume": "1688363",
+      "volume": "1689710",
       "market_cap": 0
     },
     {
@@ -306,7 +306,7 @@
       "price": "1676.69",
       "change_amount": "45.85",
       "change_percentage": "2.8114%",
-      "volume": "1235255",
+      "volume": "1239652",
       "market_cap": 0
     },
     {
@@ -314,7 +314,7 @@
       "price": "345.49",
       "change_amount": "8.90",
       "change_percentage": "2.6442%",
-      "volume": "2125448",
+      "volume": "2128010",
       "market_cap": 0
     },
     {
@@ -322,7 +322,7 @@
       "price": "221.97",
       "change_amount": "5.50",
       "change_percentage": "2.5408%",
-      "volume": "85740755",
+      "volume": "86111324",
       "market_cap": 0
     },
     {
@@ -330,7 +330,7 @@
       "price": "226.59",
       "change_amount": "5.53",
       "change_percentage": "2.5016%",
-      "volume": "3218729",
+      "volume": "3239187",
       "market_cap": 0
     },
     {
@@ -338,7 +338,7 @@
       "price": "284.65",
       "change_amount": "6.87",
       "change_percentage": "2.4732%",
-      "volume": "9869645",
+      "volume": "10193468",
       "market_cap": 0
     },
     {
@@ -346,7 +346,7 @@
       "price": "237.53",
       "change_amount": "5.73",
       "change_percentage": "2.4720%",
-      "volume": "4936040",
+      "volume": "4955168",
       "market_cap": 0
     },
     {
@@ -354,7 +354,7 @@
       "price": "153.12",
       "change_amount": "3.58",
       "change_percentage": "2.3940%",
-      "volume": "12970348",
+      "volume": "13012456",
       "market_cap": 0
     },
     {
@@ -362,7 +362,7 @@
       "price": "216.10",
       "change_amount": "4.96",
       "change_percentage": "2.3492%",
-      "volume": "1351833",
+      "volume": "1352144",
       "market_cap": 0
     },
     {
@@ -370,7 +370,7 @@
       "price": "347.25",
       "change_amount": "6.97",
       "change_percentage": "2.0483%",
-      "volume": "5136278",
+      "volume": "5138227",
       "market_cap": 0
     },
     {
@@ -378,7 +378,7 @@
       "price": "242.36",
       "change_amount": "4.76",
       "change_percentage": "2.0034%",
-      "volume": "3115549",
+      "volume": "3118546",
       "market_cap": 0
     },
     {
@@ -386,7 +386,7 @@
       "price": "225.50",
       "change_amount": "4.39",
       "change_percentage": "1.9877%",
-      "volume": "2303201",
+      "volume": "2310138",
       "market_cap": 0
     },
     {
@@ -394,7 +394,7 @@
       "price": "913.67",
       "change_amount": "17.60",
       "change_percentage": "1.9641%",
-      "volume": "20635155",
+      "volume": "20724431",
       "market_cap": 0
     },
     {
@@ -402,7 +402,7 @@
       "price": "326.07",
       "change_amount": "6.20",
       "change_percentage": "1.9383%",
-      "volume": "2156906",
+      "volume": "2157473",
       "market_cap": 0
     },
     {
@@ -410,7 +410,7 @@
       "price": "524.52",
       "change_amount": "9.87",
       "change_percentage": "1.9178%",
-      "volume": "1417642",
+      "volume": "1419096",
       "market_cap": 0
     },
     {
@@ -418,7 +418,7 @@
       "price": "244.76",
       "change_amount": "4.34",
       "change_percentage": "1.8052%",
-      "volume": "13703887",
+      "volume": "13737291",
       "market_cap": 0
     },
     {
@@ -426,7 +426,7 @@
       "price": "76.94",
       "change_amount": "1.32",
       "change_percentage": "1.7456%",
-      "volume": "8294921",
+      "volume": "8300723",
       "market_cap": 0
     },
     {
@@ -434,7 +434,7 @@
       "price": "184.33",
       "change_amount": "3.14",
       "change_percentage": "1.7330%",
-      "volume": "6516561",
+      "volume": "6552465",
       "market_cap": 0
     },
     {
@@ -442,7 +442,7 @@
       "price": "431.89",
       "change_amount": "6.81",
       "change_percentage": "1.6021%",
-      "volume": "10582070",
+      "volume": "10658488",
       "market_cap": 0
     },
     {
@@ -450,7 +450,7 @@
       "price": "245.81",
       "change_amount": "3.73",
       "change_percentage": "1.5408%",
-      "volume": "15850257",
+      "volume": "15939661",
       "market_cap": 0
     },
     {
@@ -458,7 +458,7 @@
       "price": "22.54",
       "change_amount": "0.32",
       "change_percentage": "1.4401%",
-      "volume": "926294",
+      "volume": "926296",
       "market_cap": 0
     },
     {
@@ -466,7 +466,7 @@
       "price": "92.96",
       "change_amount": "1.27",
       "change_percentage": "1.3851%",
-      "volume": "73917997",
+      "volume": "74242457",
       "market_cap": 0
     },
     {
@@ -474,7 +474,7 @@
       "price": "343.99",
       "change_amount": "4.49",
       "change_percentage": "1.3225%",
-      "volume": "35131228",
+      "volume": "35368592",
       "market_cap": 0
     },
     {
@@ -482,7 +482,7 @@
       "price": "177.96",
       "change_amount": "2.25",
       "change_percentage": "1.2805%",
-      "volume": "7112289",
+      "volume": "7164759",
       "market_cap": 0
     },
     {
@@ -490,7 +490,7 @@
       "price": "149.88",
       "change_amount": "1.58",
       "change_percentage": "1.0654%",
-      "volume": "8981890",
+      "volume": "9004057",
       "market_cap": 0
     },
     {
@@ -498,7 +498,7 @@
       "price": "163.43",
       "change_amount": "1.69",
       "change_percentage": "1.0449%",
-      "volume": "8882348",
+      "volume": "8935229",
       "market_cap": 0
     },
     {
@@ -506,7 +506,7 @@
       "price": "337.80",
       "change_amount": "3.43",
       "change_percentage": "1.0258%",
-      "volume": "16897548",
+      "volume": "16959641",
       "market_cap": 0
     },
     {
@@ -514,7 +514,7 @@
       "price": "408.94",
       "change_amount": "3.96",
       "change_percentage": "0.9778%",
-      "volume": "6156864",
+      "volume": "6233155",
       "market_cap": 0
     },
     {
@@ -522,7 +522,7 @@
       "price": "322.73",
       "change_amount": "3.12",
       "change_percentage": "0.9762%",
-      "volume": "2534301",
+      "volume": "2561900",
       "market_cap": 0
     },
     {
@@ -530,7 +530,7 @@
       "price": "451.19",
       "change_amount": "3.57",
       "change_percentage": "0.7976%",
-      "volume": "1269323",
+      "volume": "1270008",
       "market_cap": 0
     },
     {
@@ -538,7 +538,7 @@
       "price": "107.26",
       "change_amount": "0.55",
       "change_percentage": "0.5154%",
-      "volume": "11364461",
+      "volume": "11370620",
       "market_cap": 0
     },
     {
@@ -546,7 +546,7 @@
       "price": "697.52",
       "change_amount": "3.27",
       "change_percentage": "0.4710%",
-      "volume": "23758493",
+      "volume": "26478796",
       "market_cap": 0
     },
     {
@@ -554,7 +554,7 @@
       "price": "458.59",
       "change_amount": "1.88",
       "change_percentage": "0.4116%",
-      "volume": "751275",
+      "volume": "751716",
       "market_cap": 0
     },
     {
@@ -562,7 +562,7 @@
       "price": "532.95",
       "change_amount": "1.08",
       "change_percentage": "0.2031%",
-      "volume": "13784913",
+      "volume": "13826924",
       "market_cap": 0
     },
     {
@@ -570,7 +570,7 @@
       "price": "262.37",
       "change_amount": "-0.26",
       "change_percentage": "-0.0990%",
-      "volume": "30746898",
+      "volume": "30981629",
       "market_cap": 0
     },
     {
@@ -578,7 +578,7 @@
       "price": "438.34",
       "change_amount": "-0.60",
       "change_percentage": "-0.1367%",
-      "volume": "2262524",
+      "volume": "2263159",
       "market_cap": 0
     },
     {
@@ -586,7 +586,7 @@
       "price": "805.67",
       "change_amount": "-1.81",
       "change_percentage": "-0.2242%",
-      "volume": "577987",
+      "volume": "578415",
       "market_cap": 0
     },
     {
@@ -594,7 +594,7 @@
       "price": "241.78",
       "change_amount": "-0.65",
       "change_percentage": "-0.2681%",
-      "volume": "5414556",
+      "volume": "5425611",
       "market_cap": 0
     },
     {
@@ -602,7 +602,7 @@
       "price": "255.06",
       "change_amount": "-1.67",
       "change_percentage": "-0.6505%",
-      "volume": "3076844",
+      "volume": "3078619",
       "market_cap": 0
     },
     {
@@ -610,15 +610,15 @@
       "price": "39.06",
       "change_amount": "-0.29",
       "change_percentage": "-0.7370%",
-      "volume": "6710692",
+      "volume": "6721708",
       "market_cap": 0
     },
     {
       "ticker": "PFE",
-      "price": "29.86",
-      "change_amount": "-0.25",
-      "change_percentage": "-0.8303%",
-      "volume": "22140334",
+      "price": "29.85",
+      "change_amount": "-0.26",
+      "change_percentage": "-0.8635%",
+      "volume": "22196975",
       "market_cap": 0
     },
     {
@@ -626,7 +626,7 @@
       "price": "240.98",
       "change_amount": "-2.12",
       "change_percentage": "-0.8721%",
-      "volume": "812841",
+      "volume": "812875",
       "market_cap": 0
     },
     {
@@ -634,7 +634,7 @@
       "price": "260.81",
       "change_amount": "-2.64",
       "change_percentage": "-1.0021%",
-      "volume": "14271119",
+      "volume": "15261196",
       "market_cap": 0
     },
     {
@@ -642,15 +642,15 @@
       "price": "1270.75",
       "change_amount": "-12.91",
       "change_percentage": "-1.0057%",
-      "volume": "1862712",
+      "volume": "1874070",
       "market_cap": 0
     },
     {
       "ticker": "ORCL",
-      "price": "129.10",
-      "change_amount": "-2.04",
-      "change_percentage": "-1.5556%",
-      "volume": "25994349",
+      "price": "129.13",
+      "change_amount": "-2.01",
+      "change_percentage": "-1.5327%",
+      "volume": "26126507",
       "market_cap": 0
     },
     {
@@ -658,7 +658,7 @@
       "price": "334.76",
       "change_amount": "-5.51",
       "change_percentage": "-1.6207%",
-      "volume": "28247615",
+      "volume": "28525256",
       "market_cap": 0
     },
     {
@@ -666,7 +666,7 @@
       "price": "153.57",
       "change_amount": "-2.94",
       "change_percentage": "-1.8785%",
-      "volume": "6186447",
+      "volume": "6188210",
       "market_cap": 0
     },
     {
@@ -674,10 +674,10 @@
       "price": "65.04",
       "change_amount": "-3.65",
       "change_percentage": "-5.3137%",
-      "volume": "100741000",
+      "volume": "100931063",
       "market_cap": 0
     }
   ],
-  "last_updated": "2026-10-21 16:18:40 US/Eastern",
-  "fetched_at": "2026-10-21T20:18:40Z"
+  "last_updated": "2026-10-21 19:32:29 US/Eastern",
+  "fetched_at": "2026-10-21T23:32:29Z"
 }
