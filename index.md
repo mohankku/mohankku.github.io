@@ -80,11 +80,36 @@ title: Home
 
 <div class="section-title-wrap">
   <h2 id="featured-projects">Featured Systems & Projects</h2>
-  <span class="section-subtitle">Selected open-source autonomous agents, edge AI tools, and browser science sandboxes</span>
+  <span class="section-subtitle">LLM inference systems and local-first autonomous agents</span>
 </div>
 
 <div class="featured-projects-grid">
-  <!-- Card 1: Zenith -->
+  <!-- Card 1: llm-rs -->
+  <div class="project-card">
+    <div class="project-card-header">
+      <div class="project-card-icon"><i class="fa-solid fa-microchip"></i></div>
+      <div class="project-card-badges">
+        <span class="project-badge badge-accent">GPU Inference</span>
+        <span class="project-badge badge-subtle">Rust</span>
+      </div>
+    </div>
+    <h3 class="project-card-title">llm-rs: LLM Inference Engine in Rust</h3>
+    <p class="project-card-desc">
+      LLM inference written end to end in Rust, with CPU, Apple GPU, and NVIDIA GPU backends that all match a CPU reference token for token. Hand-written SIMT and tensor-core kernels roughly doubled decode throughput over cuTile, and an OpenAI-compatible server adds continuous batching and a paged KV cache.
+    </p>
+    <div class="project-card-tags">
+      <span><i class="fa-brands fa-rust"></i> Pure Rust</span>
+      <span><i class="fa-solid fa-bolt"></i> SIMT + Tensor-Core Kernels</span>
+      <span><i class="fa-solid fa-layer-group"></i> Continuous Batching</span>
+    </div>
+    <div class="project-card-actions">
+      <a href="{{ '/blogs' | relative_url }}" class="pub-btn">
+        <i class="fa-solid fa-newspaper"></i> Blog Post
+      </a>
+    </div>
+  </div>
+
+  <!-- Card 2: Zenith -->
   <div class="project-card">
     <div class="project-card-header">
       <div class="project-card-icon"><i class="fa-solid fa-robot"></i></div>
@@ -108,87 +133,6 @@ title: Home
       </a>
       <a href="{{ '/blogs' | relative_url }}" class="pub-btn">
         <i class="fa-solid fa-newspaper"></i> Blog Post
-      </a>
-    </div>
-  </div>
-
-  <!-- Card 2: AR Physics Lab -->
-  <div class="project-card">
-    <div class="project-card-header">
-      <div class="project-card-icon"><i class="fa-solid fa-flask"></i></div>
-      <div class="project-card-badges">
-        <span class="project-badge badge-accent">WebAR</span>
-        <span class="project-badge badge-subtle">Interactive CV</span>
-      </div>
-    </div>
-    <h3 class="project-card-title">AR Physics Lab</h3>
-    <p class="project-card-desc">
-      In-browser experimental physics powered by real-time computer vision. Augment a falling ball over live camera feeds, measure gravitational acceleration (<code>g = 2h/t²</code>), track colored spheres, and export experiment trials.
-    </p>
-    <div class="project-card-tags">
-      <span><i class="fa-solid fa-video"></i> Live Camera CV</span>
-      <span><i class="fa-solid fa-hand"></i> Hand-Release Tracking</span>
-      <span><i class="fa-solid fa-chart-line"></i> Kinematics Fitting</span>
-    </div>
-    <div class="project-card-actions">
-      <a href="{{ '/physics' | relative_url }}" class="pub-btn">
-        <i class="fa-solid fa-flask"></i> Launch Lab
-      </a>
-      <a href="{{ '/other' | relative_url }}" class="pub-btn">
-        <i class="fa-solid fa-circle-info"></i> Details
-      </a>
-    </div>
-  </div>
-
-  <!-- Card 3: Stock Monitoring Dashboard -->
-  <div class="project-card">
-    <div class="project-card-header">
-      <div class="project-card-icon"><i class="fa-solid fa-chart-line"></i></div>
-      <div class="project-card-badges">
-        <span class="project-badge badge-accent">Live Systems</span>
-        <span class="project-badge badge-subtle">Automated Ingestion</span>
-      </div>
-    </div>
-    <h3 class="project-card-title">Stock Monitoring Dashboard</h3>
-    <p class="project-card-desc">
-      High-density tech market dashboard monitoring 60 tickers across 6 sectors (Big Tech, AI hardware, Cloud, Security). Ingests and caches live Yahoo Finance data hourly via automated GitHub Actions pipelines.
-    </p>
-    <div class="project-card-tags">
-      <span><i class="fa-solid fa-server"></i> GitHub Actions Cron</span>
-      <span><i class="fa-solid fa-layer-group"></i> 6 Sector Grids</span>
-      <span><i class="fa-solid fa-magnifying-glass"></i> Instant Search</span>
-    </div>
-    <div class="project-card-actions">
-      <a href="{{ '/stocks' | relative_url }}" class="pub-btn">
-        <i class="fa-solid fa-chart-simple"></i> Open Dashboard
-      </a>
-    </div>
-  </div>
-
-  <!-- Card 4: AI Image Edit -->
-  <div class="project-card">
-    <div class="project-card-header">
-      <div class="project-card-icon"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
-      <div class="project-card-badges">
-        <span class="project-badge badge-accent">Apple MLX</span>
-        <span class="project-badge badge-subtle">Private / Local</span>
-      </div>
-    </div>
-    <h3 class="project-card-title">On-Device AI Image Editor</h3>
-    <p class="project-card-desc">
-      Zero-cloud photo editing using natural language prompts powered by Qwen-Image-Edit running locally via Apple Silicon MLX/mflux, featuring 4x Real-ESRGAN upscaling and persistent worker architecture.
-    </p>
-    <div class="project-card-tags">
-      <span><i class="fa-brands fa-apple"></i> Apple Silicon MLX</span>
-      <span><i class="fa-solid fa-lock"></i> 100% On-Device</span>
-      <span><i class="fa-solid fa-image"></i> 4x Super-Resolution</span>
-    </div>
-    <div class="project-card-actions">
-      <a href="{{ '/image-edit' | relative_url }}" class="pub-btn">
-        <i class="fa-solid fa-wand-magic-sparkles"></i> Open Editor
-      </a>
-      <a href="{{ '/chat' | relative_url }}" class="pub-btn">
-        <i class="fa-solid fa-comments"></i> Local Chat
       </a>
     </div>
   </div>
