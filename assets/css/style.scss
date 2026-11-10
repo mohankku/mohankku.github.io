@@ -1991,3 +1991,13 @@ pre code {
   margin: 0;
   color: var(--text-muted);
 }
+
+/* Phones: count padding inside the sidebar and content widths, so a
+   full-width column plus its padding no longer overflows and gets clipped. */
+@media (max-width: 960px) {
+  header,
+  section {
+    box-sizing: border-box;
+    max-width: 100%;
+  }
+}
