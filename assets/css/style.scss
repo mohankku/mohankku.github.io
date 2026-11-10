@@ -1972,3 +1972,22 @@ pre code {
   .highlight .nf, .highlight .fm, .highlight .nc, .highlight .nb, .highlight .bp { color: #c4b5fd; }
   .highlight .nv, .highlight .na, .highlight .nt { color: #67e8f9; }
 }
+
+/* Post page header: date on its own line above the title. */
+.post-header {
+  margin-bottom: 28px;
+}
+.post-header-date {
+  display: block;
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+.post-header h1.post-header-title {
+  display: block;
+  margin: 0 0 8px;
+}
+.post-header-byline {
+  margin: 0;
+  color: var(--text-muted);
+}
