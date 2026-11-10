@@ -1504,6 +1504,7 @@ code {
   padding: 2px 5px;
   border-radius: 4px;
   background: var(--code-bg);
+  color: var(--text-color);
   border: 1px solid var(--border-color);
 }
 
@@ -1925,3 +1926,49 @@ html:not(.js) .project-card {
 /* Noscript fallback is also inlined in <head> for FOUC prevention */
 
 
+
+/* Markdown tables follow the site theme (the base theme hard-codes a white
+   background, which hides the light text in dark mode). */
+table:not(.stock-table):not(.rouge-table) {
+  background: var(--card-bg);
+  color: var(--text-color);
+  border: 1px solid var(--card-border);
+  display: block;
+  overflow-x: auto;
+}
+table:not(.stock-table):not(.rouge-table) th {
+  background: var(--code-bg);
+  color: var(--text-color);
+}
+table:not(.stock-table):not(.rouge-table) th,
+table:not(.stock-table):not(.rouge-table) td {
+  border-bottom: 1px solid var(--border-color);
+}
+table:not(.stock-table):not(.rouge-table) tr:hover {
+  background: var(--tag-bg);
+}
+
+/* Code blocks: the syntax theme hard-codes a light background, and the inline
+   `code` pill style was drawing a bar behind every line of a block. */
+.highlight,
+.highlight pre {
+  background: var(--code-bg);
+}
+pre code {
+  background: none;
+  border: 0;
+  padding: 0;
+  font-size: inherit;
+  color: var(--text-color);
+}
+
+/* The syntax theme's token colors are tuned for a light background. */
+@media (prefers-color-scheme: dark) {
+  .highlight span { color: var(--text-color); background: none; font-weight: normal; }
+  .highlight .c, .highlight .c1, .highlight .cm, .highlight .cs, .highlight .cp { color: #94a3b8; font-style: italic; }
+  .highlight .k, .highlight .kd, .highlight .kn, .highlight .kr, .highlight .kt, .highlight .kc, .highlight .ow { color: #93c5fd; }
+  .highlight .s, .highlight .s1, .highlight .s2, .highlight .sb, .highlight .sd, .highlight .se, .highlight .si, .highlight .sh { color: #86efac; }
+  .highlight .m, .highlight .mi, .highlight .mf, .highlight .mh, .highlight .il { color: #fcd34d; }
+  .highlight .nf, .highlight .fm, .highlight .nc, .highlight .nb, .highlight .bp { color: #c4b5fd; }
+  .highlight .nv, .highlight .na, .highlight .nt { color: #67e8f9; }
+}

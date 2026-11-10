@@ -5,18 +5,21 @@ title: Blogs
 
 <style>
 .post-list { list-style: none; padding: 0; margin: 1em 0; }
-.post-item { border: 1px solid #e8ecef; border-radius: 10px; padding: 12px 16px; margin-bottom: 12px; background: #fff; }
+.post-item { border: 1px solid var(--card-border); border-radius: 10px; padding: 12px 16px; margin-bottom: 12px; background: var(--card-bg); }
+/* The site-wide card hover lifts and scales list items; an open post is too
+   tall for that, so keep cards still and only highlight the border. */
+.post-list > .post-item:hover { transform: none; background: var(--card-bg); }
 .post-toggle { display: block; width: 100%; text-align: left; background: none; border: none; padding: 0; cursor: pointer; font: inherit; color: inherit; }
 .post-toggle:hover .post-title { text-decoration: underline; }
 .post-toggle:focus-visible { outline: 2px solid #4ecdc4; outline-offset: 2px; border-radius: 4px; }
-.post-date { font-size: 12px; color: #6b7a8a; }
-.post-title { display: block; font-size: 17px; font-weight: 700; color: #0f2027; margin: 2px 0; }
-.post-hint { font-size: 11px; color: #98a2b3; }
+.post-date { font-size: 12px; color: var(--text-muted); }
+.post-title { display: block; font-size: 17px; font-weight: 700; color: var(--text-color); margin: 2px 0; }
+.post-hint { font-size: 11px; color: var(--text-muted); }
 .post-item.open .post-hint .more { display: none; }
 .post-item:not(.open) .post-hint .less { display: none; }
-.post-excerpt { font-size: 13px; color: #344054; margin: 8px 0 0; }
+.post-excerpt { font-size: 13px; color: var(--text-muted); margin: 8px 0 0; }
 .post-item.open .post-excerpt { display: none; }
-.post-full { margin-top: 10px; border-top: 1px solid #eef2f5; padding-top: 10px; }
+.post-full { margin-top: 10px; border-top: 1px solid var(--border-color); padding-top: 10px; }
 .post-full[hidden] { display: none; }
 </style>
 
