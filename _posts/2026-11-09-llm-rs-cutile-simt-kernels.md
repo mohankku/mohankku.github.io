@@ -2,6 +2,7 @@
 layout: post
 title: "llm-rs: LLM Inference in Rust, from cuTile Tiles to Hand-Written SIMT Kernels"
 author: Mohan Kumar
+series: llm-rs
 tags: [rust, cuda, llm-inference, gpu-kernels, cutile, cuda-oxide]
 ---
 

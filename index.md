@@ -103,8 +103,8 @@ title: Home
       <span><i class="fa-solid fa-layer-group"></i> Continuous Batching</span>
     </div>
     <div class="project-card-actions">
-      <a href="{{ '/blogs' | relative_url }}" class="pub-btn">
-        <i class="fa-solid fa-newspaper"></i> Blog Post
+      <a href="{{ '/llm-rs' | relative_url }}" class="pub-btn">
+        <i class="fa-solid fa-newspaper"></i> llm-rs Blog Series
       </a>
     </div>
   </div>

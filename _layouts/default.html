@@ -54,7 +54,7 @@
               <li><a href="https://github.com/mohankku" target="_blank" rel="noopener"><i class="fa-brands fa-github"></i> <strong>GitHub</strong></a></li>
               <li><a href="https://www.linkedin.com/in/mohankkumar/" target="_blank" rel="noopener"><i class="fa-brands fa-linkedin"></i> <strong>LinkedIn</strong></a></li>
               <li><a href="#" id="open-terminal"><i class="fa-solid fa-terminal"></i> <strong>Terminal</strong></a></li>
-              <li><a href="{{ '/blogs' | relative_url }}" class="{% if page.url contains '/blogs' or page.collection == 'posts' %}active{% endif %}"><i class="fa-solid fa-blog"></i> <strong>Blogs</strong></a></li>
+              <li><a href="{{ '/blogs' | relative_url }}" class="{% if page.url contains '/blogs' or page.url contains '/llm-rs' or page.collection == 'posts' %}active{% endif %}"><i class="fa-solid fa-blog"></i> <strong>Blogs</strong></a></li>
               <li><a href="{{ '/other' | relative_url }}" class="{% if page.url contains '/other' or page.url contains '/stocks' or page.url contains '/physics' or page.url contains '/chat' or page.url contains '/image-edit' %}active{% endif %}"><i class="fa-solid fa-ellipsis"></i> <strong>Other</strong></a></li>
             </ul>
           </nav>
@@ -81,9 +81,13 @@
                 <i class="fa-solid fa-arrow-left"></i> <span>Home</span>
               </a>
               <span class="breadcrumb-separator"><i class="fa-solid fa-chevron-right"></i></span>
-              {% if page.collection == 'posts' %}
+              {% if page.collection == 'posts' or page.url contains '/llm-rs' %}
                 <a href="{{ '/blogs' | relative_url }}" class="breadcrumb-link">Blogs</a>
                 <span class="breadcrumb-separator"><i class="fa-solid fa-chevron-right"></i></span>
+                {% if page.series == 'llm-rs' %}
+                  <a href="{{ '/llm-rs' | relative_url }}" class="breadcrumb-link">llm-rs</a>
+                  <span class="breadcrumb-separator"><i class="fa-solid fa-chevron-right"></i></span>
+                {% endif %}
               {% elsif page.url contains '/stocks' or page.url contains '/physics' or page.url contains '/chat' or page.url contains '/image-edit' %}
                 <a href="{{ '/other' | relative_url }}" class="breadcrumb-link">Other</a>
                 <span class="breadcrumb-separator"><i class="fa-solid fa-chevron-right"></i></span>
@@ -311,7 +315,7 @@
             'skills': 'Languages: C/C++, Python, Rust<br>Frameworks: PyTorch<br>Expertise: Machine Learning Acceleration, SIMD vectorization, Distributed Systems, Operating Systems',
             'projects': '• <span class="command-highlight">Zenith</span>: Autonomous local coding agent (Ollama / Qwen)<br>• <span class="command-highlight">AR Physics Lab</span>: In-browser camera physics experiments<br>• <span class="command-highlight">Stock Dashboard</span>: Real-time tech tickers tracking<br>• <span class="command-highlight">AI Image Edit</span>: On-device MLX image editing',
             'scholar': '574+ citations on Google Scholar across ASPLOS, EuroSys, and ACM TACO.<br>h-index: 5 · i10-index: 5',
-            'blogs': '• <a href="/blogs" style="color:var(--link-color);">Zenith: Local-First Autonomous Coding Agent</a><br>• <a href="/blogs" style="color:var(--link-color);">AR Physics Lab: Free-Fall Gravity with Computer Vision</a>',
+            'blogs': '• <a href="/llm-rs" style="color:var(--link-color);">llm-rs series: a Rust inference engine vs vLLM</a><br>• <a href="/blogs" style="color:var(--link-color);">Zenith: Local-First Autonomous Coding Agent</a><br>• <a href="/blogs" style="color:var(--link-color);">AR Physics Lab: Free-Fall Gravity with Computer Vision</a>',
             'publications': 'Check out the "Publications" section on the main page, or search my Google Scholar profile!',
             'sudo': 'mohan is not in the sudoers file. This incident will be reported.',
           };
