@@ -33,20 +33,27 @@ That last point turned out to matter. My own benchmark tool sends `temperature: 
 
 ## What's different
 
-- **The language.** Every llm-rs kernel is Rust, compiled to PTX with cuda-oxide. There is no Python, no PyTorch and no Triton anywhere in the request path. vLLM uses hand-written CUDA (Marlin for 4-bit weights), FlashAttention-style attention kernels and Triton.
-- **4-bit weights.** vLLM's Marlin kernels dequantize the weights to 16-bit floats inside the multiply. llm-rs repacks the weights once into tiles laid out the way the tensor cores read them. Each weight enters the multiply as the exact integer `code − zero`, and the group's scale is applied to the partial sums afterwards. One copy of the weights then serves every kernel: the single-token gemvs, the batched decode GEMM and the prompt GEMM. This week's prompt GEMM uses 64×64 warp tiles and two blocks per streaming multiprocessor (SM). It reaches 66–78 TFLOPS, 1.19–1.32x the old kernel, and cut time to first token on long prompts to within 6–8% of vLLM.
-- **Exactness as a feature.** In its exact modes, a llm-rs request produces the same tokens whether it runs alone or in a batch, and llm-rs has checks for exactly that. That guarantee costs something: the fast attention path rounds to BF16, so it turns off in exact mode. This week a change of mine broke the guarantee by routing decode-only steps through that path, and those checks caught it before it reached the main branch.
-- **Where the remaining time goes.** One request's decode step now takes 10.6 ms against vLLM's 8.15 ms:
+- **Rust from the tokenizer to the kernels.** Every GPU kernel is Rust, compiled to PTX with cuda-oxide and built into one server binary. Nothing in the request path is Python, PyTorch or Triton. vLLM builds on PyTorch, with CUDA kernels like Marlin and FlashAttention underneath.
+- **A different kernel for each batch size.** llm-rs keeps one copy of the 4-bit weights and picks the kernel by how many tokens the step has:
+  - **One token:** a gemv that streams each weight once.
+  - **2–64 tokens:** a split-K decode GEMM that still reads every weight once per step.
+  - **More (prompts):** a 128×128 tensor-core GEMM.
 
-| Per token, one request | Time |
-|---|---:|
-| 4-bit gemvs (QKV, o, gate/up, down) | 7.4 ms |
-| Output layer (`lm_head`, kept in BF16) | 1.5 ms |
-| RMS norms | 0.65 ms |
-| Sampler | 0.49 ms |
-| Attention | 0.41 ms |
+  vLLM runs its Marlin kernel at every size.
+- **Integer weights in the multiply.** Marlin turns each 4-bit weight into a scaled 16-bit float before the tensor-core multiply. llm-rs feeds the multiply the exact integer `code − zero`, and applies each group's scale once to the f32 partial sums afterwards. This week's prompt GEMM in that format reaches 66–78 TFLOPS, 1.19–1.32x its predecessor, and brought time to first token on long prompts within 6–8% of vLLM.
+- **Attention shaped for decodes.** A decode has only 7 query heads per KV head on this model, so a 64-row tensor-core tile is mostly empty, and three of its four warps used to sit idle. llm-rs's own varlen kernel instead gives each of the four warps a quarter of every key tile and merges their results at the end. Decode attention reads the KV cache at up to 656 GB/s, 85% of the card's bandwidth. vLLM uses FlashAttention and FlashInfer kernels.
+- **A sampler defined by a reference.** The GPU sampler must pick exactly the token llm-rs's CPU sampler picks for the same logits and random draw, and the tests check that at the full 152k vocabulary. That rule is why it selects tokens without sorting: by radix select and running sums, in a fixed order.
 
-The gemvs read the weights at 380–560 GB/s out of 768, so that row is the next target. Under load, the gap is in time between tokens rather than time to first token: 1.4x vLLM at 256 short requests and 1.8x at 16 long ones. Both come down to the batched decode GEMM, where vLLM's Marlin is still ahead.
+## Where vLLM is still ahead
+
+Time between tokens. A single request's decode step takes 10.6 ms against vLLM's 8.15:
+- the 4-bit gemvs take 7.4 ms, reading the weights at 380–560 GB/s out of 768;
+- the BF16 `lm_head` takes 1.5 ms;
+- the RMS norms take 0.65 ms;
+- the sampler takes 0.49 ms;
+- attention takes 0.41 ms.
+
+Under load the gap is 1.4x at 256 short requests and 1.8x at 16 long ones. Both come down to the batched decode GEMM, where Marlin is faster.
 
 ## Next
 
