@@ -12,12 +12,15 @@ The setup: Qwen2.5-7B-Instruct-AWQ (4-bit weights) on one RunPod RTX A5000 (24 G
 
 | Output tokens/s | llm-rs | vLLM | llm-rs / vLLM |
 |---|---:|---:|---:|
-| One at a time, 256 in / 256 out | 88.5 | 117.9 | 75% |
-| 256 at once, 256 in / 128 out | 1,066 | 1,395 | 76% |
-| 16 at once, 2,048 in / 256 out | 284 | 435 | 65% |
-| 64 at once, 2,048 in / 512 out | 629 | 767 | 82% |
+| One at a time, 256 in / 256 out | 100.6 | 117.9 | 85% |
+| 256 at once, 256 in / 128 out | 1,184 | 1,395 | 85% |
+| 16 at once, 2,048 in / 256 out | 343 | 435 | 79% |
+| 64 at once, 2,048 in / 512 out | 673 | 767 | 88% |
 
-Before the last round of fixes these ratios were 64%, 66%, 57% and 73%. Most of the gain came from two fixes: a faster sampler and a faster prompt (prefill) kernel, both described below.
+A few days ago these ratios were 64%, 66%, 57% and 73%. The gains came from a faster sampler (described below) and faster 4-bit kernels at every batch size:
+- **Single-token gemvs:** 1.15–1.6x faster.
+- **Batched decode GEMM:** 42% less time at 16 tokens.
+- **Prompt GEMM:** 1.19–1.32x faster.
 
 ## What's the same
 
@@ -46,15 +49,22 @@ That last point turned out to matter. My own benchmark tool sends `temperature: 
 
 ## Where vLLM is still ahead
 
-Time between tokens. A single request's decode step takes 10.6 ms against vLLM's 8.15:
-- the 4-bit gemvs take 7.4 ms, reading the weights at 380–560 GB/s out of 768;
-- the BF16 `lm_head` takes 1.5 ms;
-- the RMS norms take 0.65 ms;
-- the sampler takes 0.49 ms;
-- attention takes 0.41 ms.
+Time between tokens, though the gap has narrowed:
 
-Under load the gap is 1.4x at 256 short requests and 1.8x at 16 long ones. Both come down to the batched decode GEMM, where Marlin is faster.
+| Mean inter-token latency | llm-rs | vLLM |
+|---|---:|---:|
+| One at a time | 9.5 ms | 8.15 ms |
+| 256 at once, short prompts | 47.3 ms | 37.8 ms |
+| 16 at once, 2,048-token prompts | 34.2 ms | 24.7 ms |
+| 64 at once, 2,048-token prompts | 65.1 ms | 55.2 ms |
+
+One at a time, the 4-bit gemvs now read the weights at 500–630 GB/s, up from 380–560 (of the card's 768). What's left in that step is mostly smaller pieces:
+- the BF16 `lm_head`, 1.5 ms a token;
+- the RMS norms, 0.65 ms;
+- the sampler, 0.49 ms.
+
+Under load, Marlin's batched GEMM is still ahead of llm-rs's decode GEMM, which is the 1.25–1.4x gap in the table.
 
 ## Next
 
-The batched decode GEMM and the single-token gemvs are being reworked now. After that comes an FP8 KV cache for the new attention kernel, which halves the cache traffic on long contexts. All of the numbers above, plus the runs behind them, are in the repo's `docs/PERF.md`.
+The FP8 KV cache now has its own fast attention kernel too. It halves the cache traffic and runs 1.14–1.35x faster than BF16 attention at 16 or more decodes. At these 2.5k-token contexts, though, attention is too small a share of the step for that to show in serving. For now FP8 mainly buys cache capacity, and its speed should pay off at longer contexts. Next up are the smaller pieces of the single-request step and the batched decode GEMM. All of the numbers above, plus the runs behind them, are in the repo's `docs/PERF.md`.
