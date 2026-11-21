@@ -63,7 +63,7 @@ One at a time, the 4-bit gemvs now read the weights at 500–630 GB/s, up from 3
 - the RMS norms, 0.65 ms;
 - the sampler, 0.49 ms.
 
-Under load, Marlin's batched GEMM is still ahead of llm-rs's decode GEMM, which is the 1.25–1.4x gap in the table.
+Under load, Marlin's batched GEMM is still ahead of llm-rs's decode GEMM, which is the 1.2–1.4x gap in the table.
 
 ## Next
 
