@@ -41,6 +41,34 @@ title: Home
   </div>
 </div>
 
+<div class="home-updates">
+  <div class="home-updates-col">
+    <h2 id="news">News</h2>
+    <ul class="news-feed">
+      {% for item in site.data.news limit: 6 %}
+        <li class="news-item">
+          <span class="news-date">{{ item.date | date: "%b %-d, %Y" }}</span>
+          <span class="news-text">{{ item.text | markdownify | remove: '<p>' | remove: '</p>' | strip }}</span>
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  <div class="home-updates-col">
+    <h2 id="recent-posts">Recent Posts</h2>
+    <div class="recent-posts">
+      {% for post in site.posts limit: 2 %}
+        <a class="recent-post-card" href="{{ post.url | relative_url }}">
+          <span class="news-date">{{ post.date | date: "%b %-d, %Y" }}{% if post.series %} · {{ post.series }} series{% endif %}</span>
+          <span class="recent-post-title">{{ post.title }}</span>
+          <span class="recent-post-excerpt">{{ post.excerpt | strip_html | truncate: 180 }}</span>
+        </a>
+      {% endfor %}
+      <a class="recent-posts-more" href="{{ '/blogs' | relative_url }}">All posts <i class="fa-solid fa-arrow-right"></i></a>
+    </div>
+  </div>
+</div>
+
 <h2 id="research-focus">Research Focus</h2>
 
 <div class="research-grid">

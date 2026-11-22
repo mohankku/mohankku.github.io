@@ -1,0 +1,16 @@
+# Home page news feed, newest first. The home page shows the first few.
+# `text` is markdown, so links work: [label](/path).
+- date: 2026-11-21
+  text: "llm-rs now runs **Muse Glimmer 30B** on one RTX A5000: 29.5 tokens/s for one request, 226.6 tokens/s with 16 at once."
+- date: 2026-11-20
+  text: "Compared llm-rs with vLLM on a 4-bit Qwen2.5-7B, measured with AIPerf."
+- date: 2026-11-15
+  text: "Wrote up how the llm-rs server keeps the GPU fed: continuous batching, mixed steps, and the prefix cache."
+- date: 2026-11-12
+  text: "Started the [llm-rs blog series](/llm-rs/), following a Rust LLM inference engine from kernels to serving."
+- date: 2026-11-09
+  text: "Hand-written SIMT and tensor-core kernels roughly doubled llm-rs decode throughput over cuTile."
+- date: 2026-09-07
+  text: "Released AR Physics Lab: measuring gravity with a phone camera, no servers needed."
+- date: 2026-09-04
+  text: "Open-sourced [Zenith](https://github.com/mohankku/zenith), a local-first autonomous coding agent."
