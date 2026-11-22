@@ -44,9 +44,12 @@ title: Home
 <h2 id="news">News</h2>
 <ul class="news-feed">
   {% for item in site.data.news %}
+    {% assign external = item.url | slice: 0, 4 %}
     <li class="news-item">
-      <span class="news-date">{{ item.date | date: "%b %-d, %Y" }}</span>
-      <span class="news-text">{{ item.text | markdownify | remove: '<p>' | remove: '</p>' | strip }}</span>
+      <a class="news-link" href="{% if external == 'http' %}{{ item.url }}{% else %}{{ item.url | relative_url }}{% endif %}"{% if external == 'http' %} target="_blank" rel="noopener"{% endif %}>
+        <span class="news-date">{{ item.date | date: "%b %-d, %Y" }}</span>
+        <span class="news-text">{{ item.text | markdownify | remove: '<p>' | remove: '</p>' | strip }}</span>
+      </a>
     </li>
   {% endfor %}
 </ul>

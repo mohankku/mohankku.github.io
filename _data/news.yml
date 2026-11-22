@@ -1,16 +1,24 @@
-# Home page news feed, newest first. The home page shows the first few.
-# `text` is markdown, so links work: [label](/path).
+# Home page news feed, newest first. Each item links to `url`, which is a site
+# path (/2026/11/21/post-slug.html) or a full https:// address. `text` is
+# markdown for emphasis only; don't put links in it, the whole item is a link.
 - date: 2026-11-21
+  url: /2026/11/21/llm-rs-muse-glimmer.html
   text: "llm-rs now runs **Muse Glimmer 30B** on one RTX A5000: 29.5 tokens/s for one request, 226.6 tokens/s with 16 at once."
 - date: 2026-11-20
+  url: /2026/11/20/llm-rs-7b-vs-vllm.html
   text: "Compared llm-rs with vLLM on a 4-bit Qwen2.5-7B, measured with AIPerf."
 - date: 2026-11-15
+  url: /2026/11/15/llm-rs-serving-design.html
   text: "Wrote up how the llm-rs server keeps the GPU fed: continuous batching, mixed steps, and the prefix cache."
 - date: 2026-11-12
-  text: "Started the [llm-rs blog series](/llm-rs/), following a Rust LLM inference engine from kernels to serving."
+  url: /llm-rs/
+  text: "Started the llm-rs blog series, following a Rust LLM inference engine from kernels to serving."
 - date: 2026-11-09
+  url: /2026/11/09/llm-rs-cutile-simt-kernels.html
   text: "Hand-written SIMT and tensor-core kernels roughly doubled llm-rs decode throughput over cuTile."
 - date: 2026-09-07
+  url: /2026/09/07/ar-physics-lab-gravity-camera.html
   text: "Released AR Physics Lab: measuring gravity with a phone camera, no servers needed."
 - date: 2026-09-04
-  text: "Open-sourced [Zenith](https://github.com/mohankku/zenith), a local-first autonomous coding agent."
+  url: /2026/09/04/zenith-local-coding-agent.html
+  text: "Open-sourced Zenith, a local-first autonomous coding agent."
