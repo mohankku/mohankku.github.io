@@ -1,6 +1,9 @@
 # Home page news feed, newest first. Each item links to `url`, which is a site
 # path (/2026/11/21/post-slug.html) or a full https:// address. `text` is
 # markdown for emphasis only; don't put links in it, the whole item is a link.
+- date: 2026-11-22
+  url: /2026/11/22/llm-rs-qwen3-moe-vs-llama-cpp.html
+  text: "Compared llm-rs with **llama.cpp** on the Qwen3-30B-A3B mixture-of-experts model: ahead with 16 requests, and 5.8x faster with most experts off the GPU."
 - date: 2026-11-21
   url: /2026/11/21/llm-rs-muse-glimmer.html
   text: "llm-rs now runs **Muse Glimmer 30B** on one RTX A5000: 29.5 tokens/s for one request, 226.6 tokens/s with 16 at once."
